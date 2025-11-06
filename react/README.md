@@ -61,22 +61,34 @@ The core integration lives in `src/paymentForm/PaymentForm.tsx`.
 Secure Fields are initialized via the hosted ES module:
 
 ```ts
-import {initSecureFields} from "https://cdn.purse-dev.com/secure-fields/latest/purse.esm.js?module";
+import { initSecureFields } from "https://cdn.purse-dev.com/secure-fields/latest/purse.esm.js?module";
 
 await initSecureFields({
-    tenantId: import.meta.env.VITE_PURSE_TENANT_ID,
-    apiKey: import.meta.env.VITE_PURSE_API_KEY,
-    config: {
-        brands: ["CARTE_BANCAIRE", "VISA", "MASTERCARD", "AMERICAN_EXPRESS", "MAESTRO"],
-        brandSelector: embeddedBrandSelector, // toggled in App
-        fields: {
-            cardNumber: {target: "card-number-target", placeholder: "1234 5678 9012 3456"},
-            cvv: {target: "cvv-target", placeholder: "123"},
-            expDate: {target: "expDate-target", placeholder: "MM/YY"},
-            holderName: {target: "holder-name-target", placeholder: "Card Holder Name"},
-        },
-        styles: {input: {placeholderColor: "#9CA3AF"}},
+  tenantId: import.meta.env.VITE_PURSE_TENANT_ID,
+  apiKey: import.meta.env.VITE_PURSE_API_KEY,
+  config: {
+    brands: [
+      "CARTE_BANCAIRE",
+      "VISA",
+      "MASTERCARD",
+      "AMERICAN_EXPRESS",
+      "MAESTRO",
+    ],
+    brandSelector: embeddedBrandSelector, // toggled in App
+    fields: {
+      cardNumber: {
+        target: "card-number-target",
+        placeholder: "1234 5678 9012 3456",
+      },
+      cvv: { target: "cvv-target", placeholder: "123" },
+      expDate: { target: "expDate-target", placeholder: "MM/YY" },
+      holderName: {
+        target: "holder-name-target",
+        placeholder: "Card Holder Name",
+      },
     },
+    styles: { input: { placeholderColor: "#9CA3AF" } },
+  },
 });
 ```
 
@@ -114,10 +126,10 @@ You can adjust:
 
 ## Environment Variables
 
- Name                   | Description                    | Required 
-------------------------|--------------------------------|----------
- `VITE_PURSE_TENANT_ID` | Your Purse tenant identifier   | Yes      
- `VITE_PURSE_API_KEY`   | Public API key for browser use | Yes      
+| Name                   | Description                    | Required |
+| ---------------------- | ------------------------------ | -------- |
+| `VITE_PURSE_TENANT_ID` | Your Purse tenant identifier   | Yes      |
+| `VITE_PURSE_API_KEY`   | Public API key for browser use | Yes      |
 
 (These are exposed to the client via Vite—use only public/test keys.)
 
@@ -134,12 +146,11 @@ You can adjust:
 
 ## Troubleshooting
 
- Issue                       | Possible Cause                   | Fix                                                   
------------------------------|----------------------------------|-------------------------------------------------------
- Secure fields not appearing | Missing env vars                 | Check `.env` matches names above.                     
- Brand logos broken          | Incorrect asset path             | Ensure `/public/brands/` SVG names match mapper keys. 
- Tokenization error          | Invalid test card data or config | Use valid test card numbers provided by Purse.        
- CORS / network errors       | Wrong tenant or API key          | Verify values & environment (test vs prod).           
+| Issue                       | Possible Cause                   | Fix                                                   |
+| --------------------------- | -------------------------------- | ----------------------------------------------------- |
+| Secure fields not appearing | Missing env vars                 | Check `.env` matches names above.                     |
+| Brand logos broken          | Incorrect asset path             | Ensure `/public/brands/` SVG names match mapper keys. |
+| Tokenization error          | Invalid test card data or config | Use valid test card numbers provided by Purse.        |
+| CORS / network errors       | Wrong tenant or API key          | Verify values & environment (test vs prod).           |
 
 ---
-
