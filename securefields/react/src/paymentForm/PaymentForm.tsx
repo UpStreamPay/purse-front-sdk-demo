@@ -1,32 +1,27 @@
-import { type CardBrand, type SubmitResult } from "@purse-eu/web-sdk";
 import { InlineBrandSelector } from "./BrandSelector.tsx";
-import {
-  type SecureFieldsClient,
-  type SecureFieldsConfig,
-} from "@purse-eu/web-sdk";
 
-import { initSecureFields as moduleInitSecureFields } from "https://cdn.purse-dev.com/secure-fields/latest/purse.esm.js?module";
 import { useEffect, useRef, useState } from "react";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay.tsx";
+import {Securefields} from "@purse-eu/web-sdk";
 
 export const PaymentForm = ({
   embeddedBrandSelector,
 }: {
   embeddedBrandSelector?: boolean;
 }) => {
-  const [brands, setBrands] = useState<CardBrand[]>([]);
-  const [selectedBrand, setSelectedBrand] = useState<CardBrand | null>(null);
+  const [brands, setBrands] = useState<Securefields.Brand[]>([]);
+  const [selectedBrand, setSelectedBrand] = useState<Securefields.Brand | null>(null);
   const [tokenizationResult, setTokenizationResult] =
-    useState<SubmitResult | null>(null);
+    useState<Securefields.SubmitResult | null>(null);
 
   const cardNumberRef = useRef<HTMLDivElement | null>(null);
   const cvvRef = useRef<HTMLDivElement | null>(null);
   const expDateRef = useRef<HTMLDivElement | null>(null);
   const holderNameRef = useRef<HTMLDivElement | null>(null);
-  const securefields = useRef<SecureFieldsClient | null>(null);
+  const securefields = useRef<Securefields.SecureFieldsClient | null>(null);
 
   const initSecureFields = async () => {
-    moduleInitSecureFields({
+    Securefields.initSecureFields({
       tenantId: import.meta.env.VITE_PURSE_TENANT_ID,
       apiKey: import.meta.env.VITE_PURSE_API_KEY,
       config: {
@@ -61,15 +56,15 @@ export const PaymentForm = ({
             placeholderColor: "#9CA3AF", // Tailwind Gray-400
           },
         },
-      } satisfies SecureFieldsConfig,
+      },
     }).then((sf) => {
       securefields.current = sf;
       securefields.current.on("ready", () => {
         console.log("Secure fields are ready");
       });
       securefields.current.on("brandDetected", (event) => {
-        setBrands(event.brands);
-        if (!selectedBrand && event.brands.length > 0) {
+        setBrands(event.brands ?? []);
+        if (!selectedBrand && event.brands?.[0]) {
           setSelectedBrand(event.brands[0]);
         }
       });
@@ -167,7 +162,7 @@ export const PaymentForm = ({
         className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         onClick={async () => {
           setTokenizationResult(null);
-          if (securefields.current) {
+          if (securefields.current && selectedBrand) {
             securefields.current
               .submit({
                 selectedNetwork: selectedBrand,
