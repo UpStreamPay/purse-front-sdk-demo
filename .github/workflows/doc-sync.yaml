@@ -1,0 +1,21 @@
+name: SYNC DOC
+
+on:
+  push:
+    tags:
+      - 'demos@[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  sync-demos:
+    uses: UpStreamPay/usp-widget/.github/workflows/reusable-build-artifact-and-pr-target.yaml@main
+    with:
+      target_repo: 'UpStreamPay/usp-doc'
+      target_path: 'src/demos/'
+      package_path: '.'
+      package: 'demos'
+      artifact_path: 'demos'
+      artifact_name: 'purse-front-sdk-demos'
+      pr_prefix: 'doc/purse-front-sdk-demo'
+      command: 'echo "no build needed"'
+    secrets:
+      USP_GITHUB_ADMIN_ACCES_TOKEN: ${{ secrets.USP_GITHUB_ADMIN_ACCES_TOKEN }}
