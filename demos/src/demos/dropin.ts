@@ -17,9 +17,7 @@ export const dropinDemo: DemoConfig = {
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <h1>Checkout</h1>
     <div id="dropin-container"></div>
-    <button id="pay-btn" disabled>Pay</button>
     <p id="status"></p>
     <script type="module" src="./index.ts"></script>
   </body>
@@ -34,7 +32,7 @@ import clientSession from './session.json';
   const Purse = await loadDropInCheckout('sandbox');
 
   const dropin = await Purse.createDropinCheckout({
-    session: clientSession.widget.data,,
+    session: clientSession.widget.data,
     locale: 'en-US',
     hidePayButton: true, // we render our own pay button below
   });
@@ -42,23 +40,7 @@ import clientSession from './session.json';
   // Mount the pre-built checkout UI
   await dropin.mount(document.getElementById('dropin-container')!);
 
-  const payBtn = document.getElementById('pay-btn') as HTMLButtonElement;
   const status  = document.getElementById('status')!;
-
-  // Enable the pay button once all required fields are filled
-  dropin.isPaymentFulfilled.subscribe((isFulfilled) => {
-    payBtn.disabled = !isFulfilled;
-  });
-
-  payBtn.addEventListener('click', async () => {
-    status.textContent = 'Processing…';
-    try {
-      await dropin.submitPayment();
-      status.textContent = 'Payment submitted!';
-    } catch (err) {
-      status.textContent = \`Error: \${(err as Error).message}\`;
-    }
-  });
 })();`,
       readOnly: false,
     },
@@ -74,6 +56,5 @@ h1 { font-size: 20px; margin-bottom: 24px; }
 #status { margin-top: 12px; font-size: 14px; color: #6b7280; }`,
       readOnly: true,
     },
-
   },
 };

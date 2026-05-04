@@ -1,43 +1,50 @@
-name: Publish SDK Demos
+name: Sync Demos Dependency in Docs
 
 on:
-  push:
-    tags:
-      - 'demos@[0-9]+.[0-9]+.[0-9]+'
+  workflow_run:
+    workflows:
+      - 'Publish SDK Demos'
+    types:
+      - completed
 
 jobs:
-  publish:
+  sync:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH#@upstreampay/purse-sdk-demos@}" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+
       - uses: actions/checkout@v4
+        with:
+          repository: UpStreamPay/purse-docs
+          token: ${{ secrets.SYNC_PAT }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@upstreampay'
 
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#demos@}" >> $GITHUB_OUTPUT
+      - name: Update dependency
+        run: |
+          npm install @upstreampay/purse-sdk-demos@${{ steps.version.outputs.VERSION }} --save-exact
 
-      - name: Set package version
-        working-directory: demos
-        run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
-
-      - name: Install dependencies
-        working-directory: demos
-        run: npm install
-
-      - name: Build
-        working-directory: demos
-        run: npm run build
-
-      - name: Publish
-        working-directory: demos
-        run: npm publish
+      - name: Open PR
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+        run: |
+          BRANCH="chore/bump-purse-sdk-demos-${{ steps.version.outputs.VERSION }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add package.json package-lock.json
+          git commit -m "chore: bump @upstreampay/purse-sdk-demos to ${{ steps.version.outputs.VERSION }}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --repo UpStreamPay/purse-docs \
+            --head "$BRANCH" \
+            --base main \
+            --title "chore: bump @upstreampay/purse-sdk-demos to ${{ steps.version.outputs.VERSION }}" \
+            --body "Automated dependency update triggered by tag \`${{ github.ref_name }}\`."

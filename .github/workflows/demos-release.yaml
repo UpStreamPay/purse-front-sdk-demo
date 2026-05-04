@@ -19,8 +19,9 @@ jobs:
         id: pkg
         run: |
           VERSION=$(jq -r '.version' demos/package.json)
+          NAME=$(jq -r '.name' demos/package.json)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "TAG=demos@$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=$NAME@$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if tag already exists
         id: check
