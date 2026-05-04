@@ -1,4 +1,4 @@
-name: SYNC DOC
+name: Publish SDK Demos
 
 on:
   push:
@@ -6,16 +6,38 @@ on:
       - 'demos@[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  sync-demos:
-    uses: UpStreamPay/usp-widget/.github/workflows/reusable-build-artifact-and-pr-target.yaml@main
-    with:
-      target_repo: 'UpStreamPay/usp-doc'
-      target_path: 'src/demos/'
-      package_path: '.'
-      package: 'demos'
-      artifact_path: 'demos'
-      artifact_name: 'purse-front-sdk-demos'
-      pr_prefix: 'doc/purse-front-sdk-demo'
-      command: 'echo "no build needed"'
-    secrets:
-      USP_GITHUB_ADMIN_ACCES_TOKEN: ${{ secrets.USP_GITHUB_ADMIN_ACCES_TOKEN }}
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@upstreampay'
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#demos@}" >> $GITHUB_OUTPUT
+
+      - name: Set package version
+        working-directory: demos
+        run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
+
+      - name: Install dependencies
+        working-directory: demos
+        run: npm install
+
+      - name: Build
+        working-directory: demos
+        run: npm run build
+
+      - name: Publish
+        working-directory: demos
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
