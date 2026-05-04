@@ -1,4 +1,4 @@
-import type { DemoConfig } from './types';
+import type { DemoConfig } from '../types';
 
 export const dropinDemo: DemoConfig = {
   template: 'vanilla-ts',

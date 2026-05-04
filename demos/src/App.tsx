@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { PurseDemo } from './PurseDemo';
 import { headlessDemo } from './demos/headless';
+import { hostedFormDemo } from './demos/headless/hosted-form';
+import { hostedFieldsDemo } from './demos/headless/hosted-fields';
 import { dropinDemo } from './demos/dropin';
 import type { DemoConfig } from './demos/types';
 
 const DEMOS: { key: string; label: string; config: DemoConfig }[] = [
-    { key: 'headless', label: 'Headless checkout', config: headlessDemo },
-    { key: 'dropin', label: 'Drop-in checkout', config: dropinDemo },
+    { key: 'headless',      label: 'Headless — Quick start',  config: headlessDemo },
+    { key: 'hosted-form',   label: 'Headless — Hosted form',  config: hostedFormDemo },
+    { key: 'hosted-fields', label: 'Headless — Hosted fields', config: hostedFieldsDemo },
+    { key: 'dropin',        label: 'Drop-in checkout',         config: dropinDemo },
 ];
 
 export function App() {

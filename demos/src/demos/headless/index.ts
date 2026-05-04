@@ -1,4 +1,4 @@
-import type { DemoConfig } from './types';
+import type { DemoConfig } from '../types';
 
 export const headlessDemo: DemoConfig = {
   template: 'vanilla-ts',
