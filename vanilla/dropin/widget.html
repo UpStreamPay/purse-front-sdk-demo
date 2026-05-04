@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drop-in Checkout — Quick Start</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <div class="mb-8">
+        <a href="/" class="inline-flex items-center gap-1.5 text-muted no-underline text-sm mb-4 hover:text-text">← All examples</a>
+        <div>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-blue-100 text-blue-800">Drop-in</span>
+          <h1 class="text-2xl font-bold mt-2 mb-1.5">Drop-in Checkout — Quick Start</h1>
+          <p class="text-muted text-sm">
+            Pre-built widget mounted in a div. React to <code>isPaymentFulfilled</code>
+            and call <code>submitPayment()</code> when ready.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex mb-7 bg-white border border-border rounded-xl overflow-hidden sm:flex-row flex-col">
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-sdk" data-state="pending">
+          <div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">1</div>
+          <span class="step__label text-xs">Load SDK</span>
+        </div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-init" data-state="pending">
+          <div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">2</div>
+          <span class="step__label text-xs">Init drop-in</span>
+        </div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-mount" data-state="pending">
+          <div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">3</div>
+          <span class="step__label text-xs">Mount widget</span>
+        </div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0" id="step-pay" data-state="pending">
+          <div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">4</div>
+          <span class="step__label text-xs">Pay</span>
+        </div>
+      </div>
+
+      <div id="setup-notice" class="flex gap-3 px-4 py-3.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-900 mb-6" style="display:none">
+        <span>⚠</span>
+        <span id="setup-notice-msg"></span>
+      </div>
+
+      <div class="bg-white border border-border rounded-xl p-5 mb-4">
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Widget</div>
+        <!-- The drop-in renders itself inside this element -->
+        <div id="dropin-container"></div>
+      </div>
+
+      <!--
+        The pay button is optional — the drop-in includes its own pay button by default.
+        Use this external button pattern when you need full control over placement
+        (e.g. a sticky footer, or a multi-step checkout flow).
+      -->
+      <button class="flex items-center justify-center gap-2 w-full py-3.5 bg-accent text-white border-0 rounded-lg text-base font-semibold cursor-pointer transition-all mt-4 hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed" id="pay-btn" disabled>Pay</button>
+
+      <div id="result"></div>
+    </div>
+    <script type="module" src="/src/dropin/widget.ts"></script>
+  </body>
+</html>

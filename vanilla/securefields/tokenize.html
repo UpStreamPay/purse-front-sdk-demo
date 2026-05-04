@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Fields — Quick Start</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <div class="mb-8">
+        <a href="/" class="inline-flex items-center gap-1.5 text-muted no-underline text-sm mb-4 hover:text-text">← All examples</a>
+        <div>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-pink-100 text-pink-800">Secure Fields</span>
+          <h1 class="text-2xl font-bold mt-2 mb-1.5">Secure Fields — Integration</h1>
+          <p class="text-muted text-sm">
+            <code>initSecureFields</code> → fields rendered in iframes →
+            submit → vault token returned. No session required — operates
+            at tenant level.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex mb-7 bg-white border border-border rounded-xl overflow-hidden sm:flex-row flex-col">
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-sdk"    data-state="pending"><div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">1</div><span class="step__label text-xs">Load SDK</span></div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-init"   data-state="pending"><div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">2</div><span class="step__label text-xs">Init fields</span></div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0 sm:border-b-0 border-b" id="step-render" data-state="pending"><div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">3</div><span class="step__label text-xs">Fields ready</span></div>
+        <div class="step flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 last:border-r-0" id="step-submit" data-state="pending"><div class="step__icon w-5 h-5 rounded-full bg-step-pending flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">4</div><span class="step__label text-xs">Tokenise</span></div>
+      </div>
+
+      <div id="setup-notice" class="flex gap-3 px-4 py-3.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-900 mb-6" style="display:none">
+        <span>⚠</span><span id="setup-notice-msg"></span>
+      </div>
+
+      <div class="bg-white border border-border rounded-xl p-5 mb-4">
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Card details</div>
+        <div class="hf-layout-grid">
+          <div class="hf-field hf-field--full hf-field--pan">
+            <label class="hf-label">Card number</label>
+            <!--
+              Secure Fields injects an iframe into each target element.
+              The id attribute is passed as the `target` in the fields config below.
+            -->
+            <div class="hf-field-wrap" id="sf-pan"></div>
+          </div>
+
+          <div class="hf-field">
+            <label class="hf-label">Expiry</label>
+            <div class="hf-field-wrap" id="sf-exp"></div>
+          </div>
+          <div class="hf-field hf-field--exp">
+            <label class="hf-label">CVV</label>
+            <div class="hf-field-wrap" id="sf-cvv"></div>
+          </div>
+          <div class="hf-field hf-field--name">
+            <label class="hf-label">Holder name</label>
+            <div class="hf-field-wrap" id="sf-name"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brand detection — shown when user starts typing a card number -->
+      <div class="flex items-center gap-2 text-xs text-muted mt-2.5" id="brand-indicator" style="display:none">
+        <span>Detected:</span>
+        <div id="brand-pills"></div>
+      </div>
+
+      <button class="flex items-center justify-center gap-2 w-full py-3.5 bg-accent text-white border-0 rounded-lg text-base font-semibold cursor-pointer transition-all mt-4 hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed" id="pay-btn" disabled>Submit</button>
+
+      <div id="result"></div>
+    </div>
+    <script type="module" src="/src/securefields/tokenize.ts"></script>
+  </body>
+</html>

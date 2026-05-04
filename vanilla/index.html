@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purse SDK — Vanilla TypeScript Demos</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <div class="mb-8">
+        <div>
+          <h1 class="text-2xl font-bold mt-2 mb-1.5">Purse SDK — Vanilla TypeScript Demos</h1>
+          <p class="text-muted text-sm">
+            Multi-page demo app using <code>@purse-eu/web-sdk</code>.
+            Copy <code>.env.example</code> → <code>.env.local</code> and fill in your credentials.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-3 px-4 py-3.5 bg-yellow-50 border border-yellow-300 rounded-lg text-sm text-yellow-900 mb-6">
+        <span>⚠</span>
+        <span>
+          Copy <code>.env.example</code> → <code>.env.local</code> and fill in your credentials.
+          Replace <code>getSession()</code> in each recipe with your backend API call in production.
+        </span>
+      </div>
+
+      <h2 class="text-base font-bold mb-3 mt-2">Drop-in Checkout</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-0 mb-7">
+        <a href="/dropin/widget.html" class="block p-4 bg-white border border-border rounded-xl no-underline text-inherit transition-all hover:border-accent hover:ring-2 hover:ring-accent/10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-blue-100 text-blue-800">Drop-in</span>
+          <div class="font-semibold text-base my-2">Quick Start</div>
+          <div class="text-sm text-muted">
+            Pre-built widget mounted in a div. React to <code>isPaymentFulfilled</code>
+            and call <code>submitPayment()</code> when ready.
+          </div>
+        </a>
+      </div>
+
+      <h2 class="text-base font-bold mb-3 mt-2">Headless Checkout</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-0 mb-7">
+        <a href="/headless-checkout/render-methods.html" class="block p-4 bg-white border border-border rounded-xl no-underline text-inherit transition-all hover:border-accent hover:ring-2 hover:ring-accent/10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-violet-100 text-violet-800">Headless</span>
+          <div class="font-semibold text-base my-2">Render Methods</div>
+          <div class="text-sm text-muted">
+            SDK load → init → list methods → select → pay button → result
+          </div>
+        </a>
+
+        <a href="/headless-checkout/hosted-form.html" class="block p-4 bg-white border border-border rounded-xl no-underline text-inherit transition-all hover:border-accent hover:ring-2 hover:ring-accent/10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-violet-100 text-violet-800">Headless</span>
+          <div class="font-semibold text-base my-2">Hosted Form</div>
+          <div class="text-sm text-muted">
+            Single iframe: PAN, expiry, CVV, holder name via <code>getPaymentElement()</code>
+          </div>
+        </a>
+
+        <a href="/headless-checkout/hosted-fields.html" class="block p-4 bg-white border border-border rounded-xl no-underline text-inherit transition-all hover:border-accent hover:ring-2 hover:ring-accent/10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-violet-100 text-violet-800">Headless</span>
+          <div class="font-semibold text-base my-2">Hosted Fields</div>
+          <div class="text-sm text-muted">
+            Isolated field iframes with grid, single-line, and card-shaped layouts
+          </div>
+        </a>
+      </div>
+
+      <h2 class="text-base font-bold mb-3 mt-2">Secure Fields</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-0">
+        <a href="/securefields/tokenize.html" class="block p-4 bg-white border border-border rounded-xl no-underline text-inherit transition-all hover:border-accent hover:ring-2 hover:ring-accent/10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-pink-100 text-pink-800">Secure Fields</span>
+          <div class="font-semibold text-base my-2">Quick Start</div>
+          <div class="text-sm text-muted">
+            <code>initSecureFields</code> → fields rendered in iframes →
+            submit → vault token returned. No session required — operates at tenant level.
+          </div>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

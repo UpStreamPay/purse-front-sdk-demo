@@ -11,6 +11,7 @@ The main goal of this project is to provide clear, practical examples of integra
 Each folder at the root of this repository contains an example project for a specific framework (e.g., React, Vue, etc.).
 
 - **react/**: Example integration using React
+- **vanilla/**: Example integration using Vanilla JavaScript
 - *(More frameworks coming soon!)*
 
 ## Integration Options

@@ -1,11 +1,16 @@
-import { PaymentForm } from "./paymentForm/PaymentForm.tsx";
+import { PaymentForm } from "./securefields/PaymentForm.tsx";
 import { useState } from "react";
 
 function App() {
   const [embeddedBrandSelector, setEmbeddedBrandSelector] = useState(false);
   return (
     <main className="min-h-screen w-screen  flex flex-col items-center justify-center p-4 ">
-      <h1>Basic Tokenization Example</h1>
+      <header className="w-full max-w-lg mb-4 text-center">
+        <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
+          Purse SDK — React demos
+        </p>
+        <h1 className="text-2xl font-bold mt-1">Secure Fields</h1>
+      </header>
       <div className="w-10/12 max-w-lg rounded overflow-hidden shadow-lg bg-white p-6 mt-4">
         <div className="flex items-center">
           <button
