@@ -1,6 +1,7 @@
+.claude/
 
 .env.*
-
+**.vite**
 # Logs
 logs
 *.log

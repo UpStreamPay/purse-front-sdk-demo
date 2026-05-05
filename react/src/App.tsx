@@ -1,4 +1,5 @@
 import { PaymentForm } from "./securefields/PaymentForm.tsx";
+import { DebugPanel } from "./shared/DebugPanel.tsx";
 import { useState } from "react";
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
       <div className="w-10/12 max-w-lg rounded overflow-hidden shadow-lg bg-white p-6 mt-4">
         <PaymentForm embeddedBrandSelector={embeddedBrandSelector} />
       </div>
+      <DebugPanel />
     </main>
   );
 }

@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  base: process.env.VITE_BASE_URL ?? '/',
   plugins: [tailwindcss()],
   envDir: '../',
   build: {

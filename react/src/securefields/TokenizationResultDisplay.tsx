@@ -1,4 +1,5 @@
-import type { SubmitResult } from "@purse-eu/web-sdk";
+import type { Securefields } from "@purse-eu/web-sdk";
+type SubmitResult = Securefields.SubmitResult;
 
 function isTokenizationError(
   tokenizationResult: SubmitResult,

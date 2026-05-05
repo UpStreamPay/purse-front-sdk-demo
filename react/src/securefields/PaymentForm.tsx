@@ -3,6 +3,7 @@ import { InlineBrandSelector } from "./BrandSelector.tsx";
 import { useEffect, useRef, useState } from "react";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay.tsx";
 import {Securefields} from "@purse-eu/web-sdk";
+import { getEnv } from "../shared/env";
 
 export const PaymentForm = ({
   embeddedBrandSelector,
@@ -22,8 +23,8 @@ export const PaymentForm = ({
 
   const initSecureFields = async () => {
     Securefields.initSecureFields({
-      tenantId: import.meta.env.VITE_PURSE_TENANT_ID,
-      apiKey: import.meta.env.VITE_PURSE_API_KEY,
+      tenantId: getEnv('VITE_PURSE_TENANT_ID'),
+      apiKey: getEnv('VITE_PURSE_API_KEY'),
       config: {
         brands: [
           "CARTE_BANCAIRE",

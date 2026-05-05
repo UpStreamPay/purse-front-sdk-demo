@@ -1,6 +1,7 @@
-import type { CardBrand } from "@purse-eu/web-sdk";
+import type { Securefields } from "@purse-eu/web-sdk";
+type CardBrand = Securefields.Brand;
 
-const assetsBrandMapper = {
+const assetsBrandMapper: Record<string, string> = {
   AMERICAN_EXPRESS: "amex",
   MAESTRO: "maestro",
   MASTERCARD: "mastercard",
