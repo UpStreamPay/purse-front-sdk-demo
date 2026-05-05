@@ -24,7 +24,7 @@ export const PaymentForm = ({
   useEffect(() => {
     let cancelled = false;
 
-    loadSecureFields().then(({ initSecureFields }) => {
+    loadSecureFields('sandbox').then(({ initSecureFields }) => {
       if (cancelled) return;
       return initSecureFields({
         tenantId: getEnv("VITE_PURSE_TENANT_ID"),
