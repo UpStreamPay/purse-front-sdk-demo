@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'demos/**'
+      - 'sandpack/**'
 
 jobs:
   tag:
@@ -18,8 +18,8 @@ jobs:
       - name: Read version from package.json
         id: pkg
         run: |
-          VERSION=$(jq -r '.version' demos/package.json)
-          NAME=$(jq -r '.name' demos/package.json)
+          VERSION=$(jq -r '.version' sandpack/package.json)
+          NAME=$(jq -r '.name' sandpack/package.json)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "TAG=$NAME@$VERSION" >> $GITHUB_OUTPUT
 
