@@ -1,33 +1,55 @@
-# Purse SecureFields Integration Demos
+# purse-front-sdk-demo
 
-Welcome to the Purse SecureFields integration showcase! This repository demonstrates how to integrate Vault Secured Fields into modern web applications using different frameworks.
+Demo apps for [`@purse-eu/web-sdk`](https://www.npmjs.com/package/@purse-eu/web-sdk). Two standalone Vite projects share a single `.env.local` at the repo root.
 
-## Purpose
+| Folder | Stack | What it demos |
+|---|---|---|
+| [`vanilla/`](./vanilla/) | Vite + TypeScript | Drop-in checkout, Headless checkout, Secure Fields tokenization |
+| [`react/`](./react/) | React 19 + Vite + TypeScript | Secure Fields tokenization |
 
-The main goal of this project is to provide clear, practical examples of integrating Purse Vault Secured Fields, which can be loaded either via the `@purse-eu/web-sdk` npm package or directly from the CDN.
+## Quick start
 
-## Structure
+### 1. Credentials
 
-Each folder at the root of this repository contains an example project for a specific framework (e.g., React, Vue, etc.).
+```sh
+cp .env.example .env.local
+# Edit .env.local — fill in VITE_PURSE_TENANT_ID, VITE_PURSE_API_KEY, etc.
+```
 
-- **react/**: Example integration using React
-- **vanilla/**: Example integration using Vanilla JavaScript
-- *(More frameworks coming soon!)*
+Both apps read env vars from the repo root `.env.local` (no separate env files needed in subfolders).
 
-## Integration Options
+### 2. Run a demo
 
-- **NPM Package:** Use `@purse-eu/web-sdk` for seamless integration with your build system.
-- **CDN:** Load the SDK directly in your HTML for quick prototyping or integration in non-Node environments.
+```sh
+# Vanilla TypeScript — multi-page app
+cd vanilla && npm install && npm run dev
+# → http://localhost:5173
 
-## How to Use
+# React
+cd react && npm install && npm run dev
+# → http://localhost:5173
+```
 
-1. Choose the folder matching your preferred framework.
-2. Follow the instructions in that folder's README to run the example.
+> If both run at the same time, Vite will auto-assign the second to port 5174.
 
-## About Purse Vault Secured Fields
+## Environment variables
 
-Purse Vault Secured Fields help you securely collect and tokenize sensitive payment data in your web applications, reducing PCI DSS scope and improving security.
+Defined in `.env.example`:
 
----
+| Variable | Used by | Description |
+|---|---|---|
+| `VITE_PURSE_TENANT_ID` | Secure Fields | Tenant identifier |
+| `VITE_PURSE_API_KEY` | Secure Fields, Headless | API key |
+| `VITE_PURSE_ENTITY_ID` | Headless checkout, Drop-in | Entity identifier |
+| `VITE_PURSE_SESSION_JSON` | Headless checkout, Drop-in | Base64 payment session JSON (local testing only) |
+| `VITE_PURSE_ENVIRONMENT` | All | `sandbox` (default) or `production` |
 
-For more information, visit [purse.eu](https://purse.eu) or check the documentation in each example folder.
+In production, replace `getSession()` in each recipe with a fetch to your backend.
+
+## Credential override without rebuild
+
+Both apps expose a **⚙ Config / Debug** panel in the UI. Values entered there are stored in `localStorage` and take precedence over the `.env.local` build defaults — useful for testing multiple tenants without restarting the dev server.
+
+## About Purse Vault Secure Fields
+
+Secure Fields let you collect and tokenize sensitive payment data in isolated iframes, reducing PCI DSS scope. See [purse.eu](https://purse.eu) for full documentation.

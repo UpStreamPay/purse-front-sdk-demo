@@ -5,10 +5,17 @@ Multi-page Vite app demonstrating `@purse-eu/web-sdk` integration patterns.
 ## Setup
 
 ```sh
-cp .env.example .env.local   # fill in your credentials
+# From repo root — create and fill in credentials
+cp .env.example .env.local
+
+# Install and run
+cd vanilla
 npm install
-npm run dev                  # http://localhost:5173
+npm run dev
+# → http://localhost:5173
 ```
+
+> `.env.local` must be at the **repo root** (not inside `vanilla/`). Vite is configured to read env vars from `../`.
 
 ## Environment variables
 
