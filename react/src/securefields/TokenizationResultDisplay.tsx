@@ -4,7 +4,7 @@ type SubmitResult = Securefields.SubmitResult;
 function isTokenizationError(
   tokenizationResult: SubmitResult,
 ): tokenizationResult is { error?: string } {
-  return (tokenizationResult as any).error !== undefined;
+  return (tokenizationResult as { error?: string }).error !== undefined;
 }
 
 export const TokenizationResultDisplay = ({

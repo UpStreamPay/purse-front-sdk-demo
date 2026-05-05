@@ -2,7 +2,7 @@ import { InlineBrandSelector } from "./BrandSelector.tsx";
 
 import { useEffect, useRef, useState } from "react";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay.tsx";
-import {Securefields} from "@purse-eu/web-sdk";
+import { loadSecureFields, type Securefields } from "@purse-eu/web-sdk";
 import { getEnv } from "../shared/env";
 
 export const PaymentForm = ({
@@ -21,82 +21,68 @@ export const PaymentForm = ({
   const holderNameRef = useRef<HTMLDivElement | null>(null);
   const securefields = useRef<Securefields.SecureFieldsClient | null>(null);
 
-  const initSecureFields = async () => {
-    Securefields.initSecureFields({
-      tenantId: getEnv('VITE_PURSE_TENANT_ID'),
-      apiKey: getEnv('VITE_PURSE_API_KEY'),
-      config: {
-        brands: [
-          "CARTE_BANCAIRE",
-          "VISA",
-          "MASTERCARD",
-          "AMERICAN_EXPRESS",
-          "MAESTRO",
-        ],
-        brandSelector: embeddedBrandSelector,
-        fields: {
-          cardNumber: {
-            target: "card-number-target",
-            placeholder: "1234 5678 9012 3456",
+  useEffect(() => {
+    let cancelled = false;
+
+    loadSecureFields().then(({ initSecureFields }) => {
+      if (cancelled) return;
+      return initSecureFields({
+        tenantId: getEnv("VITE_PURSE_TENANT_ID"),
+        apiKey: getEnv("VITE_PURSE_API_KEY"),
+        config: {
+          brands: [
+            "CARTE_BANCAIRE",
+            "VISA",
+            "MASTERCARD",
+            "AMERICAN_EXPRESS",
+            "MAESTRO",
+          ],
+          brandSelector: embeddedBrandSelector,
+          fields: {
+            cardNumber: {
+              target: "card-number-target",
+              placeholder: "1234 5678 9012 3456",
+            },
+            cvv: {
+              target: "cvv-target",
+              placeholder: "123",
+            },
+            expDate: {
+              target: "expDate-target",
+              placeholder: "MM/YY",
+            },
+            holderName: {
+              target: "holder-name-target",
+              placeholder: "Card Holder Name",
+            },
           },
-          cvv: {
-            target: "cvv-target",
-            placeholder: "123",
-          },
-          expDate: {
-            target: "expDate-target",
-            placeholder: "MM/YY",
-          },
-          holderName: {
-            target: "holder-name-target",
-            placeholder: "Card Holder Name",
+          styles: {
+            input: {
+              placeholderColor: "#9CA3AF",
+            },
           },
         },
-        styles: {
-          input: {
-            placeholderColor: "#9CA3AF", // Tailwind Gray-400
-          },
-        },
-      },
+      });
     }).then((sf) => {
+      if (!sf || cancelled) return;
       securefields.current = sf;
-      securefields.current.on("ready", () => {
+      sf.on("ready", () => {
         console.log("Secure fields are ready");
       });
-      securefields.current.on("brandDetected", (event) => {
+      sf.on("brandDetected", (event) => {
         setBrands(event.brands ?? []);
-        if (!selectedBrand && event.brands?.[0]) {
-          setSelectedBrand(event.brands[0]);
-        }
+        setSelectedBrand((prev) => prev ?? event.brands?.[0] ?? null);
       });
-      securefields.current.render();
+      sf.render();
     });
-  };
-
-  const cleanupSecureFields = () => {
-    setBrands([]);
-    setSelectedBrand(null);
 
     return () => {
-      console.log("Cleaning up secure fields");
+      cancelled = true;
       securefields.current?.destroy();
-      if (cardNumberRef.current) {
-        cardNumberRef.current.innerHTML = "";
-      }
-      if (cvvRef.current) {
-        cvvRef.current.innerHTML = "";
-      }
-      if (expDateRef.current) {
-        expDateRef.current.innerHTML = "";
-      }
-      if (holderNameRef.current) {
-        holderNameRef.current.innerHTML = "";
-      }
+      securefields.current = null;
+      setBrands([]);
+      setSelectedBrand(null);
     };
-  };
-  useEffect(() => {
-    initSecureFields();
-    return cleanupSecureFields();
   }, [embeddedBrandSelector]);
 
   return (
@@ -161,22 +147,17 @@ export const PaymentForm = ({
       <button
         type="submit"
         className="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        onClick={async () => {
+        onClick={() => {
           setTokenizationResult(null);
-          if (securefields.current && selectedBrand) {
-            securefields.current
-              .submit({
-                selectedNetwork: selectedBrand,
-              })
-              .then((result) => {
-                console.log("Submit");
-                setTokenizationResult(result);
-              })
-              .catch((err) => {
-                console.log("Submit");
-                setTokenizationResult({ error: err } as any);
-              });
-          }
+          if (!securefields.current) return;
+          securefields.current
+            .submit(selectedBrand ? { selectedNetwork: selectedBrand } : undefined)
+            .then((result) => {
+              setTokenizationResult(result);
+            })
+            .catch((err: unknown) => {
+              setTokenizationResult({ error: err instanceof Error ? err.message : String(err) });
+            });
         }}
       >
         Submit Payment
