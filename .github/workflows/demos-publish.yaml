@@ -3,7 +3,7 @@ name: Publish SDK Demos
 on:
   push:
     tags:
-      - '@upstreampay/purse-sdk-demos@[0-9]+.[0-9]+.[0-9]+'
+      - '@upstreampay/purse-sdk-demos@*.*.*'
 
 jobs:
   publish:
