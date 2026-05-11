@@ -1,4 +1,4 @@
-name: Tag Demos Release
+name: Tag and Publish Demos
 
 on:
   push:
@@ -8,10 +8,11 @@ on:
       - 'sandpack/**'
 
 jobs:
-  tag:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -37,3 +38,30 @@ jobs:
         run: |
           git tag ${{ steps.pkg.outputs.TAG }}
           git push origin ${{ steps.pkg.outputs.TAG }}
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.EXISTS == 'false'
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@upstreampay'
+
+      - name: Install dependencies
+        if: steps.check.outputs.EXISTS == 'false'
+        working-directory: sandpack
+        run: npm install
+
+      - name: Build
+        if: steps.check.outputs.EXISTS == 'false'
+        working-directory: sandpack
+        run: npm run build
+        env:
+          VITE_PURSE_SESSION_URL: https://usp-widget-merchant.purse-sandbox.com/orchestration_session/
+          VITE_PURSE_ORDER_URL: https://usp-widget-merchant.purse-sandbox.com/orchestration_order/
+
+      - name: Publish
+        if: steps.check.outputs.EXISTS == 'false'
+        working-directory: sandpack
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
