@@ -1,4 +1,4 @@
-name: Tag Demos Release
+name: Demos Release
 
 on:
   push:
@@ -8,32 +8,31 @@ on:
       - 'sandpack/**'
 
 jobs:
-  tag:
+  release:
+    if: "!startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DEMOS_ADMIN_ACCES_TOKEN }}
 
-      - name: Read version from package.json
-        id: pkg
-        run: |
-          VERSION=$(jq -r '.version' sandpack/package.json)
-          NAME=$(jq -r '.name' sandpack/package.json)
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "TAG=$NAME@$VERSION" >> $GITHUB_OUTPUT
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Check if tag already exists
-        id: check
-        run: |
-          if git ls-remote --tags origin "refs/tags/${{ steps.pkg.outputs.TAG }}" | grep -q "${{ steps.pkg.outputs.TAG }}"; then
-            echo "EXISTS=true" >> $GITHUB_OUTPUT
-          else
-            echo "EXISTS=false" >> $GITHUB_OUTPUT
-          fi
+      - name: Install dependencies
+        working-directory: sandpack
+        run: npm install
 
-      - name: Create and push tag
-        if: steps.check.outputs.EXISTS == 'false'
-        run: |
-          git tag ${{ steps.pkg.outputs.TAG }}
-          git push origin ${{ steps.pkg.outputs.TAG }}
+      - name: Release
+        working-directory: sandpack
+        run: npx release-it --ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEMOS_ADMIN_ACCES_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com

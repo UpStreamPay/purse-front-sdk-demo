@@ -31,8 +31,28 @@
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"
   },
+  "release-it": {
+    "git": {
+      "requireCleanWorkingDir": false,
+      "commitMessage": "chore(release): ${version}",
+      "tagName": "@upstreampay/purse-sdk-demos@${version}"
+    },
+    "github": {
+      "release": false
+    },
+    "npm": {
+      "publish": false
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "angular"
+      }
+    }
+  },
   "devDependencies": {
+    "@release-it/conventional-changelog": "^11.0.0",
     "@codesandbox/sandpack-react": "^2.18.4",
+    "release-it": "^20.0.1",
     "@types/node": "^25.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",

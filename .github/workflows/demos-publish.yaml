@@ -1,23 +1,18 @@
 name: Publish SDK Demos
 
 on:
-  workflow_run:
-    workflows:
-      - 'Tag Demos Release'
-    types:
-      - completed
+  push:
+    tags:
+      - '@upstreampay/purse-sdk-demos@*.*.*'
 
 jobs:
   publish:
-    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - uses: actions/setup-node@v4
         with:
