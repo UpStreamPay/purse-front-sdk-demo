@@ -1,0 +1,39 @@
+name: Tag Demos Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sandpack/**'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from package.json
+        id: pkg
+        run: |
+          VERSION=$(jq -r '.version' sandpack/package.json)
+          NAME=$(jq -r '.name' sandpack/package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=$NAME@$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag already exists
+        id: check
+        run: |
+          if git ls-remote --tags origin "refs/tags/${{ steps.pkg.outputs.TAG }}" | grep -q "${{ steps.pkg.outputs.TAG }}"; then
+            echo "EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push tag
+        if: steps.check.outputs.EXISTS == 'false'
+        run: |
+          git tag ${{ steps.pkg.outputs.TAG }}
+          git push origin ${{ steps.pkg.outputs.TAG }}
