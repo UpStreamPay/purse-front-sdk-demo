@@ -24,7 +24,6 @@ export const secureFieldsDemo: DemoConfig = {
 
     <div class="bg-white rounded-2xl shadow-xl w-full h-full overflow-hidden">
 
-      <!-- Header -->
       <div class="flex items-center gap-3 px-7 py-5 border-b border-gray-100">
         <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect width="24" height="24" rx="6" fill="#4f46e5"/>
@@ -37,15 +36,11 @@ export const secureFieldsDemo: DemoConfig = {
         </div>
       </div>
 
-      <!-- Credentials notice -->
       <div id="config-notice" class="hidden mx-7 mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
         <strong class="font-semibold">Configure credentials:</strong> replace <code class="font-mono bg-amber-100 px-1 rounded">TENANT_ID</code> and <code class="font-mono bg-amber-100 px-1 rounded">API_KEY</code> in <code class="font-mono bg-amber-100 px-1 rounded">index.ts</code> with your Purse credentials to run this demo.
       </div>
 
-      <!-- Fields -->
       <div class="px-7 pt-6 pb-4 space-y-3">
-
-        <!-- Card number -->
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="text-xs font-medium text-gray-600">Card number</label>
@@ -53,8 +48,6 @@ export const secureFieldsDemo: DemoConfig = {
           </div>
           <div id="sf-pan" class="flex items-center px-3 h-11 bg-white border border-gray-200 rounded-xl overflow-hidden"></div>
         </div>
-
-        <!-- Expiry + CVV -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-gray-600 mb-1">Expiry date</label>
@@ -65,16 +58,12 @@ export const secureFieldsDemo: DemoConfig = {
             <div id="sf-cvv" class="flex items-center px-3 h-11 bg-white border border-gray-200 rounded-xl overflow-hidden"></div>
           </div>
         </div>
-
-        <!-- Cardholder name -->
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">Cardholder name</label>
           <div id="sf-name" class="flex items-center px-3 h-11 bg-white border border-gray-200 rounded-xl overflow-hidden"></div>
         </div>
-
       </div>
 
-      <!-- Submit -->
       <div class="px-7 pb-6 pt-2">
         <button id="pay-btn" disabled
           class="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-600 text-white rounded-xl text-[15px] font-semibold disabled:bg-indigo-300 disabled:text-indigo-100 disabled:cursor-not-allowed">
@@ -89,7 +78,6 @@ export const secureFieldsDemo: DemoConfig = {
         </p>
       </div>
 
-      <!-- Result -->
       <div id="result" class="hidden mx-7 mb-6"></div>
 
     </div>
@@ -97,7 +85,7 @@ export const secureFieldsDemo: DemoConfig = {
     <script type="module" src="./index.ts"></script>
   </body>
 </html>`,
-      readOnly: false,
+      readOnly: true,
     },
     '/index.ts': {
       code: `import '@tailwindcss/browser';
@@ -106,7 +94,7 @@ import { loadSecureFields } from '@purse-eu/web-sdk';
 const TENANT_ID = '${TENANT_ID}';
 const API_KEY   = '${API_KEY}';
 
-(async () => {
+export async function init() {
   const payBtn   = document.getElementById('pay-btn') as HTMLButtonElement;
   const resultEl = document.getElementById('result')!;
   const noticeEl = document.getElementById('config-notice')!;
@@ -152,10 +140,7 @@ const API_KEY   = '${API_KEY}';
   // 4 – Show detected card network(s) as pills
   sf.on('brandDetected', ({ brands }) => {
     brandEl.innerHTML = '';
-    if (!brands?.length) {
-      brandEl.classList.add('hidden');
-      return;
-    }
+    if (!brands?.length) { brandEl.classList.add('hidden'); return; }
     brandEl.classList.remove('hidden');
     brands.forEach(brand => {
       const pill = document.createElement('span');
@@ -185,10 +170,8 @@ const API_KEY   = '${API_KEY}';
       return;
     }
 
-    // vault_form_token is ready — send it to your backend to create a payment
     const token = (result as any).vault_form_token as string;
     const card  = (result as any).card;
-
     resultEl.className = 'mx-7 mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs';
     resultEl.innerHTML = \`
       <p class="font-semibold text-emerald-700 mb-2">vault_form_token received</p>
@@ -197,8 +180,11 @@ const API_KEY   = '${API_KEY}';
       <p class="mt-2 text-emerald-600 font-sans">Pass this token to your backend to create a payment via the Payment API.</p>
     \`;
   });
-})();`,
+}
+
+init();`,
       readOnly: false,
+      active: true,
     },
     '/styles.css': {
       code: `/* Pay button interactive states */

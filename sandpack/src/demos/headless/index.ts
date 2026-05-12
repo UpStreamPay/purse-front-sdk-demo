@@ -68,27 +68,19 @@ export const headlessDemo: DemoConfig = {
     <script type="module" src="./index.ts"></script>
   </body>
 </html>`,
-      readOnly: false,
+      readOnly: true,
     },
     '/index.ts': {
       code: `import '@tailwindcss/browser';
 import { loadHeadlessCheckout } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 
-(async () => {
+export async function init() {
   // 1 – Load the SDK
   const Purse = await loadHeadlessCheckout('sandbox');
 
   // 2 – Initialise the checkout
   const checkout = await Purse.createHeadlessCheckout(clientSession.widget.data);
-
-  const methodListEl = document.getElementById('method-list')!;
-  const stepFields   = document.getElementById('step-fields')!;
-  const formEl       = document.getElementById('form')!;
-  const payBtn       = document.getElementById('pay-btn') as HTMLButtonElement;
-  const resultEl     = document.getElementById('result')!;
-
-  let activeElement: any = null;
 
   const paymentConfig = {
     hostedForm: {
@@ -104,14 +96,16 @@ import clientSession from './session.json';
       holderPlaceholder: 'Name as it appears on card',
     },
     theme: {
-      global: {
-        fontSize: '16px',
-        fontFamily: 'sans-serif',
-      },
+      global: { fontSize: '16px', fontFamily: 'sans-serif' },
     },
   };
 
-  // 4 – Render available payment methods
+  // 3 – Render available payment methods
+  const methodListEl = document.getElementById('method-list')!;
+  const stepFields   = document.getElementById('step-fields')!;
+  const formEl       = document.getElementById('form')!;
+  let activeElement: any = null;
+
   checkout.paymentMethods.subscribe((methods: any[]) => {
     methodListEl.innerHTML = '';
     methods.forEach(method => {
@@ -131,7 +125,7 @@ import clientSession from './session.json';
     });
   });
 
-  // 5 – On selection: render the payment element into the form container
+  // 4 – On selection: render the payment element into the form container
   function selectMethod(method: any, btn: HTMLElement) {
     methodListEl.querySelectorAll('.method-btn').forEach(b => {
       b.classList.remove('active');
@@ -159,12 +153,14 @@ import clientSession from './session.json';
     activeElement.appendTo(formEl);
   }
 
-  // 6 – Enable the pay button once the form is complete
+  // 5 – Enable the pay button once the form is complete
+  const payBtn = document.getElementById('pay-btn') as HTMLButtonElement;
   checkout.isPaymentFulfilled.subscribe((isReady: boolean) => {
     payBtn.disabled = !isReady;
   });
 
-  // 7 – Submit and display the result
+  // 6 – Submit and display the result
+  const resultEl = document.getElementById('result')!;
   payBtn.addEventListener('click', async () => {
     payBtn.classList.add('loading');
     payBtn.disabled = true;
@@ -182,8 +178,11 @@ import clientSession from './session.json';
       payBtn.disabled = false;
     }
   });
-})();`,
+}
+
+init();`,
       readOnly: false,
+      active: true,
     },
     '/styles.css': {
       code: `/* Step 2 animated reveal — max-height transition can't be done with Tailwind utilities alone */

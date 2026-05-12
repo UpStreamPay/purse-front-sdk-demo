@@ -53,6 +53,7 @@ export function PurseDemo({ demo, height = 500 }: Props) {
           '/session.json': { code: sessionJson, readOnly: true, hidden: true },
         }}
         customSetup={demo.customSetup}
+        options={{ activeFile: '/index.ts' }}
       >
         <SandpackLayout style={{ height: '100%' }}>
           <SandpackCodeEditor style={{ height: '100%' }} />

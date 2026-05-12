@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: UpStreamPay/purse-docs
-          token: ${{ secrets.SYNC_PAT }}
+          token: ${{ secrets.DEMOS_ADMIN_ACCES_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -33,7 +33,7 @@ jobs:
 
       - name: Open PR
         env:
-          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+          GH_TOKEN: ${{ secrets.DEMOS_ADMIN_ACCES_TOKEN }}
         run: |
           BRANCH="chore/bump-purse-sdk-demos-${{ steps.version.outputs.VERSION }}"
           git config user.name "github-actions[bot]"

@@ -66,24 +66,19 @@ export const hostedFormDemo: DemoConfig = {
     <script type="module" src="./index.ts"></script>
   </body>
 </html>`,
-      readOnly: false,
+      readOnly: true,
     },
     '/index.ts': {
       code: `import '@tailwindcss/browser';
 import { loadHeadlessCheckout } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 
-(async () => {
+export async function init() {
   // 1 – Load the SDK
   const Purse = await loadHeadlessCheckout('sandbox');
 
   // 2 – Initialise the checkout
   const checkout = await Purse.createHeadlessCheckout(clientSession.widget.data);
-
-  const skeletonEl = document.getElementById('skeleton')!;
-  const formEl     = document.getElementById('hosted-form')!;
-  const payBtn     = document.getElementById('pay-btn') as HTMLButtonElement;
-  const resultEl   = document.getElementById('result')!;
 
   // 3 – hostedForm config: all four fields rendered inside a single iframe
   const paymentConfig = {
@@ -105,6 +100,8 @@ import clientSession from './session.json';
   };
 
   // 4 – Wait for payment methods, pick the first available card method
+  const skeletonEl = document.getElementById('skeleton')!;
+  const formEl     = document.getElementById('hosted-form')!;
   checkout.paymentMethods.subscribe((methods: any[]) => {
     const cardMethod = methods.find(m => !m.disabled?.value && m.method === 'creditcard');
     if (!cardMethod) return;
@@ -118,11 +115,13 @@ import clientSession from './session.json';
   });
 
   // 5 – Enable pay once all fields are valid
+  const payBtn = document.getElementById('pay-btn') as HTMLButtonElement;
   checkout.isPaymentFulfilled.subscribe((isReady: boolean) => {
     payBtn.disabled = !isReady;
   });
 
   // 6 – Submit
+  const resultEl = document.getElementById('result')!;
   payBtn.addEventListener('click', async () => {
     payBtn.classList.add('loading');
     payBtn.disabled = true;
@@ -139,8 +138,11 @@ import clientSession from './session.json';
       payBtn.disabled = false;
     }
   });
-})();`,
+}
+
+init();`,
       readOnly: false,
+      active: true,
     },
     '/styles.css': {
       code: `#pay-btn:not(:disabled) { transition: background 0.15s, transform 0.1s, box-shadow 0.15s; cursor: pointer; }

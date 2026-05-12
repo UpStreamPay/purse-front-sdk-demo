@@ -22,13 +22,13 @@ export const dropinDemo: DemoConfig = {
     <script type="module" src="./index.ts"></script>
   </body>
 </html>`,
-      readOnly: false,
+      readOnly: true,
     },
     '/index.ts': {
       code: `import { loadDropInCheckout } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 
-(async () => {
+export async function init() {
   const Purse = await loadDropInCheckout('sandbox');
 
   const dropin = await Purse.createDropinCheckout({
@@ -39,10 +39,11 @@ import clientSession from './session.json';
 
   // Mount the pre-built checkout UI
   await dropin.mount(document.getElementById('dropin-container')!);
+}
 
-  const status  = document.getElementById('status')!;
-})();`,
+init();`,
       readOnly: false,
+      active: true,
     },
     '/styles.css': {
       code: `body { font-family: sans-serif; max-width: 480px; margin: 32px auto; padding: 0 16px; }

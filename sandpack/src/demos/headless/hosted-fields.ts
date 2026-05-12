@@ -83,43 +83,27 @@ export const hostedFieldsDemo: DemoConfig = {
     <script type="module" src="./index.ts"></script>
   </body>
 </html>`,
-      readOnly: false,
+      readOnly: true,
     },
     '/index.ts': {
       code: `import '@tailwindcss/browser';
 import { loadHeadlessCheckout } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 
-(async () => {
+export async function init() {
   // 1 – Load the SDK
   const Purse = await loadHeadlessCheckout('sandbox');
 
   // 2 – Initialise the checkout
   const checkout = await Purse.createHeadlessCheckout(clientSession.widget.data);
 
-  const wrapper  = document.getElementById('fields-wrapper')!;
-  const payBtn   = document.getElementById('pay-btn') as HTMLButtonElement;
-  const resultEl = document.getElementById('result')!;
-
   // 3 – hostedFields config: each field rendered in its own isolated iframe
   const paymentConfig = {
     hostedFields: {
-      pan: {
-        label:       'Card number',
-        placeholder: '1234 5678 9012 3456',
-      },
-      expiry: {
-        label:       'Expiry date',
-        placeholder: 'MM / YY',
-      },
-      cvv: {
-        label:       'Security code',
-        placeholder: '123',
-      },
-      holderName: {
-        label:       'Cardholder name',
-        placeholder: 'Name as it appears on card',
-      },
+      pan:        { label: 'Card number',       placeholder: '1234 5678 9012 3456' },
+      expiry:     { label: 'Expiry date',        placeholder: 'MM / YY' },
+      cvv:        { label: 'Security code',      placeholder: '123' },
+      holderName: { label: 'Cardholder name',    placeholder: 'Name as it appears on card' },
     },
     theme: {
       global: { fontSize: '16px', fontFamily: 'sans-serif' },
@@ -142,22 +126,24 @@ import clientSession from './session.json';
   });
 
   // 5 – Layout switcher
+  const wrapper    = document.getElementById('fields-wrapper')!;
   const layoutBtns = document.querySelectorAll<HTMLButtonElement>('.layout-btn');
   layoutBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const layout = btn.dataset.layout!;
-      wrapper.className = \`layout-\${layout}\`;
+      wrapper.className = \`layout-\${btn.dataset.layout}\`;
       layoutBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     });
   });
 
   // 6 – Enable pay once all fields are valid
+  const payBtn = document.getElementById('pay-btn') as HTMLButtonElement;
   checkout.isPaymentFulfilled.subscribe((isReady: boolean) => {
     payBtn.disabled = !isReady;
   });
 
   // 7 – Submit
+  const resultEl = document.getElementById('result')!;
   payBtn.addEventListener('click', async () => {
     payBtn.classList.add('loading');
     payBtn.disabled = true;
@@ -174,8 +160,11 @@ import clientSession from './session.json';
       payBtn.disabled = false;
     }
   });
-})();`,
+}
+
+init();`,
       readOnly: false,
+      active: true,
     },
     '/styles.css': {
       code: `/* ── Layout: Grid (default) ─────────────────────────────────────────── */
