@@ -1,6 +1,6 @@
 {
   "name": "@upstreampay/purse-sdk-demos",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Sandpack demo configs for the Purse SDK documentation",
   "type": "module",
   "main": "./dist/index.cjs",
