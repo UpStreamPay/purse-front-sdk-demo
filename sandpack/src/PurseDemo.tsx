@@ -6,8 +6,7 @@ import {
     SandpackPreview,
 } from '@codesandbox/sandpack-react';
 import type {DemoConfig} from './demos/types';
-import rawStyles from './PurseDemo.module.css?raw';
-
+import {INLINE_STYLES} from './PurseDemo.styles'
 
 type Props = {
     demo: DemoConfig;
@@ -44,7 +43,7 @@ export function PurseDemo({demo, height = 720}: Props) {
 
     return (
         <div className="purse-demo" style={{height: resolvedHeight}}>
-            <style>{rawStyles}</style>
+            <style>{INLINE_STYLES}</style>
 
             <SandpackProvider
                 template={demo.template}
@@ -55,15 +54,15 @@ export function PurseDemo({demo, height = 720}: Props) {
                 customSetup={demo.customSetup}
                 options={{
                     recompileDelay: 750,
-                    recompileMode:"delayed",
+                    recompileMode: "delayed",
                     activeFile: '/index.ts', externalResources: [
                         'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
                     ]
                 }}
             >
                 <SandpackLayout
-                   >
-                    <SandpackCodeEditor  />
+                >
+                    <SandpackCodeEditor/>
                     <SandpackPreview
                     />
                 </SandpackLayout>
