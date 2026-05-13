@@ -1,29 +1,29 @@
-.demo {
+.purse-demo {
   position: relative;
-  --sp-layout-height : 100%
+  --sp-layout-height: 100%;
 }
 
-.demo :global(.sp-wrapper) {
+.purse-demo .sp-wrapper {
   position: absolute;
   inset: 0;
 }
 
-.demo :global(.sp-layout) {
+.purse-demo .sp-layout {
   height: 100%;
   min-height: 0 !important;
 }
 
-.demo :global(.sp-editor),
-.demo :global(.sp-preview) {
+.purse-demo .sp-editor,
+.purse-demo .sp-preview {
   height: 100% !important;
   min-height: 0 !important;
 }
 
-.demo :global(.sp-preview-iframe) {
+.purse-demo .sp-preview-iframe {
   height: 100% !important;
 }
 
-.loader {
+.purse-demo-loader {
   position: absolute;
   inset: 0;
   display: flex;
@@ -37,16 +37,16 @@
   color: #666;
 }
 
-.spinner {
+.purse-demo-spinner {
   width: 28px;
   height: 28px;
   border: 3px solid #e0e0e0;
   border-top-color: #555;
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: purse-demo-spin 0.7s linear infinite;
 }
 
-@keyframes spin {
+@keyframes purse-demo-spin {
   to {
     transform: rotate(360deg);
   }

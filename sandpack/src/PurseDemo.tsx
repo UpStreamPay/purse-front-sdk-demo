@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {
     SandpackProvider,
     SandpackLayout,
@@ -6,22 +6,28 @@ import {
     SandpackPreview,
 } from '@codesandbox/sandpack-react';
 import type {DemoConfig} from './demos/types';
-import styles from './PurseDemo.module.css';
+import rawStyles from './PurseDemo.module.css?raw';
 
-const DEBOUNCE_MS = 2000;
+let stylesInjected = false;
 
 type Props = {
     demo: DemoConfig;
     height?: number | string;
 };
 
-
 export function PurseDemo({demo, height = 720}: Props) {
+    useEffect(() => {
+        if (stylesInjected) {
+            return;
+        }
+        const el = document.createElement('style');
+        el.textContent = rawStyles;
+        document.head.appendChild(el);
+        stylesInjected = true;
+    }, []);
+
     const [sessionJson, setSessionJson] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [debouncedDemo, setDebouncedDemo] = useState<DemoConfig>(demo);
-    const [configLoading, setConfigLoading] = useState(false);
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         fetch(process.env.VITE_PURSE_SESSION_URL!, {
@@ -38,25 +44,6 @@ export function PurseDemo({demo, height = 720}: Props) {
             .catch(e => setError((e as Error).message));
     }, []);
 
-    useEffect(() => {
-        if (demo === debouncedDemo) {
-            return;
-        }
-        setConfigLoading(true);
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-        }
-        timerRef.current = setTimeout(() => {
-            setDebouncedDemo(demo);
-            setConfigLoading(false);
-        }, DEBOUNCE_MS);
-        return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-        };
-    }, [demo]);
-
     const resolvedHeight = typeof height === 'number' ? `${height}px` : height;
 
     if (error) {
@@ -67,21 +54,17 @@ export function PurseDemo({demo, height = 720}: Props) {
     }
 
     return (
-        <div className={styles.demo}  style={{height: resolvedHeight}} >
-            {configLoading && (
-                <div className={styles.loader}>
-                    <div className={styles.spinner}/>
-                    Applying config…
-                </div>
-            )}
+        <div className="purse-demo" style={{height: resolvedHeight}}>
             <SandpackProvider
-                template={debouncedDemo.template}
+                template={demo.template}
                 files={{
-                    ...debouncedDemo.files,
+                    ...demo.files,
                     '/session.json': {code: sessionJson, readOnly: true, hidden: true},
                 }}
-                customSetup={debouncedDemo.customSetup}
+                customSetup={demo.customSetup}
                 options={{
+                    recompileDelay: 750,
+                    recompileMode:"delayed",
                     activeFile: '/index.ts', externalResources: [
                         'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
                     ]
