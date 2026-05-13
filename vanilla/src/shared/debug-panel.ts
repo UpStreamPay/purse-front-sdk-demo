@@ -3,14 +3,14 @@ import {ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetAllEnv, isOverridd
 const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_ENVIRONMENT: 'Environment',
     VITE_PURSE_SESSION_JSON: 'Session',
-    VITE_PURSE_TENANT_ID: 'Tenant ID',
+    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'Tenant ID',
     VITE_PURSE_API_KEY: 'API Key',
 };
 
 const HINTS: Record<EnvKey, string> = {
     VITE_PURSE_ENVIRONMENT: 'sandbox | production',
     VITE_PURSE_SESSION_JSON: 'base64 payment session token',
-    VITE_PURSE_TENANT_ID: 'for Secure Fields',
+    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
     VITE_PURSE_API_KEY: 'for Secure Fields',
 };
 

@@ -27,7 +27,7 @@ export const PaymentForm = ({
     loadSecureFields('sandbox').then(({ initSecureFields }) => {
       if (cancelled) return;
       return initSecureFields({
-        tenantId: getEnv("VITE_PURSE_TENANT_ID"),
+        tenantId: getEnv("VITE_PURSE_SECUREFIELDS_TENANT_ID"),
         apiKey: getEnv("VITE_PURSE_API_KEY"),
         config: {
           brands: [

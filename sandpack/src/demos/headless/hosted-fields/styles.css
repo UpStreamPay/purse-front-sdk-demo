@@ -1,0 +1,63 @@
+/* ── Layout: Grid (default) ─────────────────────────────────────────── */
+.layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.layout-grid .field-pan    { grid-column: 1 / -1; }
+.layout-grid .field-holder { grid-column: 1 / -1; }
+
+/* ── Layout: Single-line (inline strip) ─────────────────────────────── */
+.layout-single-line {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.layout-single-line .field-slot { min-width: 0; }
+.layout-single-line .field-pan    { flex: 2.5; }
+.layout-single-line .field-expiry { flex: 1.2; }
+.layout-single-line .field-cvv    { flex: 1; }
+.layout-single-line .field-holder { flex: 2; }
+
+/* ── Layout: Card-shaped ─────────────────────────────────────────────── */
+.layout-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  box-shadow: 0 8px 24px rgb(99 102 241 / 0.35);
+}
+.layout-card .field-pan    { grid-column: 1 / -1; }
+.layout-card .field-holder { grid-column: 1 / -1; }
+
+/* Field slot base — gives each iframe a visual border */
+.field-slot {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: 52px;
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+}
+.layout-card .field-slot {
+  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+}
+
+/* Layout switcher pill styles */
+.layout-btn { color: #6b7280; }
+.layout-btn.active { background: #fff; color: #4f46e5; font-weight: 600; box-shadow: 0 1px 3px rgb(0 0 0 / 0.1); }
+
+/* Pay button states */
+#pay-btn:not(:disabled) { transition: background 0.15s, transform 0.1s, box-shadow 0.15s; cursor: pointer; }
+#pay-btn:not(:disabled):hover { background: #4338ca; box-shadow: 0 4px 12px rgb(79 70 229 / 0.4); transform: translateY(-1px); }
+#pay-btn:not(:disabled):active { transform: translateY(0); }
+#pay-btn.loading .btn-text { opacity: 0.7; }
+#pay-btn.loading .btn-spinner { display: block !important; }

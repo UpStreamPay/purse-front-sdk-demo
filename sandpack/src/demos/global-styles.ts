@@ -1,0 +1,1 @@
+export const globalStyles = 'main { background-color: #f9fafb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2.5rem 1rem; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111827; }'

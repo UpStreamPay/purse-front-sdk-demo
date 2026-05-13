@@ -7,7 +7,7 @@ interface ImportMetaEnv {
   readonly VITE_PURSE_SESSION_JSON: string;
 
   // ── Secure Fields ────────────────────────────────────────────────────────────
-  readonly VITE_PURSE_TENANT_ID: string;
+  readonly VITE_PURSE_SECUREFIELDS_TENANT_ID: string;
 
   // ── Environment (optional) ──────────────────────────────────────────────────
   readonly VITE_PURSE_ENVIRONMENT: string | undefined;

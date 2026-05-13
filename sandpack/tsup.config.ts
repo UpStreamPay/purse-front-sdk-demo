@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 config();
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/utils.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   clean: true,
