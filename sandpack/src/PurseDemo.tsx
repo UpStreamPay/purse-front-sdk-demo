@@ -67,7 +67,7 @@ export function PurseDemo({demo, height = 720}: Props) {
     }
 
     return (
-        <div className={styles.demo} style={{height: resolvedHeight}}>
+        <div className={styles.demo}  style={{height: resolvedHeight}} >
             {configLoading && (
                 <div className={styles.loader}>
                     <div className={styles.spinner}/>
@@ -87,11 +87,10 @@ export function PurseDemo({demo, height = 720}: Props) {
                     ]
                 }}
             >
-                <SandpackLayout style={{height: '100%'}}>
-                    <SandpackCodeEditor style={{height: '100%'}}/>
-                    <SandpackPreview style={{
-                        height: '100%'
-                    }}
+                <SandpackLayout
+                   >
+                    <SandpackCodeEditor  />
+                    <SandpackPreview
                     />
                 </SandpackLayout>
             </SandpackProvider>
