@@ -7,7 +7,7 @@ import { dropinDemo } from './demos/dropin';
 import { secureFieldsDemo } from './demos/securefields';
 import type { DemoConfig } from './demos/types';
 
-const DEMOS: { scope: string; usecase: string; label: string; config: DemoConfig }[] = [
+const DEMOS: { scope: string; usecase: string; label: string; config: (dynamicData?: Record <string,any>) =>  DemoConfig }[] = [
     { scope: 'headless',      usecase: 'quick-start',    label: 'Headless — Quick start',   config: headlessDemo },
     { scope: 'headless',      usecase: 'hosted-form',    label: 'Headless — Hosted form',   config: hostedFormDemo },
     { scope: 'headless',      usecase: 'hosted-fields',  label: 'Headless — Hosted fields', config: hostedFieldsDemo },
@@ -42,7 +42,7 @@ export function App() {
                         <Route
                             key={`${d.scope}/${d.usecase}`}
                             path={`/${d.scope}/${d.usecase}`}
-                            element={<PurseDemo key={`${d.scope}/${d.usecase}`} demo={d.config} />}
+                            element={<PurseDemo key={`${d.scope}/${d.usecase}`} demo={d.config()} />}
                         />
                     ))}
                 </Routes>

@@ -5,6 +5,7 @@ export function createDemo(opts: {
   template: string;
   script: string;
   styles: string;
+  needsSession?: boolean;
 }): DemoConfig {
   return {
     template: 'vanilla-ts',
@@ -13,6 +14,7 @@ export function createDemo(opts: {
         '@purse-eu/web-sdk': 'latest',
       },
     },
+    needsSession: opts.needsSession ?? true,
     files: {
       '/index.html': { code: opts.template, readOnly: true },
       '/index.ts': { code: opts.script, readOnly: false, active: true },

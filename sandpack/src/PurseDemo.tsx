@@ -18,6 +18,9 @@ export function PurseDemo({demo, height = 720}: Props) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!demo.needsSession){
+            return;
+        }
         fetch(process.env.VITE_PURSE_SESSION_URL!, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -37,7 +40,7 @@ export function PurseDemo({demo, height = 720}: Props) {
     if (error) {
         return <p style={{color: 'red'}}>Session error: {error}</p>;
     }
-    if (!sessionJson) {
+    if (demo.needsSession && !sessionJson) {
         return <p>Loading session…</p>;
     }
 
@@ -48,7 +51,7 @@ export function PurseDemo({demo, height = 720}: Props) {
                 template={demo.template}
                 files={{
                     ...demo.files,
-                    '/session.json': {code: sessionJson, readOnly: true, hidden: true},
+                    '/session.json': {code: sessionJson ??"{}", readOnly: true, hidden: true},
                 }}
                 customSetup={demo.customSetup}
                 options={{

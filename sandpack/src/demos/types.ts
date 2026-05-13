@@ -4,4 +4,5 @@ export type DemoConfig = {
   files: SandpackFiles;
   template: SandpackPredefinedTemplate;
   customSetup?: SandpackSetup;
+  needsSession: boolean;
 };
