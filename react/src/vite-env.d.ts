@@ -5,7 +5,7 @@ interface ViteTypeOptions {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_PURSE_TENANT_ID: string;
+  readonly VITE_PURSE_SECUREFIELDS_TENANT_ID: string;
   readonly VITE_PURSE_API_KEY: string;
 }
 

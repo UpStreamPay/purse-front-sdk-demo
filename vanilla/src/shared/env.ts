@@ -3,7 +3,7 @@ const LS_PREFIX = 'purse_debug_';
 export const ENV_KEYS = [
     'VITE_PURSE_ENVIRONMENT',
     'VITE_PURSE_SESSION_JSON',
-    'VITE_PURSE_TENANT_ID',
+    'VITE_PURSE_SECUREFIELDS_TENANT_ID',
     'VITE_PURSE_API_KEY',
 ] as const;
 
@@ -12,7 +12,7 @@ export type EnvKey = (typeof ENV_KEYS)[number];
 const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_ENVIRONMENT: import.meta.env.VITE_PURSE_ENVIRONMENT ?? 'sandbox',
     VITE_PURSE_SESSION_JSON: import.meta.env.VITE_PURSE_SESSION_JSON ?? '',
-    VITE_PURSE_TENANT_ID: import.meta.env.VITE_PURSE_TENANT_ID ?? '',
+    VITE_PURSE_SECUREFIELDS_TENANT_ID: import.meta.env.VITE_PURSE_SECUREFIELDS_TENANT_ID ?? '',
     VITE_PURSE_API_KEY: import.meta.env.VITE_PURSE_API_KEY ?? '',
 };
 

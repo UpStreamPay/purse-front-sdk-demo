@@ -4,7 +4,7 @@ import { $, setStep, showNotice, showResult } from '../shared/ui';
 import '../shared/debug-panel';
 
 // Secure Fields tokenises card data at tenant level — no payment session needed.
-// Configure via VITE_PURSE_TENANT_ID and VITE_PURSE_API_KEY in .env.local or the debug panel.
+// Configure via VITE_PURSE_SECUREFIELDS_TENANT_ID and VITE_PURSE_API_KEY in .env.local or the debug panel.
 
 const payBtn = $('pay-btn') as HTMLButtonElement;
 
@@ -14,11 +14,11 @@ const BRAND_PILL_SELECTED = 'px-2.5 py-0.5 bg-accent text-white border-accent ro
 let selectedBrand: Securefields.Brand | null = null;
 
 async function main() {
-  const tenantId = getEnv('VITE_PURSE_TENANT_ID');
+  const tenantId = getEnv('VITE_PURSE_SECUREFIELDS_TENANT_ID');
   const apiKey   = getEnv('VITE_PURSE_API_KEY');
 
   if (!tenantId || !apiKey) {
-    showNotice('Set VITE_PURSE_TENANT_ID and VITE_PURSE_API_KEY in .env.local or the debug panel');
+    showNotice('Set VITE_PURSE_SECUREFIELDS_TENANT_ID and VITE_PURSE_API_KEY in .env.local or the debug panel');
     return;
   }
 
