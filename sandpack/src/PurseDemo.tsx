@@ -6,7 +6,7 @@ import {
     SandpackPreview,
 } from '@codesandbox/sandpack-react';
 import type {DemoConfig} from './demos/types';
-import {INLINE_STYLES} from './PurseDemo.styles'
+import INLINE_STYLES from './PurseDemo.module.css?raw'
 
 type Props = {
     demo: DemoConfig;
@@ -44,7 +44,6 @@ export function PurseDemo({demo, height = 720}: Props) {
     return (
         <div className="purse-demo" style={{height: resolvedHeight}}>
             <style>{INLINE_STYLES}</style>
-
             <SandpackProvider
                 template={demo.template}
                 files={{
