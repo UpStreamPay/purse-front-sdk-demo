@@ -8,7 +8,6 @@ import {
 import type {DemoConfig} from './demos/types';
 import rawStyles from './PurseDemo.module.css?raw';
 
-let stylesInjected = false;
 
 type Props = {
     demo: DemoConfig;
@@ -16,16 +15,6 @@ type Props = {
 };
 
 export function PurseDemo({demo, height = 720}: Props) {
-    useEffect(() => {
-        if (stylesInjected) {
-            return;
-        }
-        const el = document.createElement('style');
-        el.textContent = rawStyles;
-        document.head.appendChild(el);
-        stylesInjected = true;
-    }, []);
-
     const [sessionJson, setSessionJson] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +44,8 @@ export function PurseDemo({demo, height = 720}: Props) {
 
     return (
         <div className="purse-demo" style={{height: resolvedHeight}}>
+            <style>{rawStyles}</style>
+
             <SandpackProvider
                 template={demo.template}
                 files={{
