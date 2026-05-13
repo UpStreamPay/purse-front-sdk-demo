@@ -1,0 +1,56 @@
+export const INLINE_STYLES =`
+.purse-demo {
+  position: relative;
+  --sp-layout-height: 100%;
+}
+
+.purse-demo .sp-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+.purse-demo .sp-layout {
+  height: 100%;
+  min-height: 0 !important;
+}
+
+.purse-demo .sp-editor,
+.purse-demo .sp-preview {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.purse-demo .sp-preview-iframe {
+  height: 100% !important;
+}
+
+.purse-demo-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  z-index: 10;
+  font-size: 14px;
+  color: #666;
+}
+
+.purse-demo-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #555;
+  border-radius: 50%;
+  animation: purse-demo-spin 0.7s linear infinite;
+}
+
+@keyframes purse-demo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+`
+
