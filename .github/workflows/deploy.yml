@@ -31,13 +31,13 @@ jobs:
       - name: Build vanilla
         working-directory: vanilla
         env:
-          VITE_BASE_URL: /purse-front-sdk-demo/vanilla/
+          VITE_BASE_URL: /vanilla/
         run: npm ci && npm run build
 
       - name: Build react
         working-directory: react
         env:
-          VITE_BASE_URL: /purse-front-sdk-demo/react/
+          VITE_BASE_URL: /react/
         run: npm ci && npm run build
 
       - name: Assemble dist
