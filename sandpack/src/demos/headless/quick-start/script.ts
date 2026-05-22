@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { loadHeadlessCheckout } from '@purse-eu/web-sdk';
+import { loadHeadlessCheckout, PurseHeadlessCheckoutPaymentMethod } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 import './styles.css';
 
@@ -34,27 +34,48 @@ export async function init() {
   const formEl       = document.getElementById('form')!;
   let activeElement: any = null;
 
-  checkout.paymentMethods.subscribe((methods: any[]) => {
+  function renderMethodButton(method: PurseHeadlessCheckoutPaymentMethod, isSecondary: boolean) {
+    const btn = document.createElement('button');
+    btn.className = 'method-btn flex items-center w-full border-[1.5px] border-gray-200 rounded-xl px-4 py-3.5 mb-2 text-sm font-medium text-gray-700 bg-white gap-3 cursor-pointer';
+
+    const dot = document.createElement('span');
+    dot.className = isSecondary
+      ? 'radio-dot w-4 h-4 rounded-full shrink-0 border-2 border-dashed border-gray-400'
+      : 'radio-dot w-4 h-4 rounded-full shrink-0';
+
+    const label = document.createElement('span');
+    label.textContent = method.name ?? `${method.method} (${method.partner})`;
+
+    btn.appendChild(dot);
+    btn.appendChild(label);
+    btn.addEventListener('click', () => selectMethod(method, btn));
+    return btn;
+  }
+
+  checkout.paymentMethods.subscribe((methods: PurseHeadlessCheckoutPaymentMethod[]) => {
     methodListEl.innerHTML = '';
-    methods.forEach(method => {
-      const btn = document.createElement('button');
-      btn.className = 'method-btn flex items-center w-full border-[1.5px] border-gray-200 rounded-xl px-4 py-3.5 mb-2 text-sm font-medium text-gray-700 bg-white gap-3 cursor-pointer';
 
-      const dot = document.createElement('span');
-      dot.className = 'radio-dot w-4 h-4 rounded-full shrink-0';
+    const primaries   = methods.filter(m => !m.isSecondary);
+    const secondaries = methods.filter(m =>  m.isSecondary);
 
-      const label = document.createElement('span');
-      label.textContent = method.label ?? method.method;
-
-      btn.appendChild(dot);
-      btn.appendChild(label);
-      btn.addEventListener('click', () => selectMethod(method, btn));
-      methodListEl.appendChild(btn);
+    primaries.forEach(method => {
+      methodListEl.appendChild(renderMethodButton(method, false));
     });
+
+    if (secondaries.length > 0) {
+      const divider = document.createElement('p');
+      divider.className = 'text-xs font-semibold text-gray-400 uppercase tracking-wide mt-3 mb-2 px-1';
+      divider.textContent = 'Gift cards & partial payments';
+      methodListEl.appendChild(divider);
+
+      secondaries.forEach(method => {
+        methodListEl.appendChild(renderMethodButton(method, true));
+      });
+    }
   });
 
   // 4 – On selection: render the payment element into the form container
-  function selectMethod(method: any, btn: HTMLElement) {
+  function selectMethod(method: PurseHeadlessCheckoutPaymentMethod, btn: HTMLElement) {
     methodListEl.querySelectorAll('.method-btn').forEach(b => {
       b.classList.remove('active');
       const d = b.querySelector('.radio-dot') as HTMLElement | null;
@@ -74,6 +95,15 @@ export async function init() {
 
     if (method.disabled?.value) {
       formEl.innerHTML = `<p class="unavailable">This payment method is currently unavailable.</p>`;
+      return;
+    }
+
+    if (method.isSecondary) {
+      formEl.innerHTML = `
+        <div class="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-800 space-y-2">
+          <p class="font-semibold">Gift card / split payment</p>
+          <p>Call <code class="bg-indigo-100 rounded px-1 font-mono">method.take(amount)</code> to apply this method to the split, then pay the remainder with a primary method.</p>
+        </div>`;
       return;
     }
 
