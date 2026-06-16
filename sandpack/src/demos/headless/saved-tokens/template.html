@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Saved Payment Methods</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<main>
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+
+    <div class="flex items-center gap-3 px-7 py-6 border-b border-gray-100">
+      <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect width="24" height="24" rx="6" fill="#4f46e5"/>
+        <rect x="4" y="7" width="16" height="10" rx="2" stroke="white" stroke-width="1.5"/>
+        <path d="M4 11h16" stroke="white" stroke-width="1.5"/>
+        <path d="M8 15h3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight leading-none">Saved Payment Methods</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Select a saved card → enter CVV → pay</p>
+      </div>
+    </div>
+
+    <!-- Step 1: token list -->
+    <section class="px-7 pt-6">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="step-badge">1</span>
+        <span class="step-label">Select saved card</span>
+      </div>
+      <div id="token-list"></div>
+    </section>
+
+    <!-- Step 2: CVV element -->
+    <section id="step-cvv" class="hidden px-7 pt-3">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="step-badge">2</span>
+        <span class="step-label">Confirm security code</span>
+      </div>
+      <div id="cvv-form" class="min-h-10 pb-4"></div>
+    </section>
+
+    <div class="px-7 pb-6 border-t border-gray-100 mt-5 pt-5">
+      <button id="pay-btn" disabled
+              class="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-600 text-white rounded-xl text-[15px] font-semibold disabled:bg-indigo-300 disabled:cursor-not-allowed">
+        <span class="btn-text">Pay now</span>
+        <svg class="btn-spinner w-4 h-4 animate-spin hidden" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="result" class="hidden"></div>
+
+  </div>
+</main>
+<script type="module" src="./index.ts"></script>
+</body>
+</html>

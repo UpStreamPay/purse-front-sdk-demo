@@ -4,6 +4,7 @@ import {
     SandpackLayout,
     SandpackCodeEditor,
     SandpackPreview,
+    SandpackConsole,
 } from '@codesandbox/sandpack-react';
 import type {DemoConfig} from './demos/types';
 import INLINE_STYLES from './PurseDemo.module.css?raw'
@@ -16,6 +17,7 @@ type Props = {
 export function PurseDemo({demo, height = 720}: Props) {
     const [sessionJson, setSessionJson] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showConsole, setShowConsole] = useState(false);
 
     useEffect(() => {
         if (!demo.needsSession) {
@@ -74,9 +76,32 @@ export function PurseDemo({demo, height = 720}: Props) {
                     ]
                 }}
             >
-                <SandpackLayout>
-                    <SandpackCodeEditor/>
-                    <SandpackPreview/>
+                <SandpackLayout style={{flexDirection: 'column'}}>
+                    <div style={{display: 'flex', flex: 1, minHeight: 0}}>
+                        <SandpackCodeEditor style={{flex: 1}}/>
+                        <SandpackPreview style={{flex: 1}}/>
+                    </div>
+                    <div style={{borderTop: '1px solid var(--sp-colors-surface2)'}}>
+                        <button
+                            onClick={() => setShowConsole(v => !v)}
+                            style={{
+                                width: '100%',
+                                padding: '6px 12px',
+                                textAlign: 'left',
+                                fontSize: '12px',
+                                fontFamily: 'monospace',
+                                background: 'var(--sp-colors-surface1)',
+                                color: 'var(--sp-colors-fg-default)',
+                                border: 'none',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {showConsole ? '▾' : '▸'} Console
+                        </button>
+                        {showConsole && (
+                            <SandpackConsole style={{height: 160}}/>
+                        )}
+                    </div>
                 </SandpackLayout>
             </SandpackProvider>
         </div>
