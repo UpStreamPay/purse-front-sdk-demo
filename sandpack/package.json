@@ -49,6 +49,9 @@
       }
     }
   },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "devDependencies": {
     "@codesandbox/sandpack-react": "^2.18.4",
     "@purse-eu/web-sdk": "latest",
