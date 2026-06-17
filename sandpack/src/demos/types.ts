@@ -5,4 +5,5 @@ export type DemoConfig = {
   template: SandpackPredefinedTemplate;
   customSetup?: SandpackSetup;
   needsSession: boolean;
+  redirectionUrl?: string;
 };

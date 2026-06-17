@@ -18,12 +18,16 @@ export function PurseDemo({demo, height = 720}: Props) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!demo.needsSession){
+        if (!demo.needsSession) {
             return;
         }
+        const body = demo.redirectionUrl
+            ? JSON.stringify({shopper_redirection_url: demo.redirectionUrl})
+            : undefined;
         fetch(process.env.VITE_PURSE_SESSION_URL!, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
+            body,
         })
             .then(r => {
                 if (!r.ok) {
@@ -51,7 +55,7 @@ export function PurseDemo({demo, height = 720}: Props) {
                 template={demo.template}
                 files={{
                     ...demo.files,
-                    '/session.json': {code: sessionJson ??"{}", readOnly: true, hidden: true},
+                    '/session.json': {code: sessionJson ?? "{}", readOnly: true, hidden: true},
                 }}
                 customSetup={demo.customSetup}
                 options={{
@@ -62,11 +66,9 @@ export function PurseDemo({demo, height = 720}: Props) {
                     ]
                 }}
             >
-                <SandpackLayout
-                >
+                <SandpackLayout>
                     <SandpackCodeEditor/>
-                    <SandpackPreview
-                    />
+                    <SandpackPreview/>
                 </SandpackLayout>
             </SandpackProvider>
         </div>

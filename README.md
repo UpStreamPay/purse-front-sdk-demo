@@ -6,6 +6,14 @@ Demo apps for [`@purse-eu/web-sdk`](https://www.npmjs.com/package/@purse-eu/web-
 |---|---|---|
 | [`vanilla/`](./vanilla/) | Vite + TypeScript | Drop-in checkout, Headless checkout, Secure Fields tokenization |
 | [`react/`](./react/) | React 19 + Vite + TypeScript | Secure Fields tokenization |
+| [`sandpack/`](./sandpack/) | npm package | `@upstreampay/purse-sdk-demos` — Sandpack configs embedded in the doc site |
+
+## Docs
+
+| Document | Description |
+|---|---|
+| [`docs/sandpack-package.md`](./docs/sandpack-package.md) | Architecture, exports, env vars, how to add a demo, publishing |
+| [`docs/post-payment-redirect.md`](./docs/post-payment-redirect.md) | Post-payment redirect system — `redirectionUrl`, fake confirmation page, required backend change |
 
 ## Quick start
 
