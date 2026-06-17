@@ -50,7 +50,7 @@ hostedFormDemo({ redirectionUrl: '...' })
 hostedFieldsDemo({ redirectionUrl: '...' })
 ```
 
-When set, `PurseDemo` sends it in the session POST body so the backend can embed it as `shopper_redirection_url` in the Purse API client session. After payment the SDK redirects the preview iframe to that page instead of a dead URL.
+When set, `PurseDemo` fetches the default legacy order via `GET /order`, overrides `order.order.redirection` with `redirectionUrl`, then `POST`s the modified order to `/orchestration_session`. Alfred's `fromLegacyOrder` maps `order.order.redirection` → `shopper_redirection_url`, so after payment the SDK redirects the preview iframe to that page instead of a dead URL.
 
 See [post-payment-redirect.md](./post-payment-redirect.md) for the full design and the required backend change.
 

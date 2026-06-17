@@ -24,14 +24,14 @@ export function PurseDemo({demo, height = 720}: Props) {
         const orderUrl = process.env.VITE_PURSE_ORDER_URL!;
         const sessionUrl = process.env.VITE_PURSE_SESSION_URL!;
 
-        fetch(orderUrl, {method: 'POST', headers: {'Content-Type': 'application/json'}})
+        fetch(orderUrl)
             .then(r => {
                 if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
                 return r.json();
             })
-            .then(order => {
+            .then(({order}) => {
                 if (demo.redirectionUrl) {
-                    order.shopper_redirection_url = demo.redirectionUrl;
+                    order.order.redirection = demo.redirectionUrl;
                 }
                 return fetch(sessionUrl, {
                     method: 'POST',

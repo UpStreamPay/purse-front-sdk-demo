@@ -28,7 +28,7 @@ jobs:
         working-directory: sandpack
         run: npm run build
         env:
-          VITE_PURSE_ORDER_URL: https://usp-widget-merchant.purse-sandbox.com/orchestration_order/
+          VITE_PURSE_ORDER_URL: https://usp-widget-merchant.purse-sandbox.com/order
           VITE_PURSE_SESSION_URL: https://usp-widget-merchant.purse-sandbox.com/orchestration_session/
 
       - name: Publish

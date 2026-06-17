@@ -2,7 +2,7 @@
 
 ## Problem
 
-When a payment completes in a Sandpack demo, the Purse SDK redirects the preview iframe to `shopper_redirection_url`. Previously this URL was `https://example.com`, so the preview went blank with no feedback and no way to restart the demo.
+When a payment completes in a Sandpack demo, the Purse SDK redirects the preview iframe to `shopper_redirection_url`. Previously this URL was `https://example.com`, so the preview went blank with no feedback.
 
 ## Solution
 
@@ -10,7 +10,7 @@ Two moving parts work together:
 
 ### 1. `redirectionUrl` in `DemoConfig`
 
-Each session-backed demo factory now accepts a `redirectionUrl` via `dynamicData`:
+Each session-backed demo factory accepts a `redirectionUrl` via `dynamicData`:
 
 ```ts
 dropinDemo({ redirectionUrl: 'https://docs.purse.tech/docs/fake-confirmation-page' })
@@ -22,15 +22,15 @@ This value flows through `createDemo` and is stored on the `DemoConfig` object.
 
 `PurseDemo.tsx` fetches a session in two steps:
 
-1. **GET the order template** — `POST /orchestration_order` returns a base order object with all required fields pre-filled.
-2. **Override `shopper_redirection_url`** — if `demo.redirectionUrl` is set, it replaces the URL on the order before the session is created.
-3. **Create the session** — `POST /orchestration_session` with the (possibly modified) order as the request body.
+1. **Fetch the legacy order** — `GET /order` returns `{ order: <legacy order> }`, the same format alfred's `/orchestration_session` expects.
+2. **Override `redirection`** — if `demo.redirectionUrl` is set, it replaces `order.order.redirection` before the session is created.
+3. **Create the session** — `POST /orchestration_session` with the (possibly modified) legacy order as the request body.
 
 ```ts
-const order = await fetch(VITE_PURSE_ORDER_URL, { method: 'POST' }).then(r => r.json());
+const { order } = await fetch(VITE_PURSE_ORDER_URL).then(r => r.json()); // GET /order
 
 if (demo.redirectionUrl) {
-    order.shopper_redirection_url = demo.redirectionUrl;
+    order.order.redirection = demo.redirectionUrl;
 }
 
 const session = await fetch(VITE_PURSE_SESSION_URL, {
@@ -57,7 +57,7 @@ After payment the SDK redirects the preview iframe to `shopper_redirection_url` 
 const redirectionUrl = `${window.location.origin}/docs/fake-confirmation-page`;
 ```
 
-This makes it work on any deployment (local dev at `localhost:3000`, staging, production) without hardcoding a URL in the package.
+This makes it work on any deployment (local dev, staging, production) without hardcoding a URL in the package.
 
 ## Data flow
 
@@ -66,32 +66,20 @@ SandpackDemo.tsx (usp-doc)
   │  passes redirectionUrl = window.location.origin + '/docs/fake-confirmation-page'
   ▼
 PurseDemo.tsx
-  │  1. POST /orchestration_order  →  get base order object
-  │  2. order.shopper_redirection_url = redirectionUrl
-  │  3. POST /orchestration_session  { ...order }
+  │  1. GET /order  →  { order: <legacy order> }
+  │  2. order.order.redirection = redirectionUrl
+  │  3. POST /orchestration_session  <legacy order>
   │
-  │  usp-widget-merchant backend
-  │  creates Purse API client session with shopper_redirection_url = redirectionUrl
-  │  returns session JSON → injected as /session.json in Sandpack
+  │  alfred (usp-widget-merchant) calls fromLegacyOrder() on the body,
+  │  maps order.order.redirection → shopper_redirection_url,
+  │  creates Purse API client session, returns session JSON
+  │  → injected as /session.json in Sandpack
   │
   │  User completes payment in Sandpack preview iframe
   │
   └─ SDK redirects iframe → redirectionUrl?purse-redirection-data=<JWS>
        └─ Iframe shows fake-confirmation-page → user sees decoded payment status
 ```
-
-## Required backend change
-
-The `usp-widget-merchant` service (repository: `usp-widget-merchant`) needs to read `shopper_redirection_url` from the POST body when present and pass it to the Purse API client session creation call.
-
-```
-POST /orchestration_session
-Content-Type: application/json
-
-{ "shopper_redirection_url": "https://docs.purse.tech/docs/fake-confirmation-page" }
-```
-
-Until this is deployed, the Sandpack preview will still navigate away to whatever URL the backend currently uses.
 
 ## Files changed
 
@@ -100,6 +88,8 @@ Until this is deployed, the Sandpack preview will still navigate away to whateve
 | `sandpack/src/demos/types.ts` | purse-front-sdk-demo | Added `redirectionUrl?: string` to `DemoConfig` |
 | `sandpack/src/demos/utils.ts` | purse-front-sdk-demo | `createDemo` accepts and forwards `redirectionUrl` |
 | `sandpack/src/demos/*/index.ts` | purse-front-sdk-demo | All four session-backed factories accept `dynamicData.redirectionUrl` |
-| `sandpack/src/PurseDemo.tsx` | purse-front-sdk-demo | Sends `redirectionUrl` in session POST body |
+| `sandpack/src/PurseDemo.tsx` | purse-front-sdk-demo | `GET /order` → patch `order.order.redirection` → `POST /orchestration_session` |
+| `sandpack/.env` | purse-front-sdk-demo | `VITE_PURSE_ORDER_URL` points to `/order` (was `/orchestration_order/`) |
+| `.github/workflows/demos-publish.yaml` | purse-front-sdk-demo | Same URL update for CI build |
 | `src/components/SandpackDemo.tsx` | usp-doc | Passes `redirectionUrl` derived from `window.location.origin` |
 | `docs/fake-confirmation-page.mdx` | usp-doc | New unlisted page; decodes and displays `purse-redirection-data` JWT |
