@@ -18,19 +18,29 @@ dropinDemo({ redirectionUrl: 'https://docs.purse.tech/docs/fake-confirmation-pag
 
 This value flows through `createDemo` and is stored on the `DemoConfig` object.
 
-### 2. `PurseDemo` — session POST body
+### 2. `PurseDemo` — two-step session creation
 
-`PurseDemo.tsx` sends `redirectionUrl` to the session backend in the POST body:
+`PurseDemo.tsx` fetches a session in two steps:
+
+1. **GET the order template** — `POST /orchestration_order` returns a base order object with all required fields pre-filled.
+2. **Override `shopper_redirection_url`** — if `demo.redirectionUrl` is set, it replaces the URL on the order before the session is created.
+3. **Create the session** — `POST /orchestration_session` with the (possibly modified) order as the request body.
 
 ```ts
-const body = demo.redirectionUrl
-    ? JSON.stringify({ shopper_redirection_url: demo.redirectionUrl })
-    : undefined;
+const order = await fetch(VITE_PURSE_ORDER_URL, { method: 'POST' }).then(r => r.json());
 
-fetch(VITE_PURSE_SESSION_URL, { method: 'POST', headers: {...}, body })
+if (demo.redirectionUrl) {
+    order.shopper_redirection_url = demo.redirectionUrl;
+}
+
+const session = await fetch(VITE_PURSE_SESSION_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(order),
+}).then(r => r.json());
 ```
 
-This allows the backend to embed it as the `shopper_redirection_url` in the Purse API client session, so after payment the SDK redirects the preview iframe to that page instead of a dead URL.
+After payment the SDK redirects the preview iframe to `shopper_redirection_url` instead of a dead URL.
 
 ### 3. `fake-confirmation-page` in `usp-doc`
 
@@ -56,7 +66,9 @@ SandpackDemo.tsx (usp-doc)
   │  passes redirectionUrl = window.location.origin + '/docs/fake-confirmation-page'
   ▼
 PurseDemo.tsx
-  │  POST /orchestration_session  { shopper_redirection_url: redirectionUrl }
+  │  1. POST /orchestration_order  →  get base order object
+  │  2. order.shopper_redirection_url = redirectionUrl
+  │  3. POST /orchestration_session  { ...order }
   │
   │  usp-widget-merchant backend
   │  creates Purse API client session with shopper_redirection_url = redirectionUrl

@@ -101,11 +101,12 @@ const checkout = await Purse.createHeadlessCheckout(clientSession.widget.data);
 
 | Variable | Set at | Description |
 |---|---|---|
+| `VITE_PURSE_ORDER_URL` | **build time** (baked by tsup) | Backend endpoint for fetching the base order object |
 | `VITE_PURSE_SESSION_URL` | **build time** (baked by tsup) | Backend endpoint for creating client sessions |
 | `VITE_SECUREFIELDS_TENANT_ID` | build time | Default SecureFields tenant (overridable via `dynamicData`) |
 | `VITE_SECUREFIELDS_LOGS_API_KEY` | build time | SecureFields logging key |
 
-`VITE_PURSE_SESSION_URL` is baked into the published bundle during `npm run build`. It is set to the sandbox URL in the CI publish workflow (`.github/workflows/demos-publish.yaml`) and to the dev URL in the local `.env` file.
+Both URL variables are baked into the published bundle during `npm run build`. They are set to the sandbox URLs in the CI publish workflow (`.github/workflows/demos-publish.yaml`) and to the dev URLs in the local `.env` file.
 
 ## Building and publishing
 

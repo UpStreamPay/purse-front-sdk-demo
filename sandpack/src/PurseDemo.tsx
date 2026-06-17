@@ -21,18 +21,26 @@ export function PurseDemo({demo, height = 720}: Props) {
         if (!demo.needsSession) {
             return;
         }
-        const body = demo.redirectionUrl
-            ? JSON.stringify({shopper_redirection_url: demo.redirectionUrl})
-            : undefined;
-        fetch(process.env.VITE_PURSE_SESSION_URL!, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body,
-        })
+        const orderUrl = process.env.VITE_PURSE_ORDER_URL!;
+        const sessionUrl = process.env.VITE_PURSE_SESSION_URL!;
+
+        fetch(orderUrl, {method: 'POST', headers: {'Content-Type': 'application/json'}})
             .then(r => {
-                if (!r.ok) {
-                    throw new Error(`${r.status} ${r.statusText}`);
+                if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+                return r.json();
+            })
+            .then(order => {
+                if (demo.redirectionUrl) {
+                    order.shopper_redirection_url = demo.redirectionUrl;
                 }
+                return fetch(sessionUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(order),
+                });
+            })
+            .then(r => {
+                if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
                 return r.json();
             })
             .then(data => setSessionJson(JSON.stringify(data, null, 2)))
