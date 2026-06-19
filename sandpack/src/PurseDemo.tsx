@@ -78,8 +78,8 @@ export function PurseDemo({demo, height = 720}: Props) {
             >
                 <SandpackLayout style={{flexDirection: 'column'}}>
                     <div style={{display: 'flex', flex: 1, minHeight: 0}}>
-                        <SandpackCodeEditor style={{flex: 1}}/>
-                        <SandpackPreview style={{flex: 1}}/>
+                        <SandpackCodeEditor style={{flex: '1 1 50%', minWidth: 0}} wrapContent/>
+                        <SandpackPreview style={{flex: '1 1 50%', minWidth: 0}}/>
                     </div>
                     <div style={{borderTop: '1px solid var(--sp-colors-surface2)'}}>
                         <button

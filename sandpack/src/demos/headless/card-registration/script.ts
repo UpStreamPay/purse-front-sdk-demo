@@ -30,14 +30,14 @@ export async function init() {
     theme: { global: { fontSize: '16px', fontFamily: 'sans-serif' } },
   };
 
-  // createHeadlessCheckout resolves after session ready — paymentMethods.value populated sync
-  const creditCard = checkout.paymentMethods.value.find(m => !m.disabled?.value && m.method === 'creditcard');
-  if (!creditCard) {
+  let creditCard;
+  try {
+    checkout.getPaymentElement({ method: 'creditcard', ...paymentConfig }).appendTo(formEl);
+    creditCard = checkout.paymentMethods.value.find(m => m.method === 'creditcard');
+  } catch {
     skeletonEl.textContent = 'No credit card method available in this session.';
     return;
   }
-
-  creditCard.getPaymentElement(paymentConfig).appendTo(formEl);
   skeletonEl.classList.add('hidden');
   formEl.classList.remove('hidden');
 

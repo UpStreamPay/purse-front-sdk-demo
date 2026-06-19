@@ -30,8 +30,8 @@ export async function init() {
   icon.src = googlePay.iconUrl;
   icon.style.display = 'block';
 
-  const paymentElement = googlePay.getPaymentElement({ xPayButton: xPayButtonConfig });
-  paymentElement.appendTo(document.getElementById('btn-container'));
+  checkout.getPaymentElement({ method: 'googlepay', xPayButton: xPayButtonConfig })
+    .appendTo(document.getElementById('btn-container'));
 }
 
 init();

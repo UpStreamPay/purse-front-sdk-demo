@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
+      'process.env.VITE_PURSE_ORDER_URL': JSON.stringify(env.VITE_PURSE_ORDER_URL ?? ''),
       'process.env.VITE_PURSE_SESSION_URL': JSON.stringify(env.VITE_PURSE_SESSION_URL ?? ''),
       'process.env.VITE_PURSE_SECUREFIELDS_TENANT_ID': JSON.stringify(env.VITE_PURSE_SECUREFIELDS_TENANT_ID ?? ''),
       'process.env.VITE_PURSE_API_KEY': JSON.stringify(env.VITE_PURSE_API_KEY ?? ''),
