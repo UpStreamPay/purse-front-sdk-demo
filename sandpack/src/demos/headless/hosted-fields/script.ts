@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { loadHeadlessCheckout } from '@purse-eu/web-sdk';
 import clientSession from './session.json';
 import './styles.css';
@@ -18,31 +19,40 @@ export async function init() {
       holderName: { label: 'Cardholder name',    placeholder: 'Name as it appears on card',    target :'holder-field' },
     },
     theme: {
-      global: { fontSize: '16px', fontFamily: 'sans-serif' },
-      input :{}
+      global: { fontSize: '16px', fontFamily: 'sans-serif', height: '45px', width: '100%' },
+      input: {},
     },
   };
 
-  // 4 – Wait for payment methods, pick the first available card method
-  checkout.paymentMethods.subscribe((methods) => {
-    const cardMethod = methods.find(m => !m.disabled?.value && m.method === 'creditcard');
-    if (!cardMethod || cardMethod.isSecondary) return;
+  // 4 – createHeadlessCheckout resolves after session ready — paymentMethods.value populated sync
+  let hostedFields: any = null;
 
-    // getPaymentElement returns an object with individual field handles
-    const element = cardMethod.getHostedFields(paymentConfig);
-
-    // Mount each field into its dedicated container (separate iframes)
-    element.render()
-  });
+  const cardMethod = checkout.paymentMethods.value.find(m => !m.disabled?.value && !m.isSecondary && m.method === 'creditcard');
+  if (cardMethod) {
+    hostedFields = cardMethod.getHostedFields(paymentConfig);
+    hostedFields.render();
+  }
 
   // 5 – Layout switcher
   const wrapper    = document.getElementById('fields-wrapper')!;
   const layoutBtns = document.querySelectorAll<HTMLButtonElement>('.layout-btn');
   layoutBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      wrapper.className = `layout-${btn.dataset.layout}`;
+      const layout = btn.dataset.layout;
+      wrapper.className = `layout-${layout}`;
       layoutBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+
+      if (!hostedFields) return;
+      if (layout === 'card') {
+        hostedFields.setOptions({
+          theme: { global: { fontSize: '16px', fontFamily: 'sans-serif', height: '45px', width: '100%', color: '#ffffff' } },
+        });
+      } else {
+        hostedFields.setOptions({
+          theme: { global: { fontSize: '16px', fontFamily: 'sans-serif', height: '45px', width: '100%' } },
+        });
+      }
     });
   });
 

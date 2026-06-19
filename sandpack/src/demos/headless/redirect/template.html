@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Redirect Payment</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<main>
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+
+    <div class="flex items-center gap-3 px-7 py-6 border-b border-gray-100">
+      <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect width="24" height="24" rx="6" fill="#4f46e5"/>
+        <path d="M5 12h12M13 8l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight leading-none">Redirect Payment</h1>
+        <p class="text-xs text-gray-400 mt-0.5">e.g. Bancontact, iDEAL, Klarna</p>
+      </div>
+    </div>
+
+    <!-- Step 1: choose a redirect method -->
+    <section class="px-7 pt-6">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold shrink-0">1</span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-gray-500">Choose method</span>
+      </div>
+      <div id="method-list"></div>
+    </section>
+
+    <!-- Step 2: redirect notice rendered by SDK -->
+    <section id="step-fields" class="hidden px-7">
+      <div class="flex items-center gap-2.5 mt-5 mb-4">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold shrink-0">2</span>
+        <span class="text-xs font-semibold uppercase tracking-widest text-gray-500">Confirm redirect</span>
+      </div>
+      <div id="form" class="min-h-10 pb-4"></div>
+    </section>
+
+    <div class="px-7 pb-6 border-t border-gray-100 mt-5 pt-5">
+      <button id="pay-btn" disabled
+              class="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-600 text-white rounded-xl text-[15px] font-semibold disabled:bg-indigo-300 disabled:cursor-not-allowed">
+        <span class="btn-text">Proceed to payment</span>
+        <svg class="btn-spinner w-4 h-4 animate-spin hidden" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="result" class="hidden"></div>
+
+  </div>
+</main>
+<script type="module" src="./index.ts"></script>
+</body>
+</html>

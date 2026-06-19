@@ -29,20 +29,18 @@ export async function init() {
     },
   };
 
-  // 4 – Wait for payment methods, pick the first available card method
+  // 4 – Mount the complete hosted form (single iframe: PAN + expiry + CVV + holder)
   const skeletonEl = document.getElementById('skeleton')!;
   const formEl     = document.getElementById('hosted-form')!;
-  checkout.paymentMethods.subscribe((methods: any[]) => {
-    const cardMethod = methods.find(m => !m.disabled?.value && m.method === 'creditcard');
-    if (!cardMethod) return;
 
-    // Mount the complete hosted form (single iframe: PAN + expiry + CVV + holder)
-    const element = cardMethod.getPaymentElement(paymentConfig);
-    element.appendTo(formEl);
-
+  try {
+    checkout.getPaymentElement({ method: 'creditcard', ...paymentConfig }).appendTo(formEl);
     skeletonEl.classList.add('hidden');
     formEl.classList.remove('hidden');
-  });
+  } catch {
+    skeletonEl.textContent = 'No credit card method available in this session.';
+    return;
+  }
 
   // 5 – Enable pay once all fields are valid
   const payBtn = document.getElementById('pay-btn') as HTMLButtonElement;

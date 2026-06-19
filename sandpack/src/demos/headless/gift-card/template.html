@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Gift Card</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<main>
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+
+    <div class="flex items-center gap-3 px-7 py-6 border-b border-gray-100">
+      <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect width="24" height="24" rx="6" fill="#ec4899"/>
+        <path d="M12 7v10M7 12h10" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight leading-none">Gift Card</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Enter card → check balance → apply</p>
+      </div>
+    </div>
+
+    <!-- Step 1: choose gift card method -->
+    <section class="px-7 pt-6">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="step-badge">1</span>
+        <span class="step-label">Select gift card type</span>
+      </div>
+      <div id="method-list"></div>
+    </section>
+
+    <!-- Step 2: enter card details -->
+    <section id="gc-form" class="hidden px-7 pt-3">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="step-badge">2</span>
+        <span class="step-label">Enter card details</span>
+      </div>
+      <div class="space-y-3">
+        <input id="pan" type="text" placeholder="Card number"
+               class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"/>
+        <div id="cvv-row">
+          <input id="cvv" type="text" placeholder="CVV"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"/>
+        </div>
+      </div>
+      <button id="load-btn"
+              class="mt-3 w-full py-3 bg-pink-500 text-white rounded-xl text-sm font-semibold transition-colors hover:bg-pink-600 disabled:opacity-60 disabled:cursor-not-allowed">
+        Load card
+      </button>
+    </section>
+
+    <!-- Step 3: balance + apply amount -->
+    <section id="balance-section" class="hidden px-7 pt-4">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="step-badge">3</span>
+        <span class="step-label">Apply to split</span>
+      </div>
+      <div class="balance-box mb-3">
+        <span class="text-xs text-gray-500">Available balance</span>
+        <span id="balance-value" class="text-xl font-bold text-pink-600">…</span>
+      </div>
+      <div class="flex gap-2">
+        <input id="take-amount" type="number" placeholder="Amount to use" min="0.01" step="0.01"
+               class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"/>
+        <button id="apply-btn"
+                class="px-4 py-3 bg-pink-500 text-white rounded-xl text-sm font-semibold transition-colors hover:bg-pink-600 disabled:opacity-60 disabled:cursor-not-allowed">
+          Apply
+        </button>
+      </div>
+    </section>
+
+    <p id="feedback" class="px-7 text-xs text-red-600 mt-2 min-h-4"></p>
+
+    <div class="px-7 pb-6 border-t border-gray-100 mt-4 pt-5">
+      <button id="pay-btn" disabled
+              class="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-600 text-white rounded-xl text-[15px] font-semibold disabled:bg-indigo-300 disabled:cursor-not-allowed">
+        <span class="btn-text">Pay remaining</span>
+        <svg class="btn-spinner w-4 h-4 animate-spin hidden" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="result" class="hidden"></div>
+
+  </div>
+</main>
+<script type="module" src="./index.ts"></script>
+</body>
+</html>

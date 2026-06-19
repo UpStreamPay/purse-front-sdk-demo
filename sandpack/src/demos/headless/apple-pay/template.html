@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Apple Pay</title>
+  <link rel="stylesheet" href="./styles.css"/>
+</head>
+<body>
+<main>
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+
+    <div class="flex items-center gap-3 px-7 py-6 border-b border-gray-100">
+      <img id="method-icon" class="w-8 h-8 shrink-0 rounded object-contain" alt="Apple Pay" style="display:none"/>
+      <div>
+        <h1 class="text-lg font-semibold tracking-tight leading-none">Apple Pay</h1>
+        <p class="text-xs text-gray-400 mt-0.5">Native button via <code>xPayButton</code> config</p>
+      </div>
+    </div>
+
+    <section class="px-7 py-6">
+
+      <!-- Not-available notice -->
+      <div id="not-available" class="hidden rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 mb-4">
+        <strong>Apple Pay not available</strong> in this session or environment.
+        Requires Safari + Apple Pay domain registration.
+      </div>
+
+      <!-- Apple Pay button rendered here by the SDK -->
+      <div id="btn-container" class="min-h-12"></div>
+
+    </section>
+
+    <!-- Config reference -->
+    <div class="px-7 pb-6 border-t border-gray-100 pt-4">
+      <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">xPayButton config</p>
+      <pre class="config-preview">xPayButton: {
+  apple: {
+    type:         'buy',
+    buttonstyle:  'black',
+    borderRadius: '8px',
+    width:        '100%',
+    height:       '48px',
+  },
+}</pre>
+      <p class="text-xs text-gray-400 mt-2">Edit <code>xPayButtonConfig</code> in <code>index.ts</code> to customise.</p>
+    </div>
+
+  </div>
+</main>
+<script type="module" src="./index.ts"></script>
+</body>
+</html>
