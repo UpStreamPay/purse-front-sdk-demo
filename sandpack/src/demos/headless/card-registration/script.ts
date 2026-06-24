@@ -32,6 +32,7 @@ export async function init() {
 
   let creditCard;
   try {
+    formEl.innerHTML = '';
     checkout.getPaymentElement({ method: 'creditcard', ...paymentConfig }).appendTo(formEl);
     creditCard = checkout.paymentMethods.value.find(m => m.method === 'creditcard');
   } catch {

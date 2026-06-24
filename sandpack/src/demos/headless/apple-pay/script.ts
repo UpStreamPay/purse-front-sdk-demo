@@ -32,8 +32,10 @@ export async function init() {
   icon.src = applePay.iconUrl;
   icon.style.display = 'block';
 
+  const btnContainer = document.getElementById('btn-container');
+  btnContainer.innerHTML = '';
   checkout.getPaymentElement({ method: 'applepay', xPayButton: xPayButtonConfig })
-    .appendTo(document.getElementById('btn-container'));
+    .appendTo(btnContainer);
 }
 
 init();
