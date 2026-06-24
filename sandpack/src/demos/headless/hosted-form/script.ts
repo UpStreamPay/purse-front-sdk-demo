@@ -34,6 +34,7 @@ export async function init() {
   const formEl     = document.getElementById('hosted-form')!;
 
   try {
+    formEl.innerHTML = '';
     checkout.getPaymentElement({ method: 'creditcard', ...paymentConfig }).appendTo(formEl);
     skeletonEl.classList.add('hidden');
     formEl.classList.remove('hidden');

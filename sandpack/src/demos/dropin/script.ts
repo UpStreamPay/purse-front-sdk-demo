@@ -13,7 +13,9 @@ export async function init() {
   });
 
   // Mount the pre-built checkout UI
-  await dropin.mount(document.getElementById('dropin-container')!);
+  const container = document.getElementById('dropin-container')!;
+  container.innerHTML = '';
+  await dropin.mount(container);
 }
 
 init();
