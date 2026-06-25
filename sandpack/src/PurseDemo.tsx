@@ -72,6 +72,7 @@ export function PurseDemo({demo, height = 720}: Props) {
                     recompileDelay: 750,
                     recompileMode: "delayed",
                     activeFile: '/index.ts',
+                    externalResources: ['https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'],
                 }}
             >
                 <SandpackLayout style={{flexDirection: 'column'}}>
