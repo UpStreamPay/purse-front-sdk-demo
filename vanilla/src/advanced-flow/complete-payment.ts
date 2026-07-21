@@ -1,5 +1,5 @@
 import { loadSecureFields, type Securefields } from '@purse-eu/web-sdk';
-import { getEnv, getEnvironment } from '../shared/env';
+import { getEnv, getSecureFieldsEnvironment } from '../shared/env';
 import { $, setStep, showNotice, showResult } from '../shared/ui';
 import '../shared/debug-panel';
 
@@ -183,7 +183,10 @@ async function initCardForm() {
   }
 
   setStep('step-form', 'active');
-  const { initSecureFields } = await loadSecureFields(getEnvironment());
+  // 'test' is accepted at runtime but absent from loadSecureFields' public types.
+  const { initSecureFields } = await loadSecureFields(
+    getSecureFieldsEnvironment() as Parameters<typeof loadSecureFields>[0],
+  );
 
   const sf = await initSecureFields({
     tenantId,

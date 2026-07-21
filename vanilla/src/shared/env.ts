@@ -50,3 +50,10 @@ export function getBuildDefault(key: EnvKey): string {
 export function getEnvironment(): 'sandbox' | 'production' | undefined {
     return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | undefined;
 }
+
+// Secure Fields additionally supports a 'test' environment. The SDK's public
+// `loadSecureFields` type only lists 'sandbox' | 'production', so callers must
+// cast the result to the SDK's parameter type (see tokenize.ts).
+export function getSecureFieldsEnvironment(): 'sandbox' | 'production' | 'test' | undefined {
+    return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | 'test' | undefined;
+}

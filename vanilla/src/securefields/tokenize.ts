@@ -1,5 +1,5 @@
 import { loadSecureFields, type Securefields } from '@purse-eu/web-sdk';
-import { getEnv, getEnvironment } from '../shared/env';
+import { getEnv, getSecureFieldsEnvironment } from '../shared/env';
 import { $, setStep, showNotice, showResult } from '../shared/ui';
 import '../shared/debug-panel';
 
@@ -25,8 +25,10 @@ async function main() {
   setStep('step-sdk', 'active');
 
   // Step 1 — Load Secure Fields SDK from CDN
+  // 'test' is accepted by loadSecureFields at runtime but absent from its public
+  // types, so cast to the SDK's parameter type.
   const { initSecureFields } = await loadSecureFields(
-    getEnvironment(),
+    getSecureFieldsEnvironment() as Parameters<typeof loadSecureFields>[0],
   );
   setStep('step-sdk', 'done');
   setStep('step-init', 'active');
