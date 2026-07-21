@@ -29,7 +29,17 @@ const payBtn = $('pay-btn') as HTMLButtonElement;
 const saveTokenEl = $('save-token') as HTMLInputElement;
 
 let selectedBrand: Securefields.Brand | null = null;
-let paymentContext: { amount: number; currency: string; orderReference: string } | null = null;
+
+// Everything create_payment needs, gathered across steps 1–3.
+type PaymentContext = {
+  amount: number;
+  currency: string;
+  order: Record<string, unknown>;
+  // The credit-card solution chosen from the eligible list (step 1).
+  partner: string;
+  method: string;
+};
+let paymentContext: PaymentContext | null = null;
 
 const BRAND_PILL_BASE = 'px-2.5 py-0.5 bg-bg border border-border rounded-full text-xs cursor-pointer transition-all';
 const BRAND_PILL_SELECTED = 'px-2.5 py-0.5 bg-accent text-white border-accent rounded-full text-xs cursor-pointer transition-all';
@@ -66,11 +76,32 @@ async function fetchOrderAndBuildEligibleBody() {
   const c = o.customer ?? {};
   const billing = c.billing_address ?? {};
 
+  // v2 order object, reused by both eligible-solutions and create_payment so the
+  // persisted order (matched on `reference`) stays consistent between calls.
+  // net_amount is the full payable total (amount == net_amount), tax_amount is
+  // the tax portion of it — NOT the legacy ex-tax net, which would trip:
+  // "Amount must be less or equal to order net amount minus already paid net amount."
+  const v2Order = {
+    reference: o.reference,
+    net_amount: o.amount,
+    tax_amount: o.tax_amount,
+    billing_address: {
+      first_name: billing.first_name,
+      last_name: billing.last_name,
+      address_lines: billing.address_lines,
+      city: billing.city,
+      postal_code: billing.postal_code,
+      country_code: billing.country_code,
+    },
+  };
+
   // Remember what we charge so step 4 stays consistent with eligibility.
   paymentContext = {
     amount: o.amount,
     currency: o.currency_code,
-    orderReference: o.reference,
+    order: v2Order,
+    partner: '',
+    method: '',
   };
 
   return {
@@ -83,23 +114,7 @@ async function fetchOrderAndBuildEligibleBody() {
       ip_address: c.ip,
       locale: c.locale_code,
     },
-    order: {
-      reference: o.reference,
-      // In the v2 model net_amount is the full payable total (amount == net_amount),
-      // with tax_amount being the tax portion of it — not the legacy ex-tax net.
-      // Sending the legacy ex-tax net trips: "Amount must be less or equal to
-      // order net amount minus already paid net amount."
-      net_amount: o.amount,
-      tax_amount: o.tax_amount,
-      billing_address: {
-        first_name: billing.first_name,
-        last_name: billing.last_name,
-        address_lines: billing.address_lines,
-        city: billing.city,
-        postal_code: billing.postal_code,
-        country_code: billing.country_code,
-      },
-    },
+    order: v2Order,
   };
 }
 
@@ -125,15 +140,18 @@ async function checkEligibleSolutions() {
   // one lets the shopper pay with a stored card (CVV re-entry only). Not wired
   // in this demo — the backend proxy does not expose the wallet endpoint yet.
 
-  // This showcase implements the new-card path, which needs the credit-card
-  // solution to be eligible.
-  const hasCard = eligible_solutions.some(
+  // This showcase implements the new-card path, which needs a credit-card
+  // solution to be eligible. Capture the chosen partner+method — create_payment
+  // requires both on the split item.
+  const card = eligible_solutions.find(
     (s: { method: string }) => s.method === 'creditcard',
   );
-  if (!hasCard) {
+  if (!card || !paymentContext) {
     showNotice('No credit-card solution eligible for this order — cannot render the card form.');
     return false;
   }
+  paymentContext.partner = card.partner;
+  paymentContext.method = card.method;
   return true;
 }
 
@@ -245,20 +263,28 @@ async function initCardForm() {
         // Step 4 — Create the payment. Step 5 (register a token) is opted into here
       // via `save_token`: when true, the card is stored to the customer wallet on
       // a successful authorisation. Always gate this behind explicit consent.
+      //
+      // The split item is a NewAuthorizationCandidate: amount + partner + method
+      // are required, the vault token goes in `vault_form_token`, and both
+      // `three_ds_authentication_options` and `save_token` live on the item
+      // (there is no root-level save_token).
       const paymentBody = {
         amount: paymentContext.amount,
         currency: paymentContext.currency,
-        order: { reference: paymentContext.orderReference },
+        order: paymentContext.order,
         split: [
           {
+            amount: paymentContext.amount,
+            partner: paymentContext.partner,
+            method: paymentContext.method,
             vault_form_token: vaultFormToken,
             three_ds_authentication_options: {
               challenge_indicator: 'NO_CHALLENGE_REQUESTED',
             },
+            save_token: saveTokenEl.checked,
           },
         ],
         browser: browserData(),
-        save_token: saveTokenEl.checked,
       };
 
       const res = await fetch(`${proxyBase()}/create_payment`, {
