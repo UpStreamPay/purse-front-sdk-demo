@@ -24,6 +24,7 @@ npm run dev
 | `VITE_PURSE_SESSION_JSON` | Drop-in, Headless checkout | Base64 session token from your backend |
 | `VITE_PURSE_TENANT_ID` | Secure Fields | Tenant identifier |
 | `VITE_PURSE_API_KEY` | Secure Fields | API key for Secure Fields |
+| `VITE_PURSE_PROXY_URL` | Advanced Flow | Merchant backend proxying the Payment API v2 endpoints |
 | `VITE_PURSE_ENVIRONMENT` | All | `sandbox` (default) or `production` |
 
 In production, replace `getSession()` in each recipe with a fetch to your backend API that creates and returns a payment session.
@@ -49,6 +50,12 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 | Page | Entry point | Description |
 |---|---|---|
 | `/securefields/tokenize.html` | `src/securefields/tokenize.ts` | Tokenises card data at tenant level — no payment session required. Returns a `vault_form_token` to pass to your backend. |
+
+### Advanced Flow
+
+| Page | Entry point | Description |
+|---|---|---|
+| `/advanced-flow/complete-payment.html` | `src/advanced-flow/complete-payment.ts` | Drives the raw [Payment API v2 complete-payment flow](https://docs.purse.tech/docs/integrate/purse-api/additional-features/advanced-flow/complete-payment-flow): `eligible_solutions` → Secure Fields card form → `create_payment` (with optional `save_token`). The v2 endpoints are proxied by a merchant backend (`VITE_PURSE_PROXY_URL`) since they require a server-side bearer token. |
 
 ## Shared utilities
 

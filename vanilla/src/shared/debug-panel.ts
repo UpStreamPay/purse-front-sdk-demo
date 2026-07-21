@@ -5,6 +5,7 @@ const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_SESSION_JSON: 'Session',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'Tenant ID',
     VITE_PURSE_API_KEY: 'API Key',
+    VITE_PURSE_PROXY_URL: 'Proxy URL',
 };
 
 const HINTS: Record<EnvKey, string> = {
@@ -12,6 +13,7 @@ const HINTS: Record<EnvKey, string> = {
     VITE_PURSE_SESSION_JSON: 'base64 payment session token',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
     VITE_PURSE_API_KEY: 'for Secure Fields',
+    VITE_PURSE_PROXY_URL: 'merchant backend proxy (advanced flow)',
 };
 
 function updateBadge(
