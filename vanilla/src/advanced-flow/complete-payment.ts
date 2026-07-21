@@ -85,7 +85,11 @@ async function fetchOrderAndBuildEligibleBody() {
     },
     order: {
       reference: o.reference,
-      net_amount: o.net_amount,
+      // In the v2 model net_amount is the full payable total (amount == net_amount),
+      // with tax_amount being the tax portion of it — not the legacy ex-tax net.
+      // Sending the legacy ex-tax net trips: "Amount must be less or equal to
+      // order net amount minus already paid net amount."
+      net_amount: o.amount,
       tax_amount: o.tax_amount,
       billing_address: {
         first_name: billing.first_name,
