@@ -16,6 +16,7 @@ export default defineConfig({
         'headless-hosted-fields': resolve(__dirname, 'headless-checkout/hosted-fields.html'),
         'securefields-tokenize': resolve(__dirname, 'securefields/tokenize.html'),
         'advanced-complete-payment': resolve(__dirname, 'advanced-flow/complete-payment.html'),
+        'advanced-token-payment': resolve(__dirname, 'advanced-flow/token-payment.html'),
       },
     },
   },
