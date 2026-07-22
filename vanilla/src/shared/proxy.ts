@@ -14,6 +14,8 @@ export function browserData() {
     user_agent: navigator.userAgent,
     accept_header: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     color_depth: window.screen.colorDepth,
+    java_enabled: navigator.javaEnabled?.() ?? false,
+    javascript_enabled: true,
     screen_height: window.screen.height,
     screen_width: window.screen.width,
     locale: navigator.language,
