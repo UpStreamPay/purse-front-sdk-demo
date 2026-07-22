@@ -1,7 +1,7 @@
 import '../components';
 import { getEnv } from '../shared/env';
 import { setStep, showNotice, showResult } from '../shared/ui';
-import { proxyBase, browserData, fetchOrder, fetchCardSolution } from '../shared/proxy';
+import { proxyBase, browserData, fetchOrder } from '../shared/proxy';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
 import type { DemoOptionList } from '../components/demo-option-list';
@@ -21,25 +21,31 @@ import '../shared/debug-panel';
  *
  * Flow:
  *   1. List the customer's saved cards  → GET  {proxy}/wallet_tokens/{reference}
- *   2. Check eligible solutions          → POST {proxy}/eligible_solutions  (partner/method)
- *   3. Re-enter CVV                       → Secure Fields (browser-side, PCI-safe)
- *   4. Create a payment with the token    → POST {proxy}/create_payment  (split[].wallet_token)
+ *   2. Re-enter CVV                      → Secure Fields (browser-side, PCI-safe)
+ *   3. Create a payment with the token   → POST {proxy}/create_payment  (split[].wallet_token)
+ *
+ * Each saved token carries its own `scope` (partner + method), so — unlike the
+ * new-card flow — there is no eligible-solutions call: the split reuses the
+ * token's partner/method.
  */
 
 const payBtn = document.querySelector<DemoButton>('demo-button')!;
 
-// A saved card token, as returned by the wallet list endpoint.
+// A saved token as returned by the wallet list endpoint (subset of fields used).
 type WalletToken = {
   id: string;
+  status: string;
   description?: { display_token?: string; brand_name?: string };
+  scope: { partner: string; method: string };
 };
+
+// The wallet endpoint wraps the tokens in an envelope.
+type WalletTokensResponse = { tokens?: WalletToken[] };
 
 type PaymentContext = {
   amount: number;
   currency: string;
   order: Record<string, unknown>;
-  partner: string;
-  method: string;
 };
 let paymentContext: PaymentContext | null = null;
 let selectedToken: WalletToken | null = null;
@@ -50,9 +56,15 @@ async function loadSavedCards(customerReference: string) {
   const res = await fetch(`${proxyBase()}/wallet_tokens/${encodeURIComponent(customerReference)}`);
   if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
 
-  const tokens: WalletToken[] = await res.json();
+  const body: WalletTokensResponse = await res.json();
+  // Only active credit-card tokens can be charged via this CVV + create_payment
+  // flow (skip inactive tokens and non-card methods like PayPal / gift cards).
+  const tokens = (body.tokens ?? []).filter(
+    t => t.status === 'ACTIVE' && t.scope?.method === 'creditcard',
+  );
+
   if (tokens.length === 0) {
-    showNotice('No saved cards for this customer — run the Complete Payment demo with "Save this card" first.');
+    showNotice('No active saved cards for this customer — run the Complete Payment demo with "Save this card" first.');
     return false;
   }
 
@@ -72,7 +84,7 @@ async function loadSavedCards(customerReference: string) {
   return true;
 }
 
-// Step 3 — Secure Fields CVV-only form.
+// Step 2 — Secure Fields CVV-only form.
 async function initCvvForm() {
   const tenantId = getEnv('VITE_PURSE_SECUREFIELDS_TENANT_ID');
   const apiKey = getEnv('VITE_PURSE_API_KEY');
@@ -96,7 +108,7 @@ async function initCvvForm() {
     },
   });
 
-  // Step 4 — tokenise the CVV, then create the payment with the saved token.
+  // Step 3 — tokenise the CVV, then create the payment with the saved token.
   payBtn.addEventListener('click', async () => {
     if (!paymentContext || !selectedToken) return;
     payBtn.disabled = true;
@@ -115,9 +127,9 @@ async function initCvvForm() {
       }
       const { vault_form_token: vaultFormToken } = tokenResult as { vault_form_token: string };
 
-      // The split item carries both the saved-card `wallet_token` and the
-      // freshly tokenised `vault_form_token` (the CVV). partner/method come from
-      // the eligible-solutions step, as in the complete-payment flow.
+      // The split item carries both the saved-card `wallet_token` and the freshly
+      // tokenised `vault_form_token` (the CVV). partner/method come from the
+      // chosen token's own scope.
       const paymentBody = {
         amount: paymentContext.amount,
         currency: paymentContext.currency,
@@ -125,8 +137,8 @@ async function initCvvForm() {
         split: [
           {
             amount: paymentContext.amount,
-            partner: paymentContext.partner,
-            method: paymentContext.method,
+            partner: selectedToken.scope.partner,
+            method: selectedToken.scope.method,
             wallet_token: selectedToken.id,
             vault_form_token: vaultFormToken,
             three_ds_authentication_options: {
@@ -176,18 +188,10 @@ async function main() {
     const hasCards = await loadSavedCards(order.customerReference);
     if (!hasCards) return;
 
-    // partner/method are required on the create_payment split item.
-    const { card } = await fetchCardSolution(order.eligibleBody);
-    if (!card) {
-      showNotice('No credit-card solution eligible for this order — cannot charge the saved card.');
-      return;
-    }
     paymentContext = {
       amount: order.amount,
       currency: order.currency,
       order: order.v2Order,
-      partner: card.partner,
-      method: card.method,
     };
 
     await initCvvForm();
