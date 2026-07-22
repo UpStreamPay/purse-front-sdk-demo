@@ -1,9 +1,10 @@
 import '../components';
 import { getEnv } from '../shared/env';
-import { $, setStep, showNotice, showResult } from '../shared/ui';
+import { setStep, showNotice, showResult } from '../shared/ui';
 import { proxyBase, browserData, fetchOrder, fetchCardSolution } from '../shared/proxy';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
+import type { DemoOptionList } from '../components/demo-option-list';
 import '../shared/debug-panel';
 
 /**
@@ -50,57 +51,25 @@ async function loadSavedCards(customerReference: string) {
   if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
 
   const tokens: WalletToken[] = await res.json();
-  renderTokens(tokens);
-
   if (tokens.length === 0) {
     showNotice('No saved cards for this customer — run the Complete Payment demo with "Save this card" first.');
     return false;
   }
-  return true;
-}
 
-function renderTokens(tokens: WalletToken[]) {
-  const list = $('token-list');
-  list.innerHTML = '';
-  if (tokens.length === 0) {
-    list.innerHTML = '<div class="text-xs text-muted">No saved cards returned.</div>';
-    return;
-  }
-
-  tokens.forEach(token => {
-    const btn = document.createElement('button');
-    btn.className =
-      'flex items-center justify-between w-full px-3.5 py-3 bg-bg border border-border rounded-lg text-left cursor-pointer transition-all hover:border-accent';
-    btn.dataset.tokenId = token.id;
-
-    const label = document.createElement('span');
-    label.className = 'text-sm font-mono';
-    label.textContent = token.description?.display_token ?? token.id;
-
-    const brand = document.createElement('span');
-    brand.className = 'text-xs text-muted uppercase';
-    brand.textContent = token.description?.brand_name ?? '';
-
-    btn.append(label, brand);
-    btn.addEventListener('click', () => selectToken(token));
-    list.appendChild(btn);
+  const list = document.querySelector<DemoOptionList>('demo-option-list')!;
+  list.addEventListener('option-select', e => {
+    const { id } = (e as CustomEvent<{ id: string }>).detail;
+    selectedToken = tokens.find(t => t.id === id) ?? null;
+    setStep('step-tokens', 'done');
   });
-
+  list.options = tokens.map(t => ({
+    id: t.id,
+    title: t.description?.display_token ?? t.id,
+    secondary: t.description?.brand_name,
+  }));
   // Auto-select the first card so the demo is one click to pay.
-  selectToken(tokens[0]);
-}
-
-function selectToken(token: WalletToken) {
-  selectedToken = token;
-  $('token-list')
-    .querySelectorAll<HTMLButtonElement>('[data-token-id]')
-    .forEach(btn => {
-      const active = btn.dataset.tokenId === token.id;
-      btn.className = active
-        ? 'flex items-center justify-between w-full px-3.5 py-3 bg-accent/10 border border-accent rounded-lg text-left cursor-pointer transition-all'
-        : 'flex items-center justify-between w-full px-3.5 py-3 bg-bg border border-border rounded-lg text-left cursor-pointer transition-all hover:border-accent';
-    });
-  setStep('step-tokens', 'done');
+  list.select(tokens[0].id);
+  return true;
 }
 
 // Step 3 — Secure Fields CVV-only form.

@@ -4,6 +4,7 @@ import { $, setStep, showNotice, showResult } from '../shared/ui';
 import { proxyBase, browserData, fetchOrder, fetchCardSolution, type CardSolution } from '../shared/proxy';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
+import type { DemoChips } from '../components/demo-chips';
 import '../shared/debug-panel';
 
 /**
@@ -37,21 +38,12 @@ type PaymentContext = {
 let paymentContext: PaymentContext | null = null;
 
 function renderEligible(solutions: CardSolution[]) {
-  const list = $('eligible-list');
-  list.innerHTML = '';
-  if (solutions.length === 0) {
-    list.innerHTML = '<div class="text-xs text-muted">No eligible solutions returned.</div>';
-    return;
-  }
-  solutions.forEach(({ partner, method }) => {
-    const chip = document.createElement('span');
-    const isCard = method === 'creditcard';
-    chip.className = isCard
-      ? 'px-2.5 py-1 bg-accent text-white rounded-full text-xs font-medium'
-      : 'px-2.5 py-1 bg-bg border border-border rounded-full text-xs text-muted';
-    chip.textContent = `${method} · ${partner}`;
-    list.appendChild(chip);
-  });
+  const chips = document.querySelector<DemoChips>('demo-chips')!;
+  chips.emptyText = 'No eligible solutions returned.';
+  chips.chips = solutions.map(({ partner, method }) => ({
+    label: `${method} · ${partner}`,
+    highlight: method === 'creditcard',
+  }));
 }
 
 // Step 3 — Display the card form via Secure Fields (PCI-safe, browser-side)

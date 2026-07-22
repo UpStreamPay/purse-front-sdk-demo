@@ -1,15 +1,12 @@
 import { loadSecureFields, type Securefields } from '@purse-eu/web-sdk';
 import { getSecureFieldsEnvironment } from './env';
-import { $ } from './ui';
+import type { DemoBrandPills } from '../components/demo-brand-pills';
 
 // Precise types inferred from the SDK, so callers stay type-safe without the
 // SDK re-exporting them.
 type SecureFieldsModule = Awaited<ReturnType<typeof loadSecureFields>>;
 type SecureFieldsInstance = Awaited<ReturnType<SecureFieldsModule['initSecureFields']>>;
 type FieldsConfig = Parameters<SecureFieldsModule['initSecureFields']>[0]['config']['fields'];
-
-const BRAND_PILL_BASE = 'px-2.5 py-0.5 bg-bg border border-border rounded-full text-xs cursor-pointer transition-all';
-const BRAND_PILL_SELECTED = 'px-2.5 py-0.5 bg-accent text-white border-accent rounded-full text-xs cursor-pointer transition-all';
 
 const DEFAULT_BRANDS: Securefields.Brand[] = [
   'CARTE_BANCAIRE', 'VISA', 'MASTERCARD', 'AMERICAN_EXPRESS', 'MAESTRO',
@@ -26,7 +23,7 @@ type BootOptions = {
   apiKey: string;
   // Which Secure Fields to render, keyed by the SDK field name → DOM target id.
   fields: FieldsConfig;
-  // Wire the #brand-indicator / #brand-pills UI (rendered by <sf-card-form brand>).
+  // Wire the <demo-brand-pills> scheme selector (rendered by <sf-card-form brand>).
   brandSelect?: boolean;
   onReady?: () => void;
 };
@@ -60,34 +57,16 @@ export async function bootSecureFields(opts: BootOptions): Promise<SecureFieldsH
   if (opts.onReady) sf.on('ready', opts.onReady);
 
   if (opts.brandSelect) {
-    // brandDetected fires once enough digits identify the scheme. Co-branded
-    // cards (e.g. CB/Visa) return more than one brand — let the shopper choose.
+    // <demo-brand-pills> renders the scheme picker and tracks selection; we just
+    // feed it detected brands and record the shopper's choice. brandDetected
+    // fires once enough digits identify the scheme (co-branded cards return >1).
+    const pills = document.querySelector<DemoBrandPills>('demo-brand-pills');
+    pills?.addEventListener('brand-select', e => {
+      selectedBrand = (e as CustomEvent<{ brand: Securefields.Brand }>).detail.brand;
+    });
     sf.on('brandDetected', ({ brands }) => {
-      const indicator = $('brand-indicator') as HTMLElement;
-      const pills = $('brand-pills');
-      if (!brands || brands.length === 0) {
-        indicator.style.display = 'none';
-        selectedBrand = null;
-        return;
-      }
-      indicator.style.display = 'flex';
-      pills.innerHTML = '';
-      brands.forEach(brand => {
-        const pill = document.createElement('button');
-        pill.className = BRAND_PILL_BASE;
-        pill.textContent = brand;
-        pill.addEventListener('click', () => {
-          selectedBrand = brand;
-          pills.querySelectorAll('button').forEach(p => (p.className = BRAND_PILL_BASE));
-          pill.className = BRAND_PILL_SELECTED;
-        });
-        pills.appendChild(pill);
-      });
-      if (brands.length === 1) {
-        selectedBrand = brands[0];
-        const first = pills.querySelector('button');
-        if (first) first.className = BRAND_PILL_SELECTED;
-      }
+      selectedBrand = null;
+      if (pills) pills.brands = brands ?? [];
     });
   }
 

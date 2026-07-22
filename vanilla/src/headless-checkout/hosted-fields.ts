@@ -4,6 +4,7 @@ import {getEnv, getEnvironment} from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult} from '../shared/ui';
 import type {DemoButton} from '../components/demo-button';
+import type {DemoBrandPills} from '../components/demo-brand-pills';
 import '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -20,8 +21,12 @@ let currentMethod: HeadlessCheckout.PurseHeadlessCheckoutPrimaryMethod | null = 
 const LAYOUT_TAB_BASE = 'px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all';
 const LAYOUT_TAB_ACTIVE = 'px-3.5 py-1.5 border rounded-full text-xs font-[inherit] cursor-pointer transition-all bg-accent text-white border-accent';
 
-const BRAND_PILL_BASE = 'px-2.5 py-0.5 bg-bg border border-border rounded-full text-xs cursor-pointer transition-all';
-const BRAND_PILL_SELECTED = 'px-2.5 py-0.5 bg-accent text-white border-accent rounded-full text-xs cursor-pointer transition-all';
+// Brand picker is shared across layouts; a single listener drives the current hf.
+const brandPills = document.querySelector<DemoBrandPills>('demo-brand-pills')!;
+brandPills.addEventListener('brand-select', e => {
+    const { brand } = (e as CustomEvent<{ brand: string }>).detail;
+    activeHF?.setSelectedBrand(brand as HeadlessCheckout.CardScheme);
+});
 
 const LIGHT_THEME: HeadlessCheckout.HostedFieldsTheme = {
     global: {},
@@ -96,35 +101,11 @@ function setupHostedFields(method: HeadlessCheckout.PurseHeadlessCheckoutPrimary
 
     hf.on('ready', () => setStep('step-render', 'done'));
 
+    // <demo-brand-pills> renders the picker and tracks selection; the module-level
+    // brand-select listener forwards the choice to the current hf (and auto-selects
+    // a lone brand). Just feed it the detected brands here.
     hf.detectedBrands.subscribe((brands: string[]) => {
-        if (brands.length === 0) {
-            ($('brand-indicator') as HTMLElement).style.display = 'none';
-            return;
-        }
-
-        ($('brand-indicator') as HTMLElement).style.display = 'flex';
-        const pills = $('brand-pills');
-        pills.innerHTML = '';
-
-        brands.forEach(brand => {
-            const pill = document.createElement('button');
-            pill.className = BRAND_PILL_BASE;
-            pill.textContent = brand;
-            pill.addEventListener('click', () => {
-                hf.setSelectedBrand(brand as HeadlessCheckout.CardScheme);
-                pills.querySelectorAll('button').forEach(p => {
-                    (p as HTMLButtonElement).className = BRAND_PILL_BASE;
-                });
-                pill.className = BRAND_PILL_SELECTED;
-            });
-            pills.appendChild(pill);
-        });
-
-        if (brands.length === 1) {
-            hf.setSelectedBrand(brands[0] as HeadlessCheckout.CardScheme);
-            const firstPill = pills.querySelector('button');
-            if (firstPill) firstPill.className = BRAND_PILL_SELECTED;
-        }
+        brandPills.brands = brands;
     });
 
     hf.render();

@@ -20,8 +20,8 @@ const ORDER = ['pan', 'exp', 'cvv', 'name'];
  *   <sf-card-form fields="pan exp cvv name" brand></sf-card-form>   (full form)
  *   <sf-card-form fields="cvv"></sf-card-form>                      (CVV-only)
  *
- * `brand` adds the brand-detection indicator (#brand-indicator / #brand-pills),
- * populated by shared/secure-fields.ts.
+ * `brand` adds the <demo-brand-pills> scheme selector, driven by
+ * shared/secure-fields.ts.
  */
 @customElement('sf-card-form')
 export class SfCardForm extends DemoElement {
@@ -45,12 +45,7 @@ export class SfCardForm extends DemoElement {
             `;
           })}
         </div>
-        ${this.brand
-          ? html`<div class="flex items-center gap-2 text-xs text-muted mt-2.5" id="brand-indicator" style="display:none">
-              <span>Detected:</span>
-              <div id="brand-pills"></div>
-            </div>`
-          : nothing}
+        ${this.brand ? html`<demo-brand-pills></demo-brand-pills>` : nothing}
       </div>
     `;
   }
