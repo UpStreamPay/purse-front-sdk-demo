@@ -2,10 +2,16 @@ import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DemoElement } from './base';
 
-export type Option = { id: string; title: string; secondary?: string };
+export type Option = {
+  id: string;
+  title: string;
+  secondary?: string;
+  // Optional muted sub-lines shown under the title (e.g. holder, partner, dates).
+  meta?: string[];
+};
 
-const ROW_BASE = 'flex items-center justify-between w-full px-3.5 py-3 bg-bg border border-border rounded-lg text-left cursor-pointer transition-all hover:border-accent';
-const ROW_ACTIVE = 'flex items-center justify-between w-full px-3.5 py-3 bg-accent/10 border border-accent rounded-lg text-left cursor-pointer transition-all';
+const ROW_BASE = 'flex items-start justify-between gap-3 w-full px-3.5 py-3 bg-bg border border-border rounded-lg text-left cursor-pointer transition-all hover:border-accent';
+const ROW_ACTIVE = 'flex items-start justify-between gap-3 w-full px-3.5 py-3 bg-accent/10 border border-accent rounded-lg text-left cursor-pointer transition-all';
 
 /**
  * <demo-option-list> — a single-select list of rows (a primary title on the
@@ -43,9 +49,12 @@ export class DemoOptionList extends DemoElement {
       <div class="flex flex-col gap-2">
         ${this.options.map(opt => html`
           <button class="${opt.id === this.selectedId ? ROW_ACTIVE : ROW_BASE}" @click=${() => this.select(opt.id)}>
-            <span class="text-sm ${this.mono ? 'font-mono' : 'font-medium'}">${opt.title}</span>
+            <span class="flex flex-col gap-0.5 min-w-0">
+              <span class="text-sm ${this.mono ? 'font-mono' : 'font-medium'}">${opt.title}</span>
+              ${(opt.meta ?? []).map(line => html`<span class="text-xs text-muted">${line}</span>`)}
+            </span>
             ${opt.secondary
-              ? html`<span class="text-xs text-muted ${this.uppercaseSecondary ? 'uppercase' : ''}">${opt.secondary}</span>`
+              ? html`<span class="text-xs text-muted shrink-0 ${this.uppercaseSecondary ? 'uppercase' : ''}">${opt.secondary}</span>`
               : nothing}
           </button>
         `)}

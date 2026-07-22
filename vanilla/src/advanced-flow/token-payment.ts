@@ -35,9 +35,17 @@ const payBtn = document.querySelector<DemoButton>('demo-button')!;
 type WalletToken = {
   id: string;
   status: string;
-  description?: { display_token?: string; brand_name?: string };
+  expiration_date?: string;
+  created_at?: string;
+  updated_at?: string;
+  description?: { display_token?: string; brand_name?: string; holder_name?: string };
   scope: { partner: string; method: string };
 };
+
+// ISO timestamp → YYYY-MM-DD (drop the time); '—' when absent.
+const day = (iso?: string) => (iso ? iso.slice(0, 10) : '—');
+// ISO date → MM/YYYY.
+const monthYear = (iso?: string) => (iso ? `${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '—');
 
 // The wallet endpoint wraps the tokens in an envelope.
 type WalletTokensResponse = { tokens?: WalletToken[] };
@@ -59,9 +67,10 @@ async function loadSavedCards(customerReference: string) {
   const body: WalletTokensResponse = await res.json();
   // Only active credit-card tokens can be charged via this CVV + create_payment
   // flow (skip inactive tokens and non-card methods like PayPal / gift cards).
-  const tokens = (body.tokens ?? []).filter(
-    t => t.status === 'ACTIVE' && t.scope?.method === 'creditcard',
-  );
+  const tokens = (body.tokens ?? [])
+    .filter(t => t.status === 'ACTIVE' && t.scope?.method === 'creditcard')
+    // Newest first (created_at is ISO, so lexical compare is chronological).
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''));
 
   if (tokens.length === 0) {
     showNotice('No active saved cards for this customer — run the Complete Payment demo with "Save this card" first.');
@@ -78,6 +87,11 @@ async function loadSavedCards(customerReference: string) {
     id: t.id,
     title: t.description?.display_token ?? t.id,
     secondary: t.description?.brand_name,
+    meta: [
+      [t.description?.holder_name, t.scope.partner].filter(Boolean).join(' · '),
+      `Exp ${monthYear(t.expiration_date)}`,
+      `Added ${day(t.created_at)} · Updated ${day(t.updated_at)}`,
+    ],
   }));
   // Auto-select the first card so the demo is one click to pay.
   list.select(tokens[0].id);
