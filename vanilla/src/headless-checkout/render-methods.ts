@@ -1,7 +1,9 @@
+import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnv, getEnvironment} from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult} from '../shared/ui';
+import type {DemoButton} from '../components/demo-button';
 import '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,7 +17,7 @@ import '../shared/debug-panel';
 // in .env.local (see .env.example).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const payBtn = $('pay-btn') as HTMLButtonElement;
+const payBtn = document.querySelector<DemoButton>('demo-button')!;
 let activeElement: HeadlessCheckout.PurseHeadlessCheckoutPaymentElement | null = null;
 
 const METHOD_BTN_BASE = 'flex items-center gap-3 w-full px-3.5 py-3 bg-bg border border-border rounded-lg cursor-pointer text-left text-sm font-[inherit] transition-all hover:border-accent hover:bg-violet-50';
@@ -130,8 +132,8 @@ async function main() {
     setStep('step-pay', 'active');
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.textContent = 'Processing…';
-        payBtn.classList.add('loading');
+        payBtn.label = 'Processing…';
+        payBtn.loading = true;
 
         try {
             await checkout.submitPayment();
@@ -141,8 +143,8 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.textContent = 'Retry';
-            payBtn.classList.remove('loading');
+            payBtn.label = 'Retry';
+            payBtn.loading = false;
         }
     });
 }

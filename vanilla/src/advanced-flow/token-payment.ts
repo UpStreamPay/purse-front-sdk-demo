@@ -1,6 +1,9 @@
-import { loadSecureFields } from '@purse-eu/web-sdk';
-import { getEnv, getSecureFieldsEnvironment } from '../shared/env';
+import '../components';
+import { getEnv } from '../shared/env';
 import { $, setStep, showNotice, showResult } from '../shared/ui';
+import { proxyBase, browserData, fetchOrder, fetchCardSolution } from '../shared/proxy';
+import { bootSecureFields } from '../shared/secure-fields';
+import type { DemoButton } from '../components/demo-button';
 import '../shared/debug-panel';
 
 /**
@@ -12,8 +15,8 @@ import '../shared/debug-panel';
  * in the vault — only the CVV is re-collected via Secure Fields.
  *
  * The v2 payment endpoints and the wallet token list require a server-side
- * bearer token, so both are proxied by the merchant backend (Alfred) at
- * VITE_PURSE_PROXY_URL. In production, replace these calls with your own backend.
+ * bearer token, so both are proxied by the merchant backend (Alfred) — see
+ * shared/proxy.ts. The wallet list uses Alfred's GET /wallet_tokens route.
  *
  * Flow:
  *   1. List the customer's saved cards  → GET  {proxy}/wallet_tokens/{reference}
@@ -22,7 +25,7 @@ import '../shared/debug-panel';
  *   4. Create a payment with the token    → POST {proxy}/create_payment  (split[].wallet_token)
  */
 
-const payBtn = $('pay-btn') as HTMLButtonElement;
+const payBtn = document.querySelector<DemoButton>('demo-button')!;
 
 // A saved card token, as returned by the wallet list endpoint.
 type WalletToken = {
@@ -30,106 +33,15 @@ type WalletToken = {
   description?: { display_token?: string; brand_name?: string };
 };
 
-// Everything create_payment needs, gathered across steps 1–2.
 type PaymentContext = {
   amount: number;
   currency: string;
   order: Record<string, unknown>;
-  // The credit-card solution chosen from the eligible list (step 2).
   partner: string;
   method: string;
 };
 let paymentContext: PaymentContext | null = null;
 let selectedToken: WalletToken | null = null;
-
-// Resolve the merchant-backend proxy endpoints from a single base URL.
-function proxyBase(): string {
-  return getEnv('VITE_PURSE_PROXY_URL').replace(/\/+$/, '');
-}
-
-// Collect the browser metadata required by the create-payment call (used for 3DS).
-function browserData() {
-  return {
-    user_agent: navigator.userAgent,
-    accept_header: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    color_depth: window.screen.colorDepth,
-    screen_height: window.screen.height,
-    screen_width: window.screen.width,
-    locale: navigator.language,
-    utc_time_zone: -new Date().getTimezoneOffset(),
-  };
-}
-
-/**
- * Fetch the sample order from the proxy and build the eligible-solutions body.
- * Returns the customer reference used to look up saved cards. Mirrors
- * complete-payment.ts so both advanced-flow demos stay consistent.
- */
-async function fetchOrder() {
-  const res = await fetch(`${proxyBase()}/order/`);
-  if (!res.ok) throw new Error(`Order fetch failed: ${res.status} ${res.statusText}`);
-  const { order } = await res.json();
-  const o = order.order;
-  const c = o.customer ?? {};
-  const billing = c.billing_address ?? {};
-
-  const v2Order = {
-    reference: o.reference,
-    net_amount: o.amount,
-    tax_amount: o.tax_amount,
-    billing_address: {
-      first_name: billing.first_name,
-      last_name: billing.last_name,
-      address_lines: billing.address_lines,
-      city: billing.city,
-      postal_code: billing.postal_code,
-      country_code: billing.country_code,
-    },
-  };
-
-  paymentContext = {
-    amount: o.amount,
-    currency: o.currency_code,
-    order: v2Order,
-    partner: '',
-    method: '',
-  };
-
-  return {
-    customerReference: c.reference as string,
-    eligibleBody: {
-      amount: o.amount,
-      currency: o.currency_code,
-      customer: {
-        reference: c.reference,
-        type: 'PERSON',
-        email: billing.email,
-        ip_address: c.ip,
-        locale: c.locale_code,
-      },
-      order: v2Order,
-    },
-  };
-}
-
-// Step 2 — the credit-card partner/method are required on the split item.
-async function resolveCardSolution(eligibleBody: Record<string, unknown>) {
-  const res = await fetch(`${proxyBase()}/eligible_solutions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(eligibleBody),
-  });
-  if (!res.ok) throw new Error(`Eligible solutions failed: ${res.status} ${res.statusText}`);
-
-  const { eligible_solutions = [] } = await res.json();
-  const card = eligible_solutions.find(
-    (s: { method: string }) => s.method === 'creditcard',
-  );
-  if (!card || !paymentContext) return false;
-  paymentContext.partner = card.partner;
-  paymentContext.method = card.method;
-  return true;
-}
 
 // Step 1 — list the customer's saved cards and render the selector.
 async function loadSavedCards(customerReference: string) {
@@ -201,39 +113,26 @@ async function initCvvForm() {
   }
 
   setStep('step-cvv', 'active');
-  // 'test' is accepted at runtime but absent from loadSecureFields' public types.
-  const { initSecureFields } = await loadSecureFields(
-    getSecureFieldsEnvironment() as Parameters<typeof loadSecureFields>[0],
-  );
-
   // Only the cvv field is rendered — the saved card supplies the PAN.
-  const sf = await initSecureFields({
+  const { sf } = await bootSecureFields({
     tenantId,
     apiKey,
-    config: {
-      brands: ['CARTE_BANCAIRE', 'VISA', 'MASTERCARD', 'AMERICAN_EXPRESS', 'MAESTRO'],
-      brandSelector: false,
-      fields: {
-        cvv: { target: 'sf-cvv', placeholder: '123' },
-      },
-      styles: { input: { placeholderColor: '#9ca3af' } },
+    fields: {
+      cvv: { target: 'sf-cvv', placeholder: '123' },
+    },
+    onReady: () => {
+      setStep('step-cvv', 'done');
+      setStep('step-pay', 'active');
+      payBtn.disabled = false;
     },
   });
-
-  sf.on('ready', () => {
-    setStep('step-cvv', 'done');
-    setStep('step-pay', 'active');
-    payBtn.disabled = false;
-  });
-
-  sf.render();
 
   // Step 4 — tokenise the CVV, then create the payment with the saved token.
   payBtn.addEventListener('click', async () => {
     if (!paymentContext || !selectedToken) return;
     payBtn.disabled = true;
-    payBtn.textContent = 'Processing…';
-    payBtn.classList.add('loading');
+    payBtn.label = 'Processing…';
+    payBtn.loading = true;
 
     try {
       const tokenResult = await sf.submit({});
@@ -241,8 +140,8 @@ async function initCvvForm() {
         setStep('step-pay', 'error');
         showResult('error', tokenResult);
         payBtn.disabled = false;
-        payBtn.textContent = 'Retry';
-        payBtn.classList.remove('loading');
+        payBtn.label = 'Retry';
+        payBtn.loading = false;
         return;
       }
       const { vault_form_token: vaultFormToken } = tokenResult as { vault_form_token: string };
@@ -275,25 +174,25 @@ async function initCvvForm() {
         body: JSON.stringify(paymentBody),
       });
       const data = await res.json();
-      payBtn.classList.remove('loading');
+      payBtn.loading = false;
 
       if (!res.ok) {
         setStep('step-pay', 'error');
         showResult('error', data);
         payBtn.disabled = false;
-        payBtn.textContent = 'Retry';
+        payBtn.label = 'Retry';
         return;
       }
 
       setStep('step-pay', 'done');
       showResult('success', data, 'Payment created');
-      payBtn.textContent = 'Done';
+      payBtn.label = 'Done';
     } catch (e) {
-      payBtn.classList.remove('loading');
+      payBtn.loading = false;
       setStep('step-pay', 'error');
       showResult('error', { error: (e as Error).message });
       payBtn.disabled = false;
-      payBtn.textContent = 'Retry';
+      payBtn.label = 'Retry';
     }
   });
 }
@@ -304,15 +203,23 @@ async function main() {
     return;
   }
   try {
-    const { customerReference, eligibleBody } = await fetchOrder();
-    const hasCards = await loadSavedCards(customerReference);
+    const order = await fetchOrder();
+    const hasCards = await loadSavedCards(order.customerReference);
     if (!hasCards) return;
 
-    const hasCardSolution = await resolveCardSolution(eligibleBody);
-    if (!hasCardSolution) {
+    // partner/method are required on the create_payment split item.
+    const { card } = await fetchCardSolution(order.eligibleBody);
+    if (!card) {
       showNotice('No credit-card solution eligible for this order — cannot charge the saved card.');
       return;
     }
+    paymentContext = {
+      amount: order.amount,
+      currency: order.currency,
+      order: order.v2Order,
+      partner: card.partner,
+      method: card.method,
+    };
 
     await initCvvForm();
   } catch (e) {
