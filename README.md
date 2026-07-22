@@ -26,19 +26,27 @@ cp .env.example .env.local
 
 Both apps read env vars from the repo root `.env.local` (no separate env files needed in subfolders).
 
-### 2. Run a demo
+### 2. Install (npm workspaces)
+
+The three projects are npm workspaces. Install once from the repo root:
 
 ```sh
-# Vanilla TypeScript — multi-page app
-cd vanilla && npm install && npm run dev
-# → http://localhost:5173
-
-# React
-cd react && npm install && npm run dev
-# → http://localhost:5173
+npm install
 ```
 
-> If both run at the same time, Vite will auto-assign the second to port 5174.
+### 3. Run a demo
+
+```sh
+npm run dev:vanilla     # Vanilla TypeScript — multi-page app → http://localhost:5173
+npm run dev:react       # React → http://localhost:5173
+npm run dev:sandpack    # Sandpack preview → http://localhost:8000
+```
+
+> If both Vite apps run at the same time, the second is auto-assigned to port 5174.
+
+Build the deployed site (vanilla + react): `npm run build`. Build the Sandpack
+package: `npm run build:sandpack`. Both run against a single hoisted
+`@purse-eu/web-sdk` version — see each workspace's `package.json`.
 
 ## Environment variables
 
