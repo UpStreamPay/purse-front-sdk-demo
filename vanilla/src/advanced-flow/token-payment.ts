@@ -54,6 +54,8 @@ type PaymentContext = {
   amount: number;
   currency: string;
   order: Record<string, unknown>;
+  // Required by create_payment so the wallet_token resolves to its owner.
+  customerReference: string;
 };
 let paymentContext: PaymentContext | null = null;
 let selectedToken: WalletToken | null = null;
@@ -65,9 +67,7 @@ async function loadSavedCards(customerReference: string) {
   // segment only when an entity id is configured (else Alfred uses its default).
   const entityId = getEnv('VITE_PURSE_ENTITY_ID');
   const ref = encodeURIComponent(customerReference);
-  const path = entityId
-    ? `/entity/${encodeURIComponent(entityId)}/tokens/${ref}`
-    : `/tokens/${ref}`;
+  const path =  `/tokens/${ref}`;
   const res = await fetch(`${proxyBase()}${path}`);
   if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
 
@@ -155,6 +155,8 @@ async function initCvvForm() {
         amount: paymentContext.amount,
         currency: paymentContext.currency,
         order: paymentContext.order,
+        // Mandatory so the server can resolve the wallet_token to its owner.
+        customer: { reference: paymentContext.customerReference },
         split: [
           {
             amount: paymentContext.amount,
@@ -213,6 +215,7 @@ async function main() {
       amount: order.amount,
       currency: order.currency,
       order: order.v2Order,
+      customerReference: order.customerReference,
     };
 
     await initCvvForm();
