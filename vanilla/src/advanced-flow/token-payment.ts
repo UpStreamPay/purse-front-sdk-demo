@@ -20,7 +20,7 @@ import '../shared/debug-panel';
  * shared/proxy.ts. The wallet list uses Alfred's GET /wallet_tokens route.
  *
  * Flow:
- *   1. List the customer's saved cards  → GET  {proxy}/wallet_tokens/{reference}
+ *   1. List the customer's saved cards  → GET  {proxy}/[entity/{entityId}/]tokens/{reference}
  *   2. Re-enter CVV                      → Secure Fields (browser-side, PCI-safe)
  *   3. Create a payment with the token   → POST {proxy}/create_payment  (split[].wallet_token)
  *
@@ -61,7 +61,14 @@ let selectedToken: WalletToken | null = null;
 // Step 1 — list the customer's saved cards and render the selector.
 async function loadSavedCards(customerReference: string) {
   setStep('step-tokens', 'active');
-  const res = await fetch(`${proxyBase()}/wallet_tokens/${encodeURIComponent(customerReference)}`);
+  // Alfred route: /{entity/:entityId/}tokens/:customerRef — include the entity
+  // segment only when an entity id is configured (else Alfred uses its default).
+  const entityId = getEnv('VITE_PURSE_ENTITY_ID');
+  const ref = encodeURIComponent(customerReference);
+  const path = entityId
+    ? `/entity/${encodeURIComponent(entityId)}/tokens/${ref}`
+    : `/tokens/${ref}`;
+  const res = await fetch(`${proxyBase()}${path}`);
   if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
 
   const body: WalletTokensResponse = await res.json();

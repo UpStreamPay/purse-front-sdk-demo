@@ -5,6 +5,7 @@ export const ENV_KEYS = [
     'VITE_PURSE_SESSION_JSON',
     'VITE_PURSE_SECUREFIELDS_TENANT_ID',
     'VITE_PURSE_API_KEY',
+    'VITE_PURSE_ENTITY_ID',
     'VITE_PURSE_PROXY_URL',
 ] as const;
 
@@ -15,6 +16,7 @@ const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_SESSION_JSON: import.meta.env.VITE_PURSE_SESSION_JSON ?? '',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: import.meta.env.VITE_PURSE_SECUREFIELDS_TENANT_ID ?? '',
     VITE_PURSE_API_KEY: import.meta.env.VITE_PURSE_API_KEY ?? '',
+    VITE_PURSE_ENTITY_ID: import.meta.env.VITE_PURSE_ENTITY_ID ?? '',
     VITE_PURSE_PROXY_URL: import.meta.env.VITE_PURSE_PROXY_URL ?? '',
 };
 
