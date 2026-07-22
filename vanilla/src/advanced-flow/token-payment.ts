@@ -63,12 +63,10 @@ let selectedToken: WalletToken | null = null;
 // Step 1 — list the customer's saved cards and render the selector.
 async function loadSavedCards(customerReference: string) {
   setStep('step-tokens', 'active');
-  // Alfred route: /{entity/:entityId/}tokens/:customerRef — include the entity
-  // segment only when an entity id is configured (else Alfred uses its default).
-  const entityId = getEnv('VITE_PURSE_ENTITY_ID');
+  // Alfred proxies the wallet list; it injects the merchant id (vault client_name)
+  // server-side, so the browser only sends the customer reference.
   const ref = encodeURIComponent(customerReference);
-  const path =  `/tokens/${ref}`;
-  const res = await fetch(`${proxyBase()}${path}`);
+  const res = await fetch(`${proxyBase()}/tokens/${ref}`);
   if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
 
   const body: WalletTokensResponse = await res.json();
