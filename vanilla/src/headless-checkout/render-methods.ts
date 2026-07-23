@@ -1,7 +1,10 @@
+import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnv, getEnvironment} from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult} from '../shared/ui';
+import type {DemoButton} from '../components/demo-button';
+import type {DemoOptionList} from '../components/demo-option-list';
 import '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,11 +18,20 @@ import '../shared/debug-panel';
 // in .env.local (see .env.example).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const payBtn = $('pay-btn') as HTMLButtonElement;
+const payBtn = document.querySelector<DemoButton>('demo-button')!;
+const methodList = document.querySelector<DemoOptionList>('demo-option-list')!;
 let activeElement: HeadlessCheckout.PurseHeadlessCheckoutPaymentElement | null = null;
 
-const METHOD_BTN_BASE = 'flex items-center gap-3 w-full px-3.5 py-3 bg-bg border border-border rounded-lg cursor-pointer text-left text-sm font-[inherit] transition-all hover:border-accent hover:bg-violet-50';
-const METHOD_BTN_ACTIVE = 'flex items-center gap-3 w-full px-3.5 py-3 border rounded-lg cursor-pointer text-left text-sm font-[inherit] transition-all border-accent bg-violet-50';
+// Resolve the selected method by id, and remember the checkout across the
+// possibly-repeated paymentMethods emissions. The listener is attached once.
+const methodsById = new Map<string, HeadlessCheckout.PurseHeadlessCheckoutPrimaryMethod>();
+let checkoutRef: HeadlessCheckout.HeadlessCheckout | null = null;
+
+methodList.addEventListener('option-select', e => {
+    const { id } = (e as CustomEvent<{ id: string }>).detail;
+    const method = methodsById.get(id);
+    if (method && checkoutRef) renderPaymentElement(method, checkoutRef);
+});
 
 function isPrimary(
     m: HeadlessCheckout.PurseHeadlessCheckoutPaymentMethod,
@@ -28,34 +40,16 @@ function isPrimary(
 }
 
 function renderMethods(methods: HeadlessCheckout.PurseHeadlessCheckoutPaymentMethod[], checkout: HeadlessCheckout.HeadlessCheckout) {
-    const list = $('method-list');
-    list.innerHTML = '';
-
+    checkoutRef = checkout;
     const primaryMethods = methods.filter(isPrimary);
+    methodsById.clear();
+    primaryMethods.forEach(m => methodsById.set(m.id, m));
 
-    if (primaryMethods.length === 0) {
-        list.innerHTML = '<div class="flex items-center justify-center min-h-20 text-muted text-sm">No payment methods in this session</div>';
-        return;
-    }
-
-    primaryMethods.forEach(method => {
-        const btn = document.createElement('button');
-        btn.className = METHOD_BTN_BASE;
-        btn.dataset.id = method.id;
-        btn.innerHTML = `
-      <span class="font-medium">${method.partner} · ${method.method}</span>
-      <span class="text-xs text-muted ml-auto">→</span>`;
-
-        btn.addEventListener('click', () => {
-            list.querySelectorAll('button').forEach(b => {
-                (b as HTMLButtonElement).className = METHOD_BTN_BASE;
-            });
-            btn.className = METHOD_BTN_ACTIVE;
-            renderPaymentElement(method, checkout);
-        });
-
-        list.appendChild(btn);
-    });
+    methodList.options = primaryMethods.map(m => ({
+        id: m.id,
+        title: `${m.partner} · ${m.method}`,
+        secondary: '→',
+    }));
 }
 
 function renderPaymentElement(
@@ -130,8 +124,8 @@ async function main() {
     setStep('step-pay', 'active');
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.textContent = 'Processing…';
-        payBtn.classList.add('loading');
+        payBtn.label = 'Processing…';
+        payBtn.loading = true;
 
         try {
             await checkout.submitPayment();
@@ -141,8 +135,8 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.textContent = 'Retry';
-            payBtn.classList.remove('loading');
+            payBtn.label = 'Retry';
+            payBtn.loading = false;
         }
     });
 }

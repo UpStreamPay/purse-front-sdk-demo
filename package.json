@@ -1,0 +1,20 @@
+{
+  "name": "purse-front-sdk-demo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Demo apps for @purse-eu/web-sdk (vanilla, React, Sandpack), managed as npm workspaces.",
+  "workspaces": [
+    "vanilla",
+    "react",
+    "sandpack"
+  ],
+  "scripts": {
+    "dev:vanilla": "npm run dev -w vanilla",
+    "dev:react": "npm run dev -w react",
+    "dev:sandpack": "npm run dev -w sandpack",
+    "build": "npm run build -w vanilla -w react",
+    "build:sandpack": "npm run build -w sandpack",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

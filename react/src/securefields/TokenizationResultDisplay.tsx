@@ -1,10 +1,12 @@
 import type { Securefields } from "@purse-eu/web-sdk";
 type SubmitResult = Securefields.SubmitResult;
 
+// SubmitResult is a discriminated union whose success variants all carry
+// `error?: never`, so narrow on a truthy `error` (see the SDK's isSubmitError).
 function isTokenizationError(
   tokenizationResult: SubmitResult,
-): tokenizationResult is { error?: string } {
-  return (tokenizationResult as { error?: string }).error !== undefined;
+): tokenizationResult is Securefields.SubmitResultError {
+  return Boolean((tokenizationResult as Securefields.SubmitResultError).error);
 }
 
 export const TokenizationResultDisplay = ({

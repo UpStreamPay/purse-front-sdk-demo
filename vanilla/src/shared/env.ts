@@ -5,6 +5,8 @@ export const ENV_KEYS = [
     'VITE_PURSE_SESSION_JSON',
     'VITE_PURSE_SECUREFIELDS_TENANT_ID',
     'VITE_PURSE_API_KEY',
+    'VITE_PURSE_ENTITY_ID',
+    'VITE_PURSE_PROXY_URL',
 ] as const;
 
 export type EnvKey = (typeof ENV_KEYS)[number];
@@ -14,6 +16,8 @@ const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_SESSION_JSON: import.meta.env.VITE_PURSE_SESSION_JSON ?? '',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: import.meta.env.VITE_PURSE_SECUREFIELDS_TENANT_ID ?? '',
     VITE_PURSE_API_KEY: import.meta.env.VITE_PURSE_API_KEY ?? '',
+    VITE_PURSE_ENTITY_ID: import.meta.env.VITE_PURSE_ENTITY_ID ?? '',
+    VITE_PURSE_PROXY_URL: import.meta.env.VITE_PURSE_PROXY_URL ?? '',
 };
 
 export function getEnv(key: EnvKey): string {
@@ -47,4 +51,11 @@ export function getBuildDefault(key: EnvKey): string {
 
 export function getEnvironment(): 'sandbox' | 'production' | undefined {
     return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | undefined;
+}
+
+// Secure Fields additionally supports a 'test' environment. The SDK's public
+// `loadSecureFields` type only lists 'sandbox' | 'production', so callers must
+// cast the result to the SDK's parameter type (see tokenize.ts).
+export function getSecureFieldsEnvironment(): 'sandbox' | 'production' | 'test' | undefined {
+    return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | 'test' | undefined;
 }

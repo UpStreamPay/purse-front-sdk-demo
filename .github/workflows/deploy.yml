@@ -24,21 +24,20 @@ jobs:
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: |
-            vanilla/package-lock.json
-            react/package-lock.json
+          cache-dependency-path: package-lock.json
+
+      - name: Install workspaces
+        run: npm ci
 
       - name: Build vanilla
-        working-directory: vanilla
         env:
           VITE_BASE_URL: /vanilla/
-        run: npm ci && npm run build
+        run: npm run build -w vanilla
 
       - name: Build react
-        working-directory: react
         env:
           VITE_BASE_URL: /react/
-        run: npm ci && npm run build
+        run: npm run build -w react
 
       - name: Assemble dist
         run: |

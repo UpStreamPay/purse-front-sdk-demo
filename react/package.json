@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@purse-eu/web-sdk": "^0.6.0",
+    "@purse-eu/web-sdk": "^0.10.0",
     "@tailwindcss/vite": "^4.1.16",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

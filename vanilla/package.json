@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@purse-eu/web-sdk": "^0.6.1"
+    "@purse-eu/web-sdk": "^0.10.0",
+    "lit": "^3.3.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",

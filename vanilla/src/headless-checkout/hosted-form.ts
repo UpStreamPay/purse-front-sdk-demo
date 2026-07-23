@@ -1,14 +1,16 @@
+import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnv, getEnvironment} from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult} from '../shared/ui';
+import type {DemoButton} from '../components/demo-button';
 import '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Session setup — replace with your backend call in production.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const payBtn = $('pay-btn') as HTMLButtonElement;
+const payBtn = document.querySelector<DemoButton>('demo-button')!;
 let activeForm: HeadlessCheckout.PurseHeadlessCheckoutPaymentElement | null = null;
 
 const PAYMENT_ELEMENT_OPTIONS: HeadlessCheckout.PaymentElementOptions = {
@@ -139,8 +141,8 @@ async function main() {
     // Step 5 — Submit
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.textContent = 'Processing…';
-        payBtn.classList.add('loading');
+        payBtn.label = 'Processing…';
+        payBtn.loading = true;
 
         try {
             await checkout.submitPayment();
@@ -150,8 +152,8 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.textContent = 'Retry';
-            payBtn.classList.remove('loading');
+            payBtn.label = 'Retry';
+            payBtn.loading = false;
         }
     });
 }

@@ -5,13 +5,17 @@ const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_SESSION_JSON: 'Session',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'Tenant ID',
     VITE_PURSE_API_KEY: 'API Key',
+    VITE_PURSE_ENTITY_ID: 'Entity ID',
+    VITE_PURSE_PROXY_URL: 'Proxy URL',
 };
 
 const HINTS: Record<EnvKey, string> = {
-    VITE_PURSE_ENVIRONMENT: 'sandbox | production',
+    VITE_PURSE_ENVIRONMENT: 'sandbox | production | test',
     VITE_PURSE_SESSION_JSON: 'base64 payment session token',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
     VITE_PURSE_API_KEY: 'for Secure Fields',
+    VITE_PURSE_ENTITY_ID: 'merchant id for wallet token lookup (advanced flow)',
+    VITE_PURSE_PROXY_URL: 'merchant backend proxy (advanced flow)',
 };
 
 function updateBadge(
