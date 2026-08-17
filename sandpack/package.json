@@ -49,14 +49,10 @@
       }
     }
   },
-  "overrides": {
-    "esbuild": "^0.28.1",
-    "undici": ">=7.28.0"
-  },
   "devDependencies": {
     "@codesandbox/sandpack-react": "^2.18.4",
     "@purse-eu/web-sdk": "^0.10.0",
-    "@release-it/conventional-changelog": "^11.0.0",
+    "@release-it/conventional-changelog": "^12.0.0",
     "@types/node": "^25.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
@@ -65,7 +61,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.15.0",
-    "release-it": "^20.0.1",
+    "release-it": "^21.0.2",
     "tsup": "^8.5.0",
     "typescript": "~5.9.3",
     "vite": "^8.0.16"

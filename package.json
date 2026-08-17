@@ -8,6 +8,10 @@
     "react",
     "sandpack"
   ],
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "release-it": "^21.0.2"
+  },
   "scripts": {
     "dev:vanilla": "npm run dev -w vanilla",
     "dev:react": "npm run dev -w react",
