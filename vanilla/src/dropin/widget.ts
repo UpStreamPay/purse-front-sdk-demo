@@ -1,10 +1,10 @@
 import '../components';
 import { loadDropInCheckout } from '@purse-eu/web-sdk';
-import { getEnvironment } from '../shared/env';
+import { getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import { getSession } from '../shared/session';
 import { $, setStep, showNotice, showResult } from '../shared/ui';
 import type { DemoButton } from '../components/demo-button';
-import '../shared/debug-panel';
+import { mountDebugPanel } from '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Session setup — replace with your backend call in production.
@@ -74,3 +74,5 @@ async function main() {
 }
 
 main();
+
+mountDebugPanel(DEMO_ENV_KEYS.session);

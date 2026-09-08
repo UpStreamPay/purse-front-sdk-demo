@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Flow — Redirection Return</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div class="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <demo-header
+        badge="Advanced Flow"
+        variant="amber"
+        heading="Redirection return page"
+        source="advanced-flow/redirect-return.ts"
+        description="Landing page for <code>shopper_redirection_url</code>. Reads the signed <code>purse-redirection-data</code> parameter and, when it is loaded inside an iframe, posts <code>purse-demo:redirection-complete</code> to the parent window so the checkout can close the frame."
+      ></demo-header>
+
+      <demo-notice></demo-notice>
+      <demo-result></demo-result>
+    </div>
+    <script type="module" src="/src/advanced-flow/redirect-return.ts"></script>
+  </body>
+</html>

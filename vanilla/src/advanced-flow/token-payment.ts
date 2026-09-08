@@ -1,11 +1,18 @@
 import '../components';
-import { getEnv } from '../shared/env';
+import { getEnv, DEMO_ENV_KEYS } from '../shared/env';
 import { setStep, showNotice, showResult } from '../shared/ui';
-import { proxyBase, browserData, fetchOrder } from '../shared/proxy';
+import {
+  proxyBase,
+  browserData,
+  createPayment,
+  fetchCustomerTokens,
+  fetchOrder,
+  type CustomerInfo,
+} from '../shared/proxy';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
 import type { DemoOptionList } from '../components/demo-option-list';
-import '../shared/debug-panel';
+import { mountDebugPanel } from '../shared/debug-panel';
 
 /**
  * Advanced flow — token payment (pay with a saved card)
@@ -54,8 +61,9 @@ type PaymentContext = {
   amount: number;
   currency: string;
   order: Record<string, unknown>;
-  // Required by create_payment so the wallet_token resolves to its owner.
-  customerReference: string;
+  // Required by create_payment so the wallet_token resolves to its owner, and
+  // the node the browser IP rides on (see shared/proxy.ts / clientIp).
+  customer: CustomerInfo;
 };
 let paymentContext: PaymentContext | null = null;
 let selectedToken: WalletToken | null = null;
@@ -63,13 +71,10 @@ let selectedToken: WalletToken | null = null;
 // Step 1 — list the customer's saved cards and render the selector.
 async function loadSavedCards(customerReference: string) {
   setStep('step-tokens', 'active');
-  // Alfred proxies the wallet list; it injects the merchant id (vault client_name)
-  // server-side, so the browser only sends the customer reference.
-  const ref = encodeURIComponent(customerReference);
-  const res = await fetch(`${proxyBase()}/tokens/${ref}`);
-  if (!res.ok) throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
-
-  const body: WalletTokensResponse = await res.json();
+  // Alfred proxies the wallet list. The merchant comes from the configured
+  // Entity ID when there is one, and otherwise from the proxy's own default —
+  // see proxy.ts / entityId().
+  const body = (await fetchCustomerTokens(customerReference)) as WalletTokensResponse;
   // Only active credit-card tokens can be charged via this CVV + create_payment
   // flow (skip inactive tokens and non-card methods like PayPal / gift cards).
   const tokens = (body.tokens ?? [])
@@ -154,7 +159,7 @@ async function initCvvForm() {
         currency: paymentContext.currency,
         order: paymentContext.order,
         // Mandatory so the server can resolve the wallet_token to its owner.
-        customer: { reference: paymentContext.customerReference },
+        customer: paymentContext.customer,
         split: [
           {
             amount: paymentContext.amount,
@@ -170,15 +175,10 @@ async function initCvvForm() {
         browser: browserData(),
       };
 
-      const res = await fetch(`${proxyBase()}/create_payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentBody),
-      });
-      const data = await res.json();
+      const { ok, data } = await createPayment(paymentBody);
       payBtn.loading = false;
 
-      if (!res.ok) {
+      if (!ok) {
         setStep('step-pay', 'error');
         showResult('error', data);
         payBtn.disabled = false;
@@ -213,7 +213,7 @@ async function main() {
       amount: order.amount,
       currency: order.currency,
       order: order.v2Order,
-      customerReference: order.customerReference,
+      customer: order.customer,
     };
 
     await initCvvForm();
@@ -224,3 +224,5 @@ async function main() {
 }
 
 main();
+
+mountDebugPanel(DEMO_ENV_KEYS.advancedFlow);
