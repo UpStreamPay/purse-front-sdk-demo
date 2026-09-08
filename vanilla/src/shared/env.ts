@@ -38,8 +38,45 @@ export function resetEnv(key: EnvKey): void {
 }
 
 export function resetAllEnv(): void {
-    for (const k of ENV_KEYS) localStorage.removeItem(LS_PREFIX + k);
+    resetForKeys(ENV_KEYS);
 }
+
+// Clear the overrides for a subset of the keys — the debug panel only resets
+// what it displays for the current demo.
+export function resetForKeys(keys: readonly EnvKey[]): void {
+    for (const k of keys) localStorage.removeItem(LS_PREFIX + k);
+}
+
+/**
+ * The settings each demo actually reads. Anything absent from a demo's list is
+ * dead weight in its debug panel, so the panel is mounted with the list rather
+ * than with every key.
+ *
+ * VITE_PURSE_ENVIRONMENT is on every list: it selects the CDN the SDK is loaded
+ * from, so it applies even to the demos that read nothing else.
+ */
+export const DEMO_ENV_KEYS = {
+    // Drop-in and Headless Checkout are driven by a payment session.
+    session: [
+        'VITE_PURSE_ENVIRONMENT',
+        'VITE_PURSE_SESSION_JSON',
+    ],
+    // Secure Fields tokenisation — tenant + api key, no session.
+    secureFields: [
+        'VITE_PURSE_ENVIRONMENT',
+        'VITE_PURSE_SECUREFIELDS_TENANT_ID',
+        'VITE_PURSE_API_KEY',
+    ],
+    // Advanced flow — Secure Fields plus the merchant backend (Alfred) and the
+    // entity the v2 calls are scoped to.
+    advancedFlow: [
+        'VITE_PURSE_ENVIRONMENT',
+        'VITE_PURSE_SECUREFIELDS_TENANT_ID',
+        'VITE_PURSE_API_KEY',
+        'VITE_PURSE_PROXY_URL',
+        'VITE_PURSE_ENTITY_ID',
+    ],
+} as const satisfies Record<string, readonly EnvKey[]>;
 
 export function isOverridden(key: EnvKey): boolean {
     return localStorage.getItem(LS_PREFIX + key) !== null;

@@ -1,9 +1,9 @@
 import '../components';
-import { getEnv } from '../shared/env';
+import { getEnv, DEMO_ENV_KEYS } from '../shared/env';
 import { setStep, showNotice, showResult } from '../shared/ui';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
-import '../shared/debug-panel';
+import { mountDebugPanel } from '../shared/debug-panel';
 
 // Secure Fields tokenises card data at tenant level — no payment session needed.
 // Configure via VITE_PURSE_SECUREFIELDS_TENANT_ID and VITE_PURSE_API_KEY in
@@ -75,3 +75,5 @@ async function main() {
 }
 
 main();
+
+mountDebugPanel(DEMO_ENV_KEYS.secureFields);

@@ -1,4 +1,4 @@
-import {ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetAllEnv, isOverridden, getBuildDefault} from './env';
+import {ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetForKeys, isOverridden, getBuildDefault} from './env';
 
 const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_ENVIRONMENT: 'Environment',
@@ -110,11 +110,20 @@ function createRow(key: EnvKey): HTMLElement {
     return row;
 }
 
-function mount() {
+/**
+ * Mount the floating debug panel with the settings that apply to the calling
+ * demo — a demo that never reads a key must not offer it, or the panel reads as
+ * a list of things to fill in before anything works.
+ *
+ * `keys` is ordered as displayed; it defaults to every key for a page that
+ * genuinely uses all of them.
+ */
+export function mountDebugPanel(keys: readonly EnvKey[] = ENV_KEYS) {
     if (document.getElementById('purse-debug-host')){
         console.debug('Debug panel already mounted')
         return;
     }
+    if (keys.length === 0) return;
 
     // Root host — fixed bottom-right
     const host = document.createElement('div');
@@ -159,7 +168,7 @@ function mount() {
     // Field rows separated by dividers
     const fieldsEl = document.createElement('div');
     fieldsEl.className = 'divide-y divide-border max-h-96 overflow-y-auto';
-    for (const key of ENV_KEYS) fieldsEl.appendChild(createRow(key));
+    for (const key of keys) fieldsEl.appendChild(createRow(key));
     panel.appendChild(fieldsEl);
 
     // Toggle button
@@ -181,7 +190,9 @@ function mount() {
     });
     reloadBtn.addEventListener('click', () => location.reload());
     resetAllBtn.addEventListener('click', () => {
-        resetAllEnv();
+        // Only the keys this panel shows — a demo must not clear overrides it
+        // never displayed.
+        resetForKeys(keys);
         // Refresh all rows
         fieldsEl.querySelectorAll('[data-key]').forEach(row => {
             const key = (row as HTMLElement).dataset.key as EnvKey;
@@ -193,4 +204,3 @@ function mount() {
     });
 }
 
-mount();

@@ -7,6 +7,7 @@ import type { DemoBrandPills } from '../components/demo-brand-pills';
 type SecureFieldsModule = Awaited<ReturnType<typeof loadSecureFields>>;
 type SecureFieldsInstance = Awaited<ReturnType<SecureFieldsModule['initSecureFields']>>;
 type FieldsConfig = Parameters<SecureFieldsModule['initSecureFields']>[0]['config']['fields'];
+type InitParams = Parameters<SecureFieldsModule['initSecureFields']>[0];
 
 const DEFAULT_BRANDS: Securefields.Brand[] = [
   'CARTE_BANCAIRE', 'VISA', 'MASTERCARD', 'AMERICAN_EXPRESS', 'MAESTRO',
@@ -18,6 +19,17 @@ export type SecureFieldsHandle = {
   getSelectedBrand: () => Securefields.Brand | null;
 };
 
+/**
+ * What `submit()` resolves with. `threeDSServerTransID` is only present when the
+ * instance was booted with `threeDS: true` and the versioning call succeeded;
+ * the published SDK types do not carry it yet (vault-front#322 landed after
+ * @purse-eu/web-sdk 0.10.0), hence the local shape.
+ */
+export type SubmitResult = {
+  vault_form_token: string;
+  threeDSServerTransID?: string;
+};
+
 type BootOptions = {
   tenantId: string;
   apiKey: string;
@@ -25,6 +37,16 @@ type BootOptions = {
   fields: FieldsConfig;
   // Wire the <demo-brand-pills> scheme selector (rendered by <sf-card-form brand>).
   brandSelect?: boolean;
+  /**
+   * Arm the 3DS sequence. The flag only arms it: `submit()` then chains 3DS
+   * versioning and, when the card range has a 3DS Method URL, the device
+   * fingerprint in a hidden iframe — both after tokenisation, since versioning
+   * needs the form token. The result carries `threeDSServerTransID`.
+   *
+   * Purse-vault only, and only versioning + the frictionless outcome are wired
+   * today — there is no challenge handling here.
+   */
+  threeDS?: boolean;
   onReady?: () => void;
 };
 
@@ -51,7 +73,10 @@ export async function bootSecureFields(opts: BootOptions): Promise<SecureFieldsH
       brandSelector: false,
       fields: opts.fields,
       styles: { input: { placeholderColor: '#9ca3af' } },
-    },
+      // `threeDS` is absent from the published SDK types (see SubmitResult), so
+      // the config is cast; the runtime SDK loaded from the CDN accepts it.
+      ...(opts.threeDS ? { threeDS: { enabled: true } } : {}),
+    } as InitParams['config'],
   });
 
   if (opts.onReady) sf.on('ready', opts.onReady);
