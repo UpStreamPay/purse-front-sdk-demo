@@ -1,14 +1,22 @@
 import { useState } from 'react';
-import { ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetAllEnv, isOverridden, getBuildDefault } from './env';
+import { type EnvKey, getEnv, setEnv, resetEnv, resetForKeys, isOverridden, getBuildDefault } from '@shared/env';
 
 const LABELS: Record<EnvKey, string> = {
+    VITE_PURSE_ENVIRONMENT: 'Environment',
+    VITE_PURSE_SESSION_JSON: 'Session JSON',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'Tenant ID',
     VITE_PURSE_API_KEY: 'API Key',
+    VITE_PURSE_ENTITY_ID: 'Entity ID',
+    VITE_PURSE_PROXY_URL: 'Proxy URL',
 };
 
 const HINTS: Record<EnvKey, string> = {
+    VITE_PURSE_ENVIRONMENT: 'sandbox · test · production',
+    VITE_PURSE_SESSION_JSON: 'base64 payment session',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
     VITE_PURSE_API_KEY: 'for Secure Fields',
+    VITE_PURSE_ENTITY_ID: 'scopes the Payment API v2 calls',
+    VITE_PURSE_PROXY_URL: 'merchant backend for the v2 endpoints',
 };
 
 function EnvRow({ envKey, onUpdate }: { envKey: EnvKey; onUpdate: () => void }) {
@@ -68,12 +76,19 @@ function EnvRow({ envKey, onUpdate }: { envKey: EnvKey; onUpdate: () => void }) 
     );
 }
 
-export function DebugPanel() {
+/**
+ * The demo's runtime credential override. `keys` is the subset a given page
+ * actually reads — anything else would be dead weight in the panel, so pages
+ * pass one of the DEMO_ENV_KEYS lists from @shared/env.
+ */
+export function DebugPanel({ keys }: { keys: readonly EnvKey[] }) {
     const [open, setOpen] = useState(false);
     const [, forceUpdate] = useState(0);
 
+    // Reset only what this panel displays, so one demo cannot clear another's
+    // overrides.
     const handleReset = () => {
-        resetAllEnv();
+        resetForKeys(keys);
         forceUpdate(n => n + 1);
     };
 
@@ -105,7 +120,7 @@ export function DebugPanel() {
                         </div>
                     </div>
                     <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
-                        {ENV_KEYS.map(k => (
+                        {keys.map(k => (
                             <EnvRow key={k} envKey={k} onUpdate={() => forceUpdate(n => n + 1)} />
                         ))}
                     </div>
