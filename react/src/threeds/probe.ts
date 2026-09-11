@@ -60,6 +60,8 @@ export type FormEvent = {
   action: string;
   target: string;
   inputs: string[];
+  /** The decoded 3DS Method blob, when this is that form. Scrubbed of secrets. */
+  methodData?: ThreeDSMethodData;
 };
 
 export type ResourceEvent = {
@@ -99,6 +101,30 @@ export type ProbeEvent =
 // it stays in.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Secrets travel in query strings — the 3DS versioning call and the
+ * threeDSMethodNotificationURL inside the method blob both carry `?api-key=`.
+ * Anything URL-shaped gets scrubbed before it can reach the screen.
+ */
+const SECRET_PARAM = /^(api[-_]?key|key|token|secret|signature|sig|password|auth)$/i;
+
+export function scrubUrlSecrets(value: string): string {
+  if (!/^https?:\/\//i.test(value) || !value.includes('?')) return value;
+  try {
+    const u = new URL(value);
+    let touched = false;
+    for (const name of [...u.searchParams.keys()]) {
+      if (SECRET_PARAM.test(name)) {
+        u.searchParams.set(name, 'REDACTED');
+        touched = true;
+      }
+    }
+    return touched ? u.href : value;
+  } catch {
+    return value;
+  }
+}
+
 const SECRET_KEY =
   /pan|card_?number|cvv|cvc|security_?code|expiry|exp_?date|holder|api_?key|apikey|authorization|bearer|secret|password|credential/i;
 
@@ -109,9 +135,10 @@ const MAX_DEPTH = 8;
 export function redact(value: unknown, depth = 0): unknown {
   if (depth > MAX_DEPTH) return '‹too deep›';
   if (typeof value === 'string') {
-    return value.length > MAX_STRING
-      ? `${value.slice(0, MAX_STRING)}… (${value.length - MAX_STRING} more chars)`
-      : value;
+    const scrubbed = scrubUrlSecrets(value);
+    return scrubbed.length > MAX_STRING
+      ? `${scrubbed.slice(0, MAX_STRING)}… (${scrubbed.length - MAX_STRING} more chars)`
+      : scrubbed;
   }
   if (Array.isArray(value)) return value.map(v => redact(v, depth + 1));
   if (value && typeof value === 'object') {
@@ -264,19 +291,9 @@ export function reset(): void {
 // The four observers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Secrets travel in query strings too — the 3DS versioning endpoint is called as
- * `…/payment/v2/3ds/versioning?api-key=<key>`. This trace goes on a projector,
- * so the value never survives into the log.
- */
-const SECRET_PARAM = /^(api[-_]?key|key|token|secret|signature|sig|password|auth)$/i;
-
 function splitUrl(raw: string): { url: string; host: string; path: string } {
   try {
-    const u = new URL(raw, location.href);
-    for (const name of [...u.searchParams.keys()]) {
-      if (SECRET_PARAM.test(name)) u.searchParams.set(name, REDACTED);
-    }
+    const u = new URL(scrubUrlSecrets(new URL(raw, location.href).href));
     return { url: u.href, host: u.host, path: u.pathname + u.search };
   } catch {
     return { url: raw, host: '?', path: raw };
@@ -423,11 +440,19 @@ function watchDom(): void {
     }
 
     if (el instanceof HTMLFormElement) {
+      // The 3DS Method form is built, appended and submitted in one go, so its
+      // inputs are already in place when the observer sees it. Grab the blob
+      // here — it is the whole point of the demo, and it is gone moments later.
+      const methodInput = el.querySelector<HTMLInputElement>('input[name="threeDSMethodData"]');
+      const raw = methodInput?.value;
       emit({
         kind: 'form',
         action: el.action || '(none)',
         target: el.target || '(self)',
         inputs: [...el.querySelectorAll('input')].map(i => i.name || '(unnamed)'),
+        ...(raw
+          ? { methodData: (redact(decodeThreeDSMethodData(raw)) as ThreeDSMethodData) ?? undefined }
+          : {}),
       });
     }
   };
@@ -545,6 +570,13 @@ export function selfCheck(): void {
     'notification URL did not round-trip',
   );
   assert(decodeThreeDSMethodData('not base64 at all !!') === null, 'garbage did not return null');
+
+  // The method blob's notification URL carries an api-key; it must never render.
+  const withKey = redact({
+    threeDSMethodNotificationURL: 'https://api.purse-test.com/v2/3ds/notify?api-key=abc123&x=1',
+  }) as { threeDSMethodNotificationURL: string };
+  assert(!withKey.threeDSMethodNotificationURL.includes('abc123'), 'api-key survived in a URL value');
+  assert(withKey.threeDSMethodNotificationURL.includes('x=1'), 'scrubbing dropped a harmless param');
   assert(decodeThreeDSMethodData(btoa('"a string"')) === null, 'non-object did not return null');
 
   assert(

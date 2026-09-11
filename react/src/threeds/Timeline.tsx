@@ -20,7 +20,7 @@ function evidenceLine(step: Step): string | null {
   const parts = step.evidence.slice(0, 3).map(e => {
     switch (e.kind) {
       case 'http':     return `${e.method} ${e.host}${e.path.slice(0, 40)}${e.status ? ` → ${e.status}` : ''}`;
-      case 'iframe':   return `iframe ${e.concealed ? '(hidden) ' : ''}${e.src.slice(0, 48)}`;
+      case 'iframe':   return `iframe ${e.concealed ? '(hidden) ' : ''}${e.name}`;
       case 'form':     return `form → ${e.inputs.join(', ').slice(0, 48)}`;
       case 'resource': return `${e.initiatorType} ${e.host} ${e.ms}ms`;
       default:         return e.kind;
