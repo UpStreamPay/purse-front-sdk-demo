@@ -16,6 +16,8 @@
     "dev:vanilla": "npm run dev -w vanilla",
     "dev:react": "npm run dev -w react",
     "dev:sandpack": "npm run dev -w sandpack",
+    "dev:react:test": "npm run dev -w react -- --mode test",
+    "dev:vanilla:test": "npm run dev -w vanilla -- --mode test",
     "build": "npm run build -w vanilla -w react",
     "build:sandpack": "npm run build -w sandpack",
     "typecheck": "npm run typecheck --workspaces --if-present",

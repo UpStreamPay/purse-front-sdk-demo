@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/* Palette lifted from vanilla/style.css so the two demo apps look related,
+   plus a dark set for the x-ray panel — a payment page stays light, the
+   instrumentation next to it reads like a debugger. */
+@theme inline {
+  --color-bg: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-border: #e2e5ed;
+  --color-text: #1a1d2e;
+  --color-muted: #6b7280;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-success: #059669;
+  --color-error: #dc2626;
+
+  --color-xray: #0f1222;
+  --color-xray-soft: #191d33;
+  --color-xray-line: #2b3152;
+  --color-xray-text: #c7ccf0;
+  --color-xray-dim: #6c74a8;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Secure Fields renders an iframe into each target; give them a consistent box. */
+.sf-field {
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.sf-field:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.15);
+}
+.sf-field iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(99 102 241 / 0.55); }
+  50%      { box-shadow: 0 0 0 7px rgb(99 102 241 / 0); }
+}
+.step-active-dot { animation: step-pulse 1.4s ease-out infinite; }
+
+@keyframes scan {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  35%  { opacity: 1; }
+  100% { transform: translateY(400%); opacity: 0; }
+}
+.scanning::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 26px;
+  background: linear-gradient(180deg, transparent, rgb(99 102 241 / 0.28), transparent);
+  animation: scan 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+.row-in { animation: row-in 0.28s ease-out both; }
+
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(0.9); }
+  60%  { transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.pop-in { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes trace-line {
+  from { height: 0; }
+  to   { height: 100%; }
+}
+.trace-line { animation: trace-line 0.4s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .step-active-dot, .scanning::after, .row-in, .pop-in, .trace-line {
+    animation: none !important;
+  }
+}
+
+/* ── Presenter mode — one class, bigger everything, for a projector ──────── */
+.presenter {
+  font-size: 1.16rem;
+}
+.presenter .xray-mono { font-size: 0.95rem; }
+.presenter .chrome-dim { opacity: 0.45; }

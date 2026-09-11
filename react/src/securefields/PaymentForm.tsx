@@ -3,7 +3,7 @@ import { InlineBrandSelector } from "./BrandSelector.tsx";
 import { useEffect, useRef, useState } from "react";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay.tsx";
 import { loadSecureFields, type Securefields } from "@purse-eu/web-sdk";
-import { getEnv } from "../shared/env";
+import { getEnv } from "@shared/env";
 
 export const PaymentForm = ({
   embeddedBrandSelector,

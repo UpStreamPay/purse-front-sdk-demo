@@ -124,7 +124,9 @@ export type OrderInfo = {
 export async function fetchOrder(): Promise<OrderInfo> {
   const res = await fetch(`${proxyBase()}/order/`);
   if (!res.ok)
-    throw new Error(`Order fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(
+      `Order fetch failed: ${res.status} ${res.statusText}${await detail(res)}`,
+    );
   const { order } = await res.json();
   const o = order.order;
   const c = o.customer ?? {};
@@ -168,6 +170,21 @@ export async function fetchOrder(): Promise<OrderInfo> {
   };
 }
 
+/**
+ * The proxy reports upstream failures in the response body — an expired OAuth
+ * client secret comes back as a bare 502 with `invalid_client` in the payload.
+ * Without this the demo shows the status code and nothing else, which is not
+ * enough to tell a misconfigured backend from an unreachable one.
+ */
+async function detail(res: Response): Promise<string> {
+  try {
+    const text = (await res.clone().text()).trim();
+    return text ? ` — ${text.slice(0, 300)}` : "";
+  } catch {
+    return "";
+  }
+}
+
 export type CardSolution = { partner: string; method: string };
 
 /**
@@ -186,7 +203,7 @@ export async function fetchEligibleSolutions(
   });
   if (!res.ok)
     throw new Error(
-      `Eligible solutions failed: ${res.status} ${res.statusText}`,
+      `Eligible solutions failed: ${res.status} ${res.statusText}${await detail(res)}`,
     );
 
   const { eligible_solutions = [] } = await res.json();
