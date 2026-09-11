@@ -72,7 +72,11 @@ export function ThreeDSDemo() {
           setNotice('No credit-card solution is eligible for this order — nothing to run 3DS against.');
           return;
         }
-        setPicked(solutionId(cardSolutions[0]));
+        // Prefer a real acquirer over uspmock: the mock always comes back
+        // PENDING with a redirect, so the demo would never reach AUTHORIZED.
+        const preferred =
+          cardSolutions.find(c => c.partner !== 'uspmock') ?? cardSolutions[0];
+        setPicked(solutionId(preferred));
       } catch (e) {
         if (cancelled) return;
         const message = (e as Error).message;

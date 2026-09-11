@@ -1,4 +1,4 @@
-import type { HttpEvent, MarkEvent, ProbeEvent, ThreeDSMethodData } from './probe';
+import type { FormEvent, HttpEvent, MarkEvent, ProbeEvent, ThreeDSMethodData } from './probe';
 import { findThreeDSMethodData } from './probe';
 
 /**
@@ -114,6 +114,11 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
     e => isHttp(e) && within(e, w) && /3ds|three.?ds|version|authenticat/i.test(e.path),
   );
 
+  // Every host this page called itself. The ACS is only ever reached by the
+  // hidden iframe, so it is precisely the host that is *not* in this set —
+  // which keeps the merchant proxy (a non-Purse host) out of the evidence.
+  const ourHosts = new Set(events.filter(isHttp).map(e => e.host));
+
   // The 3DS Method (fingerprint). Deliberately narrow: Secure Fields also
   // creates display:none iframes for its own non-visible fields, so "a
   // concealed iframe appeared" is not evidence of anything. What counts is the
@@ -126,12 +131,15 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
     if (!within(e, w)) return false;
     if (e.kind === 'form') return e.inputs.some(i => /threeDSMethod/i.test(i));
     if (e.kind === 'iframe') return isMethodFrameName(e.name) || /threeDSMethod/i.test(e.src);
-    if (e.kind === 'resource') return !/(^|\.)purse-(sandbox|test|secure)\.com$/.test(e.host);
-    if (e.kind === 'http') return /threeDSMethod/i.test(e.url);
+    if (e.kind === 'resource')
+      return !ourHosts.has(e.host) && !/(^|\.)purse-(sandbox|test|secure)\.com$/.test(e.host);
+    if (e.kind === 'http') return /threeDSMethod|3ds[-_]method/i.test(e.url);
     return false;
   });
 
   const methodData =
+    // The form the SDK injects is the direct source; everything else is a fallback.
+    events.find((e): e is FormEvent => e.kind === 'form' && !!e.methodData)?.methodData ??
     findThreeDSMethodData(methodEvidence.map(e => ('src' in e ? e.src : 'url' in e ? e.url : ''))) ??
     findThreeDSMethodData(events.filter(e => e.kind === 'message').map(e => e.preview)) ??
     findThreeDSMethodData(events.filter(isHttp).map(e => e.reqBody)) ??
@@ -163,10 +171,11 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
     : undefined;
   const frictionless = outcome?.flow === 'FRICTIONLESS';
   const authorization = payResponse?.authorization?.status;
-  // PENDING plus a redirection means the ACS asked for a challenge. This
-  // showcase is the frictionless path only, so it says so instead of sitting on
-  // an "active" step for ever.
-  const challengeRequired = authorization === 'PENDING' && !!payResponse?.redirection?.href;
+  // PENDING plus a redirection means the shopper has somewhere to go. Only call
+  // that a 3DS challenge when the authentication did *not* come back
+  // frictionless — otherwise it is the partner's own page, and labelling it a
+  // challenge would contradict the step right above it.
+  const needsRedirect = authorization === 'PENDING' && !!payResponse?.redirection?.href;
 
   const failed = !!(tokError || payError || flowError);
 
@@ -204,13 +213,13 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
       evidence: events.filter(e => e.kind === 'iframe' && !e.concealed),
     },
     {
-      id: 'tokenize',
-      title: 'Tokenise the card',
-      blurb: 'submit() exchanges the card data for a short-lived vault form token.',
-      state: tokError ? 'error' : tokDone ? 'done' : tokStart ? 'active' : 'pending',
-      ms: between(tokStart, tokDone ?? tokError),
+      id: 'submit',
+      title: 'submit() called',
+      blurb:
+        'One call does the lot: the card is tokenised first, then the 3DS chain below runs on top of that token. All of it before submit() resolves.',
+      state: tokError ? 'error' : tokStart ? 'done' : 'pending',
       detail: tokError ? String((tokError.detail as { error?: string })?.error ?? 'failed') : undefined,
-      evidence: events.filter(e => isHttp(e) && within(e, w) && !/3ds|version/i.test(e.path)),
+      evidence: [],
     },
     {
       id: 'versioning',
@@ -306,13 +315,15 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
     {
       id: 'authorization',
       title: 'Authorization',
-      blurb: challengeRequired
-        ? 'The fingerprint was not enough and the issuer asked for a challenge. Following that redirection is out of scope here; the vanilla advanced-flow demo handles it.'
+      blurb: needsRedirect
+        ? frictionless
+          ? 'Authentication was frictionless, but the partner still wants the shopper on its own page before it authorises. Following that redirect is out of scope here; the vanilla advanced-flow demo handles it.'
+          : 'The fingerprint was not enough, so the issuer asked for a challenge. Following that redirect is out of scope here; the vanilla advanced-flow demo handles it.'
         : 'Whether the payment was actually authorised, once the authentication was settled.',
       state: authorization
         ? authorization === 'AUTHORIZED'
           ? 'done'
-          : challengeRequired
+          : needsRedirect
             ? 'skipped'
             : authorization === 'PENDING'
               ? 'active'
@@ -322,8 +333,10 @@ export function derive(events: ProbeEvent[], armed: boolean): Derived {
           : 'pending',
       unobservedNote:
         'The payment was created but carried no authorization status. The real outcome comes from the payment.updated webhook, not this response.',
-      skipLabel: challengeRequired ? 'challenge required' : undefined,
-      detail: challengeRequired ? `${authorization} — challenge required` : authorization,
+      skipLabel: needsRedirect ? (frictionless ? 'redirect required' : 'challenge required') : undefined,
+      detail: needsRedirect
+        ? `${authorization} — ${frictionless ? 'partner redirect' : 'challenge'} required`
+        : authorization,
       evidence: [],
     },
   ];
