@@ -7,6 +7,7 @@ const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_API_KEY: 'API Key',
     VITE_PURSE_ENTITY_ID: 'Entity ID',
     VITE_PURSE_PROXY_URL: 'Proxy URL',
+    VITE_PURSE_API_ORIGIN: 'API Origin',
 };
 
 const HINTS: Record<EnvKey, string> = {
@@ -16,6 +17,7 @@ const HINTS: Record<EnvKey, string> = {
     VITE_PURSE_API_KEY: 'for Secure Fields',
     VITE_PURSE_ENTITY_ID: 'merchant id for wallet token lookup (advanced flow)',
     VITE_PURSE_PROXY_URL: 'merchant backend proxy (advanced flow)',
+    VITE_PURSE_API_ORIGIN: 'Purse API origin the 3DS challenge posts back from (defaults per environment)',
 };
 
 function updateBadge(
