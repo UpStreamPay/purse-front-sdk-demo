@@ -14,7 +14,7 @@ export function secureFieldsEnvironment(): SecureFieldsEnvironment {
 /**
  * The 3DS versioning + fingerprint chain ships only in the `test` Secure Fields
  * build — `cdn.purse-sandbox.com` has no `/3ds/versioning` call and never
- * returns a threeDSServerTransID. Anywhere else the page still runs, but the
+ * returns a three_ds_server_trans_id. Anywhere else the page still runs, but the
  * 3DS steps have nothing to observe, so say so rather than let it look broken.
  */
 export function threeDSSupported(): boolean {
@@ -28,4 +28,5 @@ export const SHOWCASE_ENV_KEYS = [
   'VITE_PURSE_API_KEY',
   'VITE_PURSE_PROXY_URL',
   'VITE_PURSE_ENTITY_ID',
+  'VITE_PURSE_API_ORIGIN',
 ] as const satisfies readonly EnvKey[];

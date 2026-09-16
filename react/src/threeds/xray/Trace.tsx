@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ProbeEvent } from './probe';
+import type { ProbeEvent } from '../probe';
 import { Json } from './Json';
 
 const KIND_STYLE: Record<ProbeEvent['kind'], { tag: string; cls: string }> = {

@@ -1,5 +1,6 @@
 import { loadSecureFields, type Securefields } from '@purse-eu/web-sdk';
-import { secureFieldsEnvironment } from './config';
+import { threeDSTransId, type SubmitResult as RawSubmitResult } from '@shared/three-ds';
+import { secureFieldsEnvironment } from '../config';
 
 // Types inferred from the SDK so callers stay type-safe without the SDK
 // re-exporting them. Mirrors vanilla/src/shared/secure-fields.ts, which cannot
@@ -17,14 +18,14 @@ const BRANDS: Securefields.Brand[] = [
 ];
 
 /**
- * What `submit()` resolves with. `threeDSServerTransID` is only present when
- * the instance was booted with 3DS armed and the versioning call succeeded; the
- * published SDK types do not carry it (vault-front#322 landed after
- * @purse-eu/web-sdk 0.10.0), hence the local shape.
+ * What `submit()` resolves with, after normalisation. `three_ds_server_trans_id`
+ * is only present when the instance was booted with 3DS armed and the versioning
+ * call succeeded; the published SDK types do not carry it (vault-front#322
+ * landed after @purse-eu/web-sdk 0.10.0), hence the local shape.
  */
 export type SubmitResult = {
   vault_form_token: string;
-  threeDSServerTransID?: string;
+  three_ds_server_trans_id?: string;
 };
 
 export type BootOptions = {
@@ -90,7 +91,13 @@ export async function bootSecureFields(opts: BootOptions): Promise<Handle> {
         ...(selectedNetwork ? { selectedNetwork } : {}),
       });
       if ('error' in result && result.error) return { error: String(result.error) };
-      return result as SubmitResult;
+      // Normalised here so nothing downstream carries both spellings of the
+      // vault-front#334 rename (shared/three-ds.ts holds the alias).
+      const submitted = result as RawSubmitResult;
+      return {
+        vault_form_token: submitted.vault_form_token,
+        three_ds_server_trans_id: threeDSTransId(submitted),
+      };
     },
   };
 }

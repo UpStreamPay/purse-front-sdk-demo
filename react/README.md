@@ -66,7 +66,7 @@ and a live network / postMessage trace.
 ### Why it is built the way it is
 
 `@purse-eu/web-sdk@0.10.0` exposes **no 3DS API** — `securefields.d.ts` has no
-`threeDS` config member, no `threeDSServerTransID` on `SubmitResult`, and no 3DS
+`threeDS` config member, no `three_ds_server_trans_id` on `SubmitResult`, and no 3DS
 entry in `SecureFieldsEvents`. Versioning and the fingerprint are performed by
 the runtime loaded from `cdn.purse-test.com`, which is not part of this repo.
 

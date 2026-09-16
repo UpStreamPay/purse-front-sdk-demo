@@ -7,10 +7,17 @@ import {
   createPayment,
   fetchOrder,
   fetchEligibleSolutions,
+  pollPayment,
   type CardSolution,
   type CustomerInfo,
 } from '../shared/proxy';
 import { bootSecureFields, type SecureFieldsHandle, type SubmitResult } from '../shared/secure-fields';
+import {
+  challengeData,
+  runChallenge,
+  threeDSTransId,
+  type ChallengeCompletion,
+} from '../shared/three-ds';
 import {
   extractRedirection,
   followRedirection,
@@ -40,13 +47,23 @@ import { mountDebugPanel } from '../shared/debug-panel';
  *   4. Authenticate the card              → 3DS versioning + fingerprint, inside sf.submit()
  *   5. Create a payment                   → POST {proxy}/create_payment
  *   6. Register a token                   → `save_token: true` in step 5
- *   7. Follow the redirection             → partner page, see shared/redirection.ts
+ *   7a. Run the 3DS challenge             → shared/three-ds.ts
+ *   7b. Follow the redirection            → shared/redirection.ts
+ *   8. Confirm the payment                → GET {proxy}/payment/{id}
  */
 
 const payBtn = document.querySelector<DemoButton>('demo-button')!;
 const saveTokenEl = $('save-token') as HTMLInputElement;
 const threeDsEl = $('three-ds') as HTMLInputElement;
 const redirectionEl = document.querySelector<DemoRedirection>('demo-redirection')!;
+// The challenge panel, laid over the card form so the stepper stays readable.
+// Closing is only allowed once the challenge has settled — dismissing a live
+// authentication would leave the ACS running behind a hidden frame.
+const challengeOverlay = $('threeds-challenge-overlay');
+const closeBtn = $('threeds-challenge-close') as HTMLButtonElement;
+closeBtn.addEventListener('click', () => {
+  challengeOverlay.hidden = true;
+});
 
 // The page the shopper (or the iframe) lands on when the partner is done. In a
 // real integration this is the `shopper_redirection_url` configured on the
@@ -74,8 +91,8 @@ let sfHandle: SecureFieldsHandle | null = null;
 /**
  * Step 4 — surface what the 3DS sequence produced. The transaction id is what a
  * merchant backend posts alongside the form token and the browser information
- * when it creates the payment; only versioning and the frictionless outcome are
- * wired today, so nothing else happens with it here.
+ * when it creates the payment — `split[].three_ds_server_trans_id`, the same
+ * name `submit()` resolves it under.
  */
 function showThreeDS(threeDSServerTransID?: string) {
   if (!threeDSServerTransID) {
@@ -94,7 +111,14 @@ function showThreeDS(threeDSServerTransID?: string) {
 function resetThreeDS() {
   $('threeds-box').hidden = true;
   $('threeds-trans-id').textContent = '—';
+  challengeOverlay.hidden = true;
+  $('threeds-auth-status').textContent = '—';
+  $('threeds-authz-status').textContent = '—';
+  $('threeds-challenge').replaceChildren();
+  $('threeds-challenge-status').textContent = 'Waiting for the cardholder…';
   setStep('step-3ds', 'pending');
+  setStep('step-challenge', 'pending');
+  setStep('step-confirm', 'pending');
 }
 
 // Identifies a solution in the chip list; partner+method is what create_payment
@@ -209,12 +233,13 @@ function registerPayHandler() {
       }
       // With 3DS enabled, submit() also ran 3DS versioning and — when the
       // card range advertises a 3DS Method URL — the device fingerprint in a
-      // hidden iframe, and resolves with the `threeDSServerTransID` the payment
+      // hidden iframe, and resolves with the transaction id the payment
       // creation call needs. Fingerprinting is best-effort (the gateway pre-set
       // the method result), a failed versioning call fails the whole submit.
-      const { vault_form_token: vaultFormToken, threeDSServerTransID } =
-        tokenResult as SubmitResult;
-      showThreeDS(threeDSServerTransID);
+      const submitResult = tokenResult as SubmitResult;
+      const vaultFormToken = submitResult.vault_form_token;
+      const transId = threeDSTransId(submitResult);
+      showThreeDS(transId);
 
       // Step 5 — Create the payment. Step 6 (register a token) is opted into here
       // via `save_token`: when true, the card is stored to the customer wallet on
@@ -222,11 +247,11 @@ function registerPayHandler() {
       //
       // The split item is a NewAuthorizationCandidate: amount + partner + method
       // are required, the vault token goes in `vault_form_token`, and
-      // `three_ds_authentication_options`, `threeds_server_trans_id` and
+      // `three_ds_authentication_options`, `three_ds_server_trans_id` and
       // `save_token` all live on the item (there is no root-level save_token).
       //
       // 3DS, per the v2 spec: the id minted by the versioning call goes in
-      // `threeds_server_trans_id`, and its presence is what triggers the Purse
+      // `three_ds_server_trans_id`, and its presence is what triggers the Purse
       // 3DS advanced flow — the payment is created upfront with an in-progress
       // authentication, then authenticated before any authorisation. At most one
       // split may carry it. Sent only when submit() actually produced one, so an
@@ -240,18 +265,17 @@ function registerPayHandler() {
         currency: paymentContext.currency,
         order: paymentContext.order,
         customer: paymentContext.customer,
-        shopper_redirection_url : 'https://purse.eu?clement_bg=1',
+        shopper_redirection_url: RETURN_URL,
         split: [
           {
             amount: paymentContext.amount,
             partner: paymentContext.partner,
             method: paymentContext.method,
             vault_form_token: vaultFormToken,
-            ...(threeDSServerTransID
-              ? { threeds_server_trans_id: threeDSServerTransID }
-              : {}),
-            // Frictionless only: versioning + the device fingerprint are wired,
-            // a challenge is not, so no challenge is requested here.
+            ...(transId ? { three_ds_server_trans_id: transId } : {}),
+            // What the merchant asks for. The issuer decides: even with no
+            // challenge requested it can still ask for one, which is exactly the
+            // case step 7a below handles.
             three_ds_authentication_options: {
               challenge_indicator: 'NO_CHALLENGE_REQUESTED',
             },
@@ -276,7 +300,16 @@ function registerPayHandler() {
       showResult('success', data, 'Payment created');
       payBtn.label = 'Done';
 
-      // Step 7 — the payment is created, but not necessarily authorised yet.
+      // Step 7a — the issuer asked for a challenge: run it, and stop there. A
+      // payment that challenges carries no partner redirection to follow.
+      const blob = challengeData(data);
+      if (blob) {
+        await runChallengeStep(blob, (data as { id?: string }).id);
+        return;
+      }
+      setStep('step-challenge', 'done');
+
+      // Step 7b — the payment is created, but not necessarily authorised yet.
       handleRedirection(data as PaymentV2);
     } catch (e) {
       payBtn.loading = false;
@@ -289,7 +322,93 @@ function registerPayHandler() {
 }
 
 /**
- * Step 7 — follow the redirection.
+ * Step 7a — run the challenge. The blob goes over verbatim; the panel over the card form is this
+ * page's. `timeout` and `aborted` are signals, not verdicts — step 8 asks the API.
+ */
+async function runChallengeStep(blob: string, paymentId?: string) {
+  setStep('step-challenge', 'active');
+  challengeOverlay.hidden = false;
+  closeBtn.disabled = true;
+
+  try {
+    const result = await runChallenge({ challengeData: blob, container: 'threeds-challenge' });
+    const completion = result.data as ChallengeCompletion | undefined;
+    const rejected = completion?.result === 'REJECTED';
+
+    setStep('step-challenge', result.status === 'completed' && !rejected ? 'done' : 'error');
+    setChallengeStatus(
+      result.status === 'completed'
+        ? [
+            `Challenge completed in ${result.durationMs} ms`,
+            completion?.result,
+            completion?.reason,
+          ]
+        : [`Challenge ${result.status} after ${result.durationMs} ms (${result.reason})`],
+    );
+    showResult(rejected ? 'error' : 'success', result, 'Challenge finished');
+    // The completion's own view, overwritten by step 8. A settled challenge owes
+    // no partner redirection.
+    showStatuses(completion?.authentication?.status, completion?.authorization?.status);
+    setStep('step-redirect', 'done');
+    // Settled by the notification message: take the panel away. A timeout or an
+    // abort keeps it up, with the reason on it.
+    if (result.reason === 'message') challengeOverlay.hidden = true;
+  } catch (e) {
+    setStep('step-challenge', 'error');
+    setChallengeStatus([(e as Error).message]);
+    showResult('error', { error: (e as Error).message });
+  }
+  closeBtn.disabled = false;
+
+  if (paymentId) await confirmPayment(paymentId);
+}
+
+/** Step 8 — read the payment back until it settles. The webhook stays the truth. */
+async function confirmPayment(paymentId: string) {
+  setStep('step-confirm', 'active');
+  try {
+    const { settled, payment, polls, unsupported } = await pollPayment(paymentId);
+    if (unsupported) {
+      setStep('step-confirm', 'error');
+      // Not into the challenge panel: it is hidden by the time this runs.
+      showNotice(
+        'This proxy has no GET /payment/{id}. Point the Proxy URL at a backend that exposes it (usp-widget/packages/alfred, http://localhost:9001 locally) to confirm the payment.',
+      );
+      return;
+    }
+
+    const { authentication, authorization } = (payment ?? {}) as {
+      authentication?: { status?: string };
+      authorization?: { status?: string };
+    };
+    const authorized = authorization?.status === 'AUTHORIZED';
+    showStatuses(authentication?.status, authorization?.status);
+    setStep('step-confirm', settled ? (authorized ? 'done' : 'error') : 'active');
+    showResult(
+      authorized ? 'success' : 'error',
+      payment,
+      `Payment ${authorization?.status ?? 'read back'} after ${polls} GET /payment/{id}`,
+    );
+  } catch (e) {
+    setStep('step-confirm', 'error');
+    showResult('error', { error: (e as Error).message });
+  }
+}
+
+/** One line under the challenge frame. */
+function setChallengeStatus(parts: Array<string | undefined>) {
+  $('threeds-challenge-status').textContent = parts.filter(Boolean).join(' · ');
+}
+
+/** The two statuses in the 3DS box — create_payment never has them settled. */
+function showStatuses(authentication?: string, authorization?: string) {
+  $('threeds-box').hidden = false;
+  $('threeds-auth-status').textContent = authentication ?? '—';
+  $('threeds-authz-status').textContent = authorization ?? '—';
+}
+
+/**
+ * Step 7b — follow the redirection.
  *
  * `create_payment` returning 200 does NOT mean the payment is authorised. When
  * the partner needs the shopper (3DS challenge, bank page, wallet approval),

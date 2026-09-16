@@ -20,15 +20,13 @@ export type SecureFieldsHandle = {
 };
 
 /**
- * What `submit()` resolves with. `threeDSServerTransID` is only present when the
+ * What `submit()` resolves with. The 3DS transaction id is only present when the
  * instance was booted with `threeDS: true` and the versioning call succeeded;
- * the published SDK types do not carry it yet (vault-front#322 landed after
- * @purse-eu/web-sdk 0.10.0), hence the local shape.
+ * the published SDK types do not carry it (vault-front#322 landed after
+ * @purse-eu/web-sdk 0.10.0), hence the local shape in shared/three-ds.ts — read
+ * it with `threeDSTransId()`, which covers both spellings of the #334 rename.
  */
-export type SubmitResult = {
-  vault_form_token: string;
-  threeDSServerTransID?: string;
-};
+export type { SubmitResult } from './three-ds';
 
 type BootOptions = {
   tenantId: string;
@@ -41,10 +39,10 @@ type BootOptions = {
    * Arm the 3DS sequence. The flag only arms it: `submit()` then chains 3DS
    * versioning and, when the card range has a 3DS Method URL, the device
    * fingerprint in a hidden iframe — both after tokenisation, since versioning
-   * needs the form token. The result carries `threeDSServerTransID`.
+   * needs the form token. The result carries `three_ds_server_trans_id`.
    *
-   * Purse-vault only, and only versioning + the frictionless outcome are wired
-   * today — there is no challenge handling here.
+   * Purse-vault only. This flag covers versioning + the fingerprint; a challenge
+   * comes back on the payment instead and is run by shared/three-ds.ts.
    */
   threeDS?: boolean;
   onReady?: () => void;

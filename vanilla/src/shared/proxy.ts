@@ -232,6 +232,46 @@ export async function createPayment(
 }
 
 /**
+ * `GET /payment/{id}` → Orchestration `GET /payment/v2/payments/{id}`: what the payment settled
+ * as. Local Alfred only for now (:9001) — a proxy without the route answers 404.
+ */
+export async function fetchPayment(
+  paymentId: string,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const res = await fetch(`${proxyBase()}/payment/${encodeURIComponent(paymentId)}`);
+  const data = await res.json().catch(() => null);
+  return { ok: res.ok, status: res.status, data };
+}
+
+type PaymentStatuses = {
+  authentication?: { status?: string };
+  authorization?: { status?: string };
+};
+
+/** A payment stops moving when the authorization leaves PENDING. */
+const isSettled = (payment: unknown): boolean => {
+  const status = (payment as PaymentStatuses | null)?.authorization?.status;
+  return !!status && status !== 'PENDING';
+};
+
+/** Poll until the authorization settles. Gives up quietly — the webhook is the authority. */
+export async function pollPayment(
+  paymentId: string,
+  { attempts = 8, intervalMs = 1000 }: { attempts?: number; intervalMs?: number } = {},
+): Promise<{ settled: boolean; payment: unknown; polls: number; unsupported?: boolean }> {
+  let payment: unknown;
+  for (let poll = 1; poll <= attempts; poll++) {
+    const { ok, status, data } = await fetchPayment(paymentId);
+    payment = data;
+    // No route on this proxy — retrying 404s would just spend the loop.
+    if (status === 404) return { settled: false, payment: null, polls: poll, unsupported: true };
+    if (ok && isSettled(data)) return { settled: true, payment, polls: poll };
+    if (poll < attempts) await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  return { settled: false, payment, polls: attempts };
+}
+
+/**
  * GET the customer's saved card tokens. Alfred exposes the merchant as an
  * optional path segment, so a configured entity overrides the proxy's default
  * merchant instead of relying on its configuration.

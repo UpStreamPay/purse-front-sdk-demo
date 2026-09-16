@@ -1,4 +1,4 @@
-import type { Derived } from './steps';
+import type { Derived } from '../steps';
 import { Json } from './Json';
 
 /**
@@ -22,6 +22,17 @@ const SERVER_SIDE_NOTES: Array<[string, string]> = [
   ['ip_address', 'A page cannot read its own address. Read back from the proxy’s GET /env, which is the hop that sees it.'],
 ];
 
+/** base64url JSON, as `challenge_data` and its `creq` arrive. Undecodable → shown raw. */
+function decodeBlob(blob: string | undefined): unknown {
+  if (!blob) return undefined;
+  try {
+    const padded = blob.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(padded + '='.repeat((4 - (padded.length % 4)) % 4)));
+  } catch {
+    return blob;
+  }
+}
+
 function Section({
   title,
   hint,
@@ -44,7 +55,7 @@ function Section({
 
 /** Each field of the 3DS outcome, and why it matters. */
 const OUTCOME_FIELDS: Array<[keyof NonNullable<Derived['outcome']>, string]> = [
-  ['flow', 'FRICTIONLESS: the fingerprint satisfied the issuer, so no challenge was shown.'],
+  ['flow', 'FRICTIONLESS: the fingerprint satisfied the issuer. CHALLENGE: it asked for the cardholder.'],
   ['eci', 'E-commerce indicator. 05 on Visa, 02 on Mastercard: authenticated, liability sits with the issuer.'],
   ['version', '3DS protocol version the card range negotiated during versioning.'],
   ['directory_response', 'The Directory Server’s verdict. Y means authenticated.'],
@@ -61,7 +72,20 @@ export function PayloadInspector({
   derived: Derived;
   browserNode?: Record<string, unknown>;
 }) {
-  const { methodData, threeDSServerTransID, paymentRequest, paymentResponse, outcome } = derived;
+  const {
+    methodData,
+    threeDSServerTransID,
+    paymentRequest,
+    paymentResponse,
+    outcome,
+    challengeBlob,
+    challengeFrame,
+    completion,
+    confirmedPayment,
+  } = derived;
+
+  const challengePayload = decodeBlob(challengeBlob) as { creq?: string } | undefined;
+  const creq = decodeBlob(challengePayload?.creq);
 
   return (
     <div>
@@ -81,7 +105,7 @@ export function PayloadInspector({
         )}
       </Section>
 
-      <Section title="threeDSServerTransID">
+      <Section title="three_ds_server_trans_id">
         {threeDSServerTransID ? (
           <p className="xray-mono m-0 font-mono text-[13px] text-emerald-300 break-all pop-in">
             {threeDSServerTransID}
@@ -96,7 +120,7 @@ export function PayloadInspector({
       {outcome && (
         <Section
           title="Authentication result"
-          hint="What the ACS decided, straight off the create_payment response."
+          hint="What the ACS decided — read off the payment fetched back after the challenge when there was one, off create_payment otherwise."
         >
           <div className="pop-in rounded-lg border border-emerald-400/30 bg-emerald-500/[0.07] p-3">
             <ul className="list-none m-0 p-0 flex flex-col gap-2">
@@ -162,18 +186,76 @@ export function PayloadInspector({
 
       <Section
         title="create_payment request"
-        hint="threeds_server_trans_id on the split is what switches the payment into the Purse 3DS advanced flow."
+        hint="three_ds_server_trans_id on the split is what switches the payment into the Purse 3DS advanced flow."
       >
         <div className="rounded-lg bg-black/30 border border-xray-line p-2.5">
           <Json value={paymentRequest} />
         </div>
       </Section>
 
-      <Section title="create_payment response">
+      <Section
+        title="create_payment response"
+        hint="Written before the cardholder authenticates: a challenged payment reads authentication.status IN_PROGRESS and authorization.status PENDING here, whatever it settles as."
+      >
         <div className="rounded-lg bg-black/30 border border-xray-line p-2.5">
           <Json value={paymentResponse} />
         </div>
       </Section>
+
+      {challengeBlob && (
+        <Section
+          title="authentication.challenge_data"
+          hint="Forwarded verbatim to threeDSChallenge(). base64url JSON: where to post (acsURL), what to post (creq) and the window size the AReq announced — EMVCo requires the rendered frame to match it."
+        >
+          <div className="rounded-lg bg-black/30 border border-xray-line p-2.5 pop-in">
+            <Json value={challengePayload} />
+          </div>
+          {creq !== undefined && (
+            <>
+              <p className="m-0 mt-2 mb-1.5 text-[11px] font-bold uppercase tracking-[0.09em] text-xray-dim">
+                creq, decoded
+              </p>
+              <div className="rounded-lg bg-black/30 border border-xray-line p-2.5">
+                <Json value={creq} />
+              </div>
+            </>
+          )}
+        </Section>
+      )}
+
+      {challengeFrame !== undefined && (
+        <Section
+          title="purse:3ds:challenge-completed"
+          hint="Posted into the challenge iframe by the page answering POST /v2/3ds/challenge-notification. The SDK wraps it: status/reason/durationMs are the frame’s own, data is the message."
+        >
+          <div className="rounded-lg bg-black/30 border border-xray-line p-2.5 pop-in">
+            <Json value={challengeFrame} />
+          </div>
+          {completion?.result && (
+            <p className="xray-mono m-0 mt-2 font-mono text-[11.5px] text-emerald-300">
+              {[
+                completion.result,
+                completion.authentication?.status && `authentication ${completion.authentication.status}`,
+                completion.authorization?.status && `authorization ${completion.authorization.status}`,
+                completion.reason,
+              ]
+                .filter(Boolean)
+                .join('  ·  ')}
+            </p>
+          )}
+        </Section>
+      )}
+
+      {confirmedPayment !== undefined && (
+        <Section
+          title="GET /payment/{id}"
+          hint="The payment read back once the challenge reported in — the only state here that was written after the authentication. A real integration still treats the payment.updated webhook as the authority."
+        >
+          <div className="rounded-lg bg-black/30 border border-xray-line p-2.5 pop-in">
+            <Json value={confirmedPayment} />
+          </div>
+        </Section>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Step, StepState } from './steps';
+import type { Step, StepState } from '../steps';
 
 const DOT: Record<StepState, { ring: string; fill: string; glyph: string }> = {
   pending:    { ring: 'border-xray-line',       fill: 'bg-transparent',  glyph: '' },
@@ -14,6 +14,12 @@ const LABEL: Partial<Record<StepState, { text: string; cls: string }>> = {
   unobserved: { text: 'not observable', cls: 'text-amber-300 border-amber-400/40' },
   error:      { text: 'failed',         cls: 'text-red-300 border-red-400/40' },
 };
+
+/** The two arms of the fork, as two metro lines. */
+const BRANCH = {
+  frictionless: { title: 'Frictionless', rail: 'bg-emerald-400', tint: 'border-emerald-400/30' },
+  challenge: { title: 'Challenge', rail: 'bg-indigo-400', tint: 'border-indigo-400/30' },
+} as const;
 
 function evidenceLine(step: Step): string | null {
   if (step.evidence.length === 0) return null;
@@ -31,6 +37,51 @@ function evidenceLine(step: Step): string | null {
 }
 
 export function Timeline({ steps }: { steps: Step[] }) {
+  const trunk = steps.filter(s => !s.branch);
+  const arms = (['frictionless', 'challenge'] as const)
+    .map(branch => ({ branch, steps: steps.filter(s => s.branch === branch) }))
+    .filter(arm => arm.steps.length > 0);
+
+  return (
+    <>
+      <StepList steps={trunk} continues={arms.length > 0} />
+      {arms.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {arms.map(({ branch, steps: armSteps }) => {
+            const off = armSteps.every(s => s.state === 'skipped' || s.state === 'pending');
+            const meta = BRANCH[branch];
+            return (
+              <div
+                key={branch}
+                className={`relative rounded-xl border pl-4 pr-3 pt-2.5 pb-1 ${
+                  off ? 'border-xray-line/50 opacity-50' : `${meta.tint} bg-white/[0.03]`
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className={`absolute left-1.5 top-3 bottom-3 w-[3px] rounded-full ${
+                    off ? 'bg-xray-line' : meta.rail
+                  }`}
+                />
+                <p
+                  className={`m-0 mb-2 text-[10px] font-bold uppercase tracking-[0.14em] ${
+                    off ? 'text-xray-dim' : 'text-white/80'
+                  }`}
+                >
+                  {meta.title}
+                </p>
+                <StepList steps={armSteps} continues={false} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+/** `continues`: the last rail keeps going, into the fork below. */
+function StepList({ steps, continues }: { steps: Step[]; continues: boolean }) {
   return (
     <ol className="list-none m-0 p-0">
       {steps.map((step, i) => {
@@ -38,7 +89,7 @@ export function Timeline({ steps }: { steps: Step[] }) {
         const label = step.state === 'skipped' && step.skipLabel
           ? { text: step.skipLabel, cls: 'text-xray-dim border-xray-line' }
           : LABEL[step.state];
-        const last = i === steps.length - 1;
+        const last = i === steps.length - 1 && !continues;
         const muted = step.state === 'pending' || step.state === 'skipped';
 
         return (
