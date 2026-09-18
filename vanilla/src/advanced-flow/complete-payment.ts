@@ -39,7 +39,7 @@ import { mountDebugPanel } from '../shared/debug-panel';
  *   3. Display the card form              → Secure Fields (browser-side, PCI-safe)
  *   4. Authenticate the card              → 3DS versioning + fingerprint, inside sf.submit()
  *   5. Create a payment                   → POST {proxy}/create_payment
- *   6. Register a token                   → `save_token: true` in step 5
+ *   6. Register a token                   → `saveToken` in step 4 + `save_token` in step 5
  *   7. Follow the redirection             → partner page, see shared/redirection.ts
  */
 
@@ -180,9 +180,11 @@ async function initCardForm() {
 // it reads whichever Secure Fields instance is currently mounted.
 function registerPayHandler() {
   payBtn.addEventListener('click', async () => {
-    // Snapshot the instance and the context: both can be swapped while the
-    // submit is in flight (a 3DS toggle, a solution change).
+    // Snapshot the instance, the context and the consent: all three can be
+    // swapped while the submit is in flight (a 3DS toggle, a solution change,
+    // a second thought about saving the card).
     const handle = sfHandle;
+    const saveToken = saveTokenEl.checked;
     if (!paymentContext || !handle) return;
     payBtn.disabled = true;
     payBtn.label = 'Processing…';
@@ -193,7 +195,11 @@ function registerPayHandler() {
       // your server). The 3DS sequence (step 4) runs inside this same call.
       if (threeDsEl.checked) setStep('step-3ds', 'active');
       const selectedBrand = handle.getSelectedBrand();
+      // `saveToken` is what puts `card.save_token` in the Secure Fields /forms
+      // request: it is the vault half of step 6, and the payment split below is
+      // the other half — both carry the same consent.
       const tokenResult = await handle.sf.submit({
+        saveToken,
         ...(selectedBrand ? { selectedNetwork: selectedBrand } : {}),
       });
       if ('error' in tokenResult && tokenResult.error) {
@@ -216,14 +222,17 @@ function registerPayHandler() {
         tokenResult as SubmitResult;
       showThreeDS(threeDSServerTransID);
 
-      // Step 5 — Create the payment. Step 6 (register a token) is opted into here
-      // via `save_token`: when true, the card is stored to the customer wallet on
-      // a successful authorisation. Always gate this behind explicit consent.
+      // Step 5 — Create the payment. Step 6 (register a token) is opted into on
+      // both calls: `saveToken` on the submit above (→ `card.save_token` in the
+      // Secure Fields /forms request) and `save_token` on the split here, which
+      // stores the card to the customer wallet on a successful authorisation.
+      // One checkbox drives both — always gate this behind explicit consent.
       //
       // The split item is a NewAuthorizationCandidate: amount + partner + method
       // are required, the vault token goes in `vault_form_token`, and
       // `three_ds_authentication_options`, `threeds_server_trans_id` and
-      // `save_token` all live on the item (there is no root-level save_token).
+      // `save_token` all live on the item (the payment body carries no
+      // root-level save_token).
       //
       // 3DS, per the v2 spec: the id minted by the versioning call goes in
       // `threeds_server_trans_id`, and its presence is what triggers the Purse
@@ -255,7 +264,7 @@ function registerPayHandler() {
             three_ds_authentication_options: {
               challenge_indicator: 'NO_CHALLENGE_REQUESTED',
             },
-            save_token: saveTokenEl.checked,
+            save_token: saveToken,
           },
         ],
         browser: browserData(),
