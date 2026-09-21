@@ -124,7 +124,9 @@ export type OrderInfo = {
 export async function fetchOrder(): Promise<OrderInfo> {
   const res = await fetch(`${proxyBase()}/order/`);
   if (!res.ok)
-    throw new Error(`Order fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(
+      `Order fetch failed: ${res.status} ${res.statusText}${await detail(res)}`,
+    );
   const { order } = await res.json();
   const o = order.order;
   const c = o.customer ?? {};
@@ -168,6 +170,21 @@ export async function fetchOrder(): Promise<OrderInfo> {
   };
 }
 
+/**
+ * The proxy reports upstream failures in the response body — an expired OAuth
+ * client secret comes back as a bare 502 with `invalid_client` in the payload.
+ * Without this the demo shows the status code and nothing else, which is not
+ * enough to tell a misconfigured backend from an unreachable one.
+ */
+async function detail(res: Response): Promise<string> {
+  try {
+    const text = (await res.clone().text()).trim();
+    return text ? ` — ${text.slice(0, 300)}` : "";
+  } catch {
+    return "";
+  }
+}
+
 export type CardSolution = { partner: string; method: string };
 
 /**
@@ -186,7 +203,7 @@ export async function fetchEligibleSolutions(
   });
   if (!res.ok)
     throw new Error(
-      `Eligible solutions failed: ${res.status} ${res.statusText}`,
+      `Eligible solutions failed: ${res.status} ${res.statusText}${await detail(res)}`,
     );
 
   const { eligible_solutions = [] } = await res.json();
@@ -212,6 +229,46 @@ export async function createPayment(
     body: JSON.stringify({ ...entityScope(), ...body }),
   });
   return { ok: res.ok, data: await res.json() };
+}
+
+/**
+ * `GET /payment/{id}` → Orchestration `GET /payment/v2/payments/{id}`: what the payment settled
+ * as. Local Alfred only for now (:9001) — a proxy without the route answers 404.
+ */
+export async function fetchPayment(
+  paymentId: string,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const res = await fetch(`${proxyBase()}/payment/${encodeURIComponent(paymentId)}`);
+  const data = await res.json().catch(() => null);
+  return { ok: res.ok, status: res.status, data };
+}
+
+type PaymentStatuses = {
+  authentication?: { status?: string };
+  authorization?: { status?: string };
+};
+
+/** A payment stops moving when the authorization leaves PENDING. */
+const isSettled = (payment: unknown): boolean => {
+  const status = (payment as PaymentStatuses | null)?.authorization?.status;
+  return !!status && status !== 'PENDING';
+};
+
+/** Poll until the authorization settles. Gives up quietly — the webhook is the authority. */
+export async function pollPayment(
+  paymentId: string,
+  { attempts = 8, intervalMs = 1000 }: { attempts?: number; intervalMs?: number } = {},
+): Promise<{ settled: boolean; payment: unknown; polls: number; unsupported?: boolean }> {
+  let payment: unknown;
+  for (let poll = 1; poll <= attempts; poll++) {
+    const { ok, status, data } = await fetchPayment(paymentId);
+    payment = data;
+    // No route on this proxy — retrying 404s would just spend the loop.
+    if (status === 404) return { settled: false, payment: null, polls: poll, unsupported: true };
+    if (ok && isSettled(data)) return { settled: true, payment, polls: poll };
+    if (poll < attempts) await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  return { settled: false, payment, polls: attempts };
 }
 
 /**

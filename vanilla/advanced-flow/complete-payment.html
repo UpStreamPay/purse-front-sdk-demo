@@ -16,7 +16,7 @@
         description="Drive the raw Payment API v2 yourself: <code>eligible-solutions</code> → Secure Fields card form → <code>create_payment</code>. The v2 endpoints are proxied by a merchant backend (they require a server-side bearer token) — set the <strong>Proxy URL</strong> in the config panel."
       ></demo-header>
 
-      <demo-stepper steps="step-eligible:Eligible, step-form:Card form, step-3ds:3DS versioning, step-pay:Create payment, step-redirect:Redirection"></demo-stepper>
+      <demo-stepper steps="step-eligible:Eligible, step-form:Card form, step-3ds:3DS versioning, step-pay:Create payment, step-challenge:3DS challenge, step-confirm:Confirm, step-redirect:Redirection"></demo-stepper>
 
       <demo-notice></demo-notice>
 
@@ -42,16 +42,61 @@
         Run 3DS on submit (<code>threeDS: { enabled: true }</code> — versioning + device fingerprint)
       </label>
 
-      <!-- Steps 2–3 — Secure Fields card form (PCI-safe iframes) -->
-      <sf-card-form fields="pan exp cvv name" brand></sf-card-form>
+      <!-- Steps 2–3 — Secure Fields card form (PCI-safe iframes), with the
+           challenge overlay anchored on top of it (step 6a below). -->
+      <div class="relative">
+        <sf-card-form fields="pan exp cvv name" brand></sf-card-form>
+
+        <!-- Step 6a — the issuer asked for a challenge: the ACS page (the OTP)
+             renders here, over the card form, so the stepper above stays visible.
+             The iframe keeps the size the AReq announced — EMVCo requires the
+             rendered frame to match it — so the panel wraps it rather than
+             resizing it. -->
+        <div
+          id="threeds-challenge-overlay"
+          class="absolute inset-x-0 top-0 z-40 rounded-xl border border-border bg-white p-4 shadow-xl"
+          hidden
+        >
+          <div class="flex items-center gap-3">
+            <div class="text-sm font-semibold text-muted uppercase tracking-wider">3DS challenge</div>
+            <button
+              id="threeds-challenge-close"
+              class="ml-auto text-xs px-3 py-1.5 rounded-lg border border-border bg-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled
+            >
+              Close
+            </button>
+          </div>
+          <p class="text-xs text-muted mt-2">
+            The fingerprint was not enough: <code>authentication.challenge_data</code> came back on the
+            payment, so the cardholder authenticates on the issuer's page below. It ends when the Purse
+            challenge-notification page posts <code>purse:3ds:challenge-completed</code> back into the
+            frame — the payment is settled server-side whatever that says.
+          </p>
+          <!-- The slot the SDK mounts the ACS iframe into. Centred: window size
+               05 fills it, the fixed EMVCo sizes (250x400 … 600x400) do not. -->
+          <div id="threeds-challenge" class="mt-3 flex min-h-[400px] items-start justify-center overflow-auto"></div>
+          <p id="threeds-challenge-status" class="text-xs text-muted mt-3">Waiting for the cardholder…</p>
+        </div>
+      </div>
 
       <!-- Step 4 — 3DS: versioning + device fingerprint, run by Secure Fields
-           inside submit(). Frictionless only — no challenge is handled here. -->
+           inside submit(). If the issuer is not satisfied by the fingerprint,
+           the payment comes back with a challenge (see below). -->
       <div id="threeds-box" class="bg-white border border-border rounded-xl p-5 mt-4" hidden>
         <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">3DS</div>
         <p class="text-xs text-muted">
-          <code>threeDSServerTransID</code>:
+          <code>three_ds_server_trans_id</code>:
           <span id="threeds-trans-id" class="font-mono text-text">—</span>
+        </p>
+        <!-- Filled from the challenge completion message, not from create_payment:
+             that response is written before the cardholder authenticates, so it
+             reads IN_PROGRESS / PENDING however the challenge ends. -->
+        <p class="text-xs text-muted mt-2">
+          <code>authentication.status</code>:
+          <span id="threeds-auth-status" class="font-mono text-text">—</span>
+          · <code>authorization.status</code>:
+          <span id="threeds-authz-status" class="font-mono text-text">—</span>
         </p>
       </div>
 
@@ -65,7 +110,7 @@
 
       <demo-result></demo-result>
 
-      <!-- Step 6 — the payment exists, but the shopper may still owe a redirection -->
+      <!-- Step 6b — no challenge, but the shopper may still owe a redirection -->
       <demo-redirection></demo-redirection>
     </div>
     <script type="module" src="/src/advanced-flow/complete-payment.ts"></script>

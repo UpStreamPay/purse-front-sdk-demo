@@ -22,7 +22,14 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Mirrors the @shared alias in vite.config.ts — the advanced-flow helpers
+       are reused from the vanilla workspace rather than duplicated. */
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../vanilla/src/shared/*"]
+    }
   },
   "include": ["src"]
 }

@@ -7,6 +7,7 @@ export const ENV_KEYS = [
     'VITE_PURSE_API_KEY',
     'VITE_PURSE_ENTITY_ID',
     'VITE_PURSE_PROXY_URL',
+    'VITE_PURSE_API_ORIGIN',
 ] as const;
 
 export type EnvKey = (typeof ENV_KEYS)[number];
@@ -18,6 +19,7 @@ const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_API_KEY: import.meta.env.VITE_PURSE_API_KEY ?? '',
     VITE_PURSE_ENTITY_ID: import.meta.env.VITE_PURSE_ENTITY_ID ?? '',
     VITE_PURSE_PROXY_URL: import.meta.env.VITE_PURSE_PROXY_URL ?? '',
+    VITE_PURSE_API_ORIGIN: import.meta.env.VITE_PURSE_API_ORIGIN ?? '',
 };
 
 export function getEnv(key: EnvKey): string {
@@ -75,6 +77,7 @@ export const DEMO_ENV_KEYS = {
         'VITE_PURSE_API_KEY',
         'VITE_PURSE_PROXY_URL',
         'VITE_PURSE_ENTITY_ID',
+        'VITE_PURSE_API_ORIGIN',
     ],
 } as const satisfies Record<string, readonly EnvKey[]>;
 
@@ -95,4 +98,20 @@ export function getEnvironment(): 'sandbox' | 'production' | undefined {
 // cast the result to the SDK's parameter type (see tokenize.ts).
 export function getSecureFieldsEnvironment(): 'sandbox' | 'production' | 'test' | undefined {
     return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | 'test' | undefined;
+}
+
+/**
+ * Origin allowed to end a 3DS challenge: the gateway's /payment/v2/3ds/challenge-notification
+ * posts the result back. Per-environment default, overridable — a wrong host never settles.
+ */
+export function getApiOrigin(): string {
+    const origins: Record<string, string> = {
+        test: 'https://api.purse-test.com',
+        sandbox: 'https://api.purse-sandbox.com',
+        production: 'https://api.purse.tech',
+    };
+    const environment = (getSecureFieldsEnvironment() ?? '').trim().toLowerCase();
+    // The environment is free text in the debug panel — an unknown one falls back
+    // rather than allowlisting `undefined`, which no message can ever match.
+    return getEnv('VITE_PURSE_API_ORIGIN') || origins[environment] || origins.sandbox;
 }
