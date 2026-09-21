@@ -5,11 +5,20 @@ import './styles.css';
 const TENANT_ID = '__TENANT_ID__';
 const API_KEY   = '__API_KEY__';
 
+// Merchant-side copy — same source of truth as the `errorMessages` passed to `cardNumber` below,
+// so the host page and the field's own in-frame announcement never disagree.
+const CARD_NUMBER_ERRORS: Record<string, string> = {
+  empty: 'Card number is required',
+  length: 'Card number is incomplete',
+  format: 'Card number is invalid',
+};
+
 export async function init() {
   const payBtn   = document.getElementById('pay-btn') as HTMLButtonElement;
   const resultEl = document.getElementById('result')!;
   const noticeEl = document.getElementById('config-notice')!;
   const brandEl  = document.getElementById('brand-pills')!;
+  const panErrorEl = document.getElementById('sf-pan-error')!;
 
   if (!TENANT_ID) {
     noticeEl.classList.remove('hidden');
@@ -27,7 +36,18 @@ export async function init() {
       brands: ['VISA', 'MASTERCARD', 'CARTE_BANCAIRE', 'AMERICAN_EXPRESS'],
       brandSelector: false, // we render brand pills ourselves via the brandDetected event
       fields: {
-        cardNumber: { target: 'sf-pan',  placeholder: '1234 5678 9012 3456' },
+        cardNumber: {
+          target: 'sf-pan',
+          placeholder: '1234 5678 9012 3456',
+          // Announced by the field itself, from inside its cross-origin iframe, where a screen
+          // reader reaching this input can find it via aria-describedby. Our own #sf-pan-error
+          // below renders the same text on the host page — the two are independent.
+          errorMessages: {
+            empty: 'Card number is required',
+            length: 'Card number is incomplete',
+            format: 'Card number is invalid',
+          },
+        },
         expDate:    { target: 'sf-exp',  placeholder: 'MM / YY' },
         cvv:        { target: 'sf-cvv',  placeholder: '123' },
         holderName: { target: 'sf-name', placeholder: 'Name as it appears on card' },
@@ -59,6 +79,15 @@ export async function init() {
       pill.textContent = brand;
       brandEl.appendChild(pill);
     });
+  });
+
+  // 4b – Mirror the card number field's error state on the host page. `blur` fires once the field
+  // has been focused and then left, matching the timing of the field's own in-frame announcement.
+  sf.on('blur', ({ fieldName, error }) => {
+    if (fieldName !== 'cardNumber') return;
+    const message = error && error !== 'none' ? CARD_NUMBER_ERRORS[error] : undefined;
+    panErrorEl.textContent = message ?? '';
+    panErrorEl.classList.toggle('hidden', !message);
   });
 
   // 5 – Render the field iframes into their target containers
