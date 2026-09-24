@@ -9,6 +9,7 @@ const LABELS: Record<EnvKey, string> = {
     VITE_PURSE_ENTITY_ID: 'Entity ID',
     VITE_PURSE_PROXY_URL: 'Proxy URL',
     VITE_PURSE_API_ORIGIN: 'API Origin',
+    VITE_PURSE_HEADLESS_URL: 'Headless URL',
 };
 
 const HINTS: Record<EnvKey, string> = {
@@ -19,6 +20,7 @@ const HINTS: Record<EnvKey, string> = {
     VITE_PURSE_ENTITY_ID: 'scopes the Payment API v2 calls',
     VITE_PURSE_PROXY_URL: 'merchant backend for the v2 endpoints',
     VITE_PURSE_API_ORIGIN: 'origin the 3DS challenge posts back from (per-environment default)',
+    VITE_PURSE_HEADLESS_URL: 'Headless Checkout build (session-flow 3DS)',
 };
 
 function EnvRow({ envKey, onUpdate }: { envKey: EnvKey; onUpdate: () => void }) {

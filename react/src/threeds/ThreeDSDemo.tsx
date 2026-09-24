@@ -8,6 +8,7 @@ import { Fireworks } from './ui/Fireworks';
 import { XRay } from './xray/XRay';
 import { Badge, Toggle } from './ui/controls';
 import { useCheckout } from './checkout/useCheckout';
+import { OneMoreThing } from './session/SessionFlow';
 
 /** The page: the shopper's checkout on the left, the x-ray of it on the right. */
 export function ThreeDSDemo() {
@@ -59,6 +60,8 @@ export function ThreeDSDemo() {
 
         <XRay checkout={checkout} />
       </main>
+
+      <OneMoreThing />
 
       <DebugPanel keys={SHOWCASE_ENV_KEYS} />
     </div>

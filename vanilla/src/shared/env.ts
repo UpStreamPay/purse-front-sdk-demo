@@ -8,6 +8,7 @@ export const ENV_KEYS = [
     'VITE_PURSE_ENTITY_ID',
     'VITE_PURSE_PROXY_URL',
     'VITE_PURSE_API_ORIGIN',
+    'VITE_PURSE_HEADLESS_URL',
 ] as const;
 
 export type EnvKey = (typeof ENV_KEYS)[number];
@@ -20,6 +21,7 @@ const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_ENTITY_ID: import.meta.env.VITE_PURSE_ENTITY_ID ?? '',
     VITE_PURSE_PROXY_URL: import.meta.env.VITE_PURSE_PROXY_URL ?? '',
     VITE_PURSE_API_ORIGIN: import.meta.env.VITE_PURSE_API_ORIGIN ?? '',
+    VITE_PURSE_HEADLESS_URL: import.meta.env.VITE_PURSE_HEADLESS_URL ?? '',
 };
 
 export function getEnv(key: EnvKey): string {

@@ -7,6 +7,7 @@ probe.install();
 import { createRoot } from 'react-dom/client';
 import './threeds.css';
 import { ThreeDSDemo } from './ThreeDSDemo';
+import { isSessionFlow, SessionFlowDemo } from './session/SessionFlow';
 
 // There is no test runner in this repo, so the redactor and the
 // threeDSMethodData decoder check themselves on every dev load. A broken
@@ -22,4 +23,6 @@ if (import.meta.env.DEV) {
 // the order fetch and the Secure Fields boot would each run twice and the trace
 // — whose entire job is to be a legible record of what the page did — would show
 // every request duplicated.
-createRoot(document.getElementById('root')!).render(<ThreeDSDemo />);
+// `?flow=session` is the "one more thing" page: a fresh load, so the advanced-flow
+// checkout never boots next to the widget (see session/SessionFlow.tsx).
+createRoot(document.getElementById('root')!).render(isSessionFlow() ? <SessionFlowDemo /> : <ThreeDSDemo />);
