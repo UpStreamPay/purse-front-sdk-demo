@@ -4,6 +4,7 @@ import { entityId, pollPayment, proxyBase } from '@shared/proxy';
 import { getEnv } from '@shared/env';
 import { Badge, Field } from '../ui/controls';
 import { DebugPanel } from '../../shared/DebugPanel';
+import { Fireworks } from '../ui/Fireworks';
 import { SHOWCASE_ENV_KEYS } from '../config';
 
 /**
@@ -197,6 +198,8 @@ export function SessionFlowDemo() {
       // On a Purse 3DS session this is the whole integration: the widget runs the
       // challenge in its own dialog, then redirects to session.success / failure.
       await checkout.current.submitPayment();
+      // Still here: the widget did not navigate, so the button must not stay stuck.
+      setPaying(false);
     } catch (e) {
       setError(String(e));
       setPaying(false);
@@ -207,6 +210,7 @@ export function SessionFlowDemo() {
 
   return (
     <div className="min-h-screen">
+      <Fireworks go={authorization === 'AUTHORIZED'} />
       <header className="border-b border-border bg-surface">
         <div className="mx-auto max-w-[1400px] px-6 py-4 flex items-center gap-4 flex-wrap">
           <div className="flex-1 min-w-[280px]">
