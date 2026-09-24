@@ -17,6 +17,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Sandbox defaults baked into the showcase so every demo runs without a
+    # debug-panel override. Tenant and API key come from repository variables.
+    env:
+      VITE_PURSE_PROXY_URL: https://usp-widget-merchant.purse-sandbox.com
+      VITE_PURSE_SECUREFIELDS_TENANT_ID: ${{ vars.VITE_PURSE_SECUREFIELDS_TENANT_ID }}
+      VITE_PURSE_API_KEY: ${{ vars.VITE_PURSE_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
