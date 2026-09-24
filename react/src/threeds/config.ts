@@ -29,5 +29,5 @@ export const SHOWCASE_ENV_KEYS = [
   'VITE_PURSE_PROXY_URL',
   'VITE_PURSE_ENTITY_ID',
   'VITE_PURSE_API_ORIGIN',
-  'VITE_PURSE_HEADLESS_URL',
+  'VITE_PURSE_DROPIN_URL',
 ] as const satisfies readonly EnvKey[];
