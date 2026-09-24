@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Headless Checkout — Express Checkout</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div class="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <demo-header
+        badge="Headless"
+        variant="violet"
+        heading="Express Checkout — One-click"
+        source="headless-checkout/express-checkout.ts"
+        description="Product page → <em>Acheter maintenant</em> → express sheet. With a saved token in the session, <code>paymentTokens</code> gives a one-click pay button; without one, the sheet falls back to <code>getHostedFields()</code> on the credit card method."
+      ></demo-header>
+
+      <demo-notice></demo-notice>
+
+      <!-- Demo control: force the no-token path even if the session has tokens -->
+      <label class="flex items-center gap-2 text-sm text-muted mb-4 cursor-pointer select-none">
+        <input type="checkbox" id="force-no-token" class="accent-accent" />
+        Ignore saved tokens (show the new-card path)
+        <span id="token-status" class="ml-auto text-xs"></span>
+      </label>
+
+      <!-- ── Phone frame ─────────────────────────────────────────── -->
+      <div class="relative mx-auto w-full max-w-[390px] h-[780px] bg-white rounded-[20px] overflow-hidden shadow-[0_24px_70px_rgba(0,0,0,.18)] border border-border flex flex-col">
+
+        <!-- Shop bar -->
+        <div class="h-[52px] shrink-0 flex items-center justify-between px-4 border-b border-[#E4E4E4]">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-[5px] bg-[#DB4444] flex items-center justify-center text-[10px] font-bold text-white">MS</div>
+            <div class="text-lg tracking-tight text-[#141413]">My Shop</div>
+          </div>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#141413" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.2l2.3 11.2a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.3L21 7.5H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg>
+        </div>
+
+        <!-- Product page -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="relative h-[300px] bg-[#F5F5F3]">
+            <img src="../express-checkout/product-chair.jpg" alt="Chaise en bois - Laurna" class="w-full h-full object-cover" />
+            <span class="absolute left-4 bottom-4 px-3 py-1 rounded-full bg-white/90 text-xs text-[#141413]">En stock</span>
+          </div>
+          <div class="px-4 pt-5 pb-8">
+            <div class="text-2xl tracking-tight text-[#141413]">Chaise en bois - Laurna</div>
+            <div class="text-xl text-[#141413] mt-2">79,99 €</div>
+            <div class="h-px bg-[#E4E4E4] my-4"></div>
+            <p class="text-sm leading-[21px] text-[#6B6B6B]">
+              Chaise en bois massif au design minimaliste et élégant. Parfaite pour votre salle à manger ou votre bureau.
+            </p>
+            <button id="buy-now" disabled class="mt-6 w-full h-12 rounded bg-[#DB4444] text-white text-base cursor-pointer hover:brightness-95 disabled:opacity-50 disabled:cursor-wait">
+              Acheter maintenant
+            </button>
+          </div>
+        </div>
+
+        <!-- Backdrop -->
+        <div id="backdrop" hidden class="absolute inset-0 z-[8] bg-black/40"></div>
+
+        <!-- ── Express sheet ───────────────────────────────────────── -->
+        <div id="sheet-express" hidden class="absolute inset-x-0 bottom-0 z-10 max-h-[95%] bg-white rounded-t-[38px] shadow-[0_15px_75px_rgba(0,0,0,.18)] flex flex-col">
+          <div class="shrink-0 flex flex-col items-center pb-2.5">
+            <div class="w-9 h-[5px] rounded-full bg-[#CCC] mt-[5px] mb-[6px]"></div>
+            <div class="relative h-10 w-full flex items-center justify-center">
+              <div class="text-xl font-semibold text-[#101828]">Achat express</div>
+              <button data-close class="absolute right-4 w-10 h-10 flex items-center justify-center cursor-pointer" aria-label="Fermer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141413" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto flex flex-col gap-6 p-6">
+            <!-- Customer info (mock — in a real integration this comes from your account system) -->
+            <div class="flex flex-col gap-4">
+              <div class="text-base font-medium text-[#364153]">Mes informations</div>
+              <div class="rounded p-4 shadow-[inset_0_0_0_1px_#E5E7EB] text-sm">
+                <div class="font-medium text-[#101828]">Camille Lourme</div>
+                <div class="text-[#6B6B6B]">0601020304</div>
+                <div class="text-[#6B6B6B]">c.lourme@gmail.com</div>
+              </div>
+            </div>
+
+            <div class="h-px bg-[#E5E7EB]"></div>
+
+            <!-- Delivery (cosmetic: the charged amount is fixed by the payment session) -->
+            <div class="flex flex-col gap-4">
+              <div class="text-base font-medium text-[#364153]">Mode de livraison</div>
+              <label class="ship-option">
+                <input type="radio" name="ship" value="home" checked class="sr-only" />
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-[#101828]">Livraison à domicile</div>
+                  <div class="text-xs text-[#6B6B6B]">Sous 3-5 jours ouvrés · 1 rue de la Liberté, 75011 Paris</div>
+                </div>
+              </label>
+              <label class="ship-option">
+                <input type="radio" name="ship" value="store" class="sr-only" />
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-[#101828]">Retrait en magasin</div>
+                  <div class="text-xs text-[#6B6B6B]">Disponible sous 2h</div>
+                </div>
+              </label>
+            </div>
+
+            <div class="h-px bg-[#E5E7EB]"></div>
+
+            <!-- Payment -->
+            <div class="flex flex-col gap-4">
+              <div class="text-base font-medium text-[#364153]">Mode de paiement</div>
+              <div class="flex justify-between items-center p-3 rounded bg-[#F9FAFB]">
+                <div class="text-sm text-[#364153]">Total</div>
+                <div class="text-xl font-semibold text-[#101828]" data-total></div>
+              </div>
+
+              <!-- Token path: CVV (if the partner requires it) mounts here -->
+              <div id="token-element"></div>
+
+              <button id="express-pay" class="h-12 rounded bg-[#DB4444] text-white flex items-center px-4 cursor-pointer hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="express-pay-label" class="flex-1 text-left text-base"></span>
+                <span id="express-pay-token" hidden class="flex items-center gap-2">
+                  <img id="token-icon" alt="" class="w-9 h-6 rounded-sm bg-white object-contain" />
+                  <span id="token-pan" class="text-xs"></span>
+                </span>
+              </button>
+
+              <button id="other-method" hidden class="text-sm text-[#101828] underline underline-offset-[3px] cursor-pointer">
+                Utiliser un autre moyen de paiement
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Card sheet ──────────────────────────────────────────── -->
+        <div id="sheet-card" hidden class="absolute inset-x-0 bottom-0 z-[11] max-h-[95%] bg-white rounded-t-[38px] shadow-[0_15px_75px_rgba(0,0,0,.18)] flex flex-col">
+          <div class="shrink-0 flex flex-col items-center pb-2.5">
+            <div class="w-9 h-[5px] rounded-full bg-[#CCC] mt-[5px] mb-[6px]"></div>
+            <div class="relative h-10 w-full flex items-center justify-between px-4">
+              <button id="card-back" class="w-10 h-10 flex items-center justify-center cursor-pointer" aria-label="Retour">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141413" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+              </button>
+              <div class="absolute inset-x-0 text-center text-xl font-semibold text-[#101828] pointer-events-none">Ajouter ma carte</div>
+              <button data-close class="w-10 h-10 flex items-center justify-center cursor-pointer" aria-label="Fermer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141413" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto flex flex-col gap-4 p-6">
+            <div class="xc-field">
+              <label>Numéro de carte</label>
+              <div class="hf-field-wrap" id="xc-pan"></div>
+            </div>
+            <div class="flex gap-3">
+              <div class="xc-field flex-1 min-w-0">
+                <label>Date d'expiration</label>
+                <div class="hf-field-wrap" id="xc-exp"></div>
+              </div>
+              <div class="xc-field flex-1 min-w-0">
+                <label>CVV</label>
+                <div class="hf-field-wrap" id="xc-cvv"></div>
+              </div>
+            </div>
+            <div class="xc-field">
+              <label>Nom sur la carte</label>
+              <div class="hf-field-wrap" id="xc-name"></div>
+            </div>
+
+            <label id="save-card-box" hidden class="rounded bg-[#F3F4F6] p-4 flex items-center gap-2 text-sm text-[#101828] cursor-pointer">
+              <input type="checkbox" id="save-card" class="accent-[#DB4444]" />
+              Enregistrer ma carte bancaire
+            </label>
+
+            <button id="card-pay" disabled class="h-12 rounded bg-[#DB4444] text-white text-base cursor-pointer hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed">
+              Payer <span data-total></span>
+            </button>
+            <div class="flex items-center justify-center gap-2 text-sm text-[#364153]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#364153" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="15" height="10" x="4.5" y="11" rx="2.2"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg>
+              Paiement sécurisé
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Busy overlay ────────────────────────────────────────── -->
+        <div id="busy" hidden class="absolute inset-0 z-[14] bg-white/95 flex flex-col items-center justify-center gap-4">
+          <div class="w-9 h-9 rounded-full border-[2.5px] border-[#E5E7EB] border-t-[#DB4444] animate-spin"></div>
+          <div class="text-sm text-[#6A7282]">Paiement en cours…</div>
+        </div>
+
+        <!-- ── Confirmation ────────────────────────────────────────── -->
+        <div id="done" hidden class="absolute inset-0 z-[15] bg-white flex flex-col items-center justify-center px-6 text-center">
+          <div class="w-16 h-16 rounded-full bg-[#DB4444] flex items-center justify-center">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="text-2xl tracking-tight text-[#141413] mt-5">Commande confirmée !</div>
+          <div class="text-sm text-[#364153] mt-3">Payé <span data-total></span> · <span id="done-method"></span></div>
+          <button id="back-home" class="mt-8 w-full h-12 rounded bg-[#DB4444] text-white cursor-pointer hover:brightness-95">Retour à l'accueil</button>
+        </div>
+      </div>
+
+      <demo-result></demo-result>
+    </div>
+    <script type="module" src="/src/headless-checkout/express-checkout.ts"></script>
+  </body>
+</html>

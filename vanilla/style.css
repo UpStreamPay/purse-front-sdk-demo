@@ -134,3 +134,28 @@
 /* ── Dropin container ────────────────────────────────────────── */
 
 #dropin-container { min-height: 200px; }
+
+/* ── Express checkout sheet ──────────────────────────────────── */
+
+.ship-option {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px #E5E7EB;
+  transition: all .15s ease;
+}
+.ship-option:has(input:checked) {
+  background: rgba(219,68,68,0.05);
+  box-shadow: inset 0 0 0 1.5px #DB4444;
+}
+
+.xc-field { display: flex; flex-direction: column; gap: 4px; }
+.xc-field label { font-size: 14px; line-height: 20px; color: #364153; }
+.xc-field .hf-field-wrap {
+  height: 48px;
+  background: #fff;
+  border-color: #99A1AF;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
