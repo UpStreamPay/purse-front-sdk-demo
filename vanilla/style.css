@@ -346,10 +346,29 @@
   transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
 }
 .xc-collapse > * { overflow: hidden; min-height: 0; }
+/* Scrolled into view when revealed — keep it clear of the sheet's bottom edge. */
+.xc-collapse { scroll-margin-bottom: 24px; }
 .xc-collapse.is-open {
   grid-template-rows: 1fr;
   opacity: 1;
   margin-bottom: 0;
+}
+
+/* "or pay with" — a label between two hairlines. */
+.xc-separator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--xc-muted-2);
+}
+.xc-separator::before,
+.xc-separator::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--xc-hairline);
 }
 
 .xc-field { display: flex; flex-direction: column; gap: 4px; }

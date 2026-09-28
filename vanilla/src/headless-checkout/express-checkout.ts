@@ -14,8 +14,8 @@ import {mountDebugPanel} from '../shared/debug-panel';
 //     "Payer •••• 4242" button. If the partner needs no CVV, isPaymentFulfilled
 //     is true right away and the payment is one tap; otherwise the first tap
 //     reveals the token's CVV field right above the button.
-//   • No token (or "Ignore saved tokens" checked), or "use another payment
-//     method" → the same sheet continues to a card step built with
+//   • No token (or "Ignore saved tokens" checked), or "use another card"
+//     → the same sheet continues to a card step built with
 //     getHostedFields() on the credit card method, with an optional
 //     "save my card" (register) checkbox.
 //
@@ -37,6 +37,7 @@ const saveCard = $('save-card') as HTMLInputElement;
 let checkout: HeadlessCheckout.HeadlessCheckout | null = null;
 let token: Token | null = null;
 let cardMethod: CardMethod | null = null;
+let walletMethods: CardMethod[] = [];
 let activeElement: ActiveElement | null = null;
 let fulfilled = false;
 
@@ -102,7 +103,72 @@ let cvvRevealed = false;
 
 function revealCvv(open: boolean) {
     cvvRevealed = open;
-    $('token-cvv-field').classList.toggle('is-open', open);
+    const field = $('token-cvv-field');
+    field.classList.toggle('is-open', open);
+    if (open) {
+        // The field sits below the button and may open under the sheet's fold:
+        // bring it into view once it has expanded.
+        // (Opacity finishes first; wait for the height, or the scroll falls short.)
+        const onExpanded = (e: TransitionEvent) => {
+            if (e.propertyName !== 'grid-template-rows') {
+                return;
+            }
+            field.removeEventListener('transitionend', onExpanded);
+            field.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+        };
+        field.addEventListener('transitionend', onExpanded);
+    }
+}
+
+// ── Wallets (xPay) ───────────────────────────────────────────────────────────
+// Rendered under the pay button when the session offers them. The SDK owns
+// their whole flow: on approval the element fires `validationRequested`, and
+// the SDK itself sets that method as the primary source and submits.
+type Wallet = {method: string; partner?: string; slot: string; popupOnly?: boolean};
+const WALLETS: Wallet[] = [
+    {method: 'googlepay', slot: 'xpay-googlepay'},
+    {method: 'applepay', slot: 'xpay-applepay'},
+    // PayPal is the `wallet` method of the `paypal` partner. It also exists as
+    // a full-page redirection; only the popup mode is a wallet button.
+    {partner: 'paypal', method: 'wallet', slot: 'xpay-paypal', popupOnly: true},
+];
+
+const isWallet = (m: CardMethod, w: Wallet) => m.method === w.method && (!w.partner || m.partner === w.partner);
+
+const XPAY_BUTTONS: HeadlessCheckout.PaymentElementOptions['xPayButton'] = {
+    google: {buttonType: 'pay', buttonColor: 'black', buttonRadius: 4, buttonSizeMode: 'fill', height: 48},
+    apple: {type: 'plain', buttonstyle: 'black', borderRadius: '4px', width: '100%', height: '48px', locale: localeTag},
+    paypal: {layout: 'horizontal', color: 'gold', shape: 'rect', label: 'pay', height: 48, disableMaxWidth: true},
+};
+
+let walletElements: HeadlessCheckout.PurseHeadlessCheckoutPaymentElement[] = [];
+
+function unmountWallets() {
+    walletElements.forEach(el => el.remove());
+    walletElements = [];
+    show('xpay-block', false);
+    WALLETS.forEach(w => show(w.slot, false));
+}
+
+function mountWallets() {
+    unmountWallets();
+    for (const wallet of WALLETS) {
+        const method = walletMethods.find(m => isWallet(m, wallet));
+        if (!method || (wallet.popupOnly && method.integrationType !== 'popup')) {
+            continue;
+        }
+        const el = method.getPaymentElement({xPayButton: XPAY_BUTTONS, locale: localeTag});
+        // A wallet the browser can't run (Apple Pay outside Safari…) never gets ready.
+        el.on('ready', () => {
+            show(wallet.slot, true);
+            show('xpay-block', true);
+        });
+        el.on('fatalError', () => show(wallet.slot, false));
+        el.on('validationRequested', () => show('busy', true));
+        el.on('partnerError', () => show('busy', false));
+        el.appendTo($(wallet.slot));
+        walletElements.push(el);
+    }
 }
 
 // A bare hosted-field iframe, themed like the card step — getPaymentElement()'s
@@ -202,6 +268,7 @@ function openExpress() {
     } else {
         $('express-pay-label').textContent = t('shop.payByCard');
     }
+    mountWallets();
     refreshPayButtons();
 }
 
@@ -211,6 +278,7 @@ function openCard() {
     }
     showStep('card');
     unmount();
+    unmountWallets();
 
     const hf = cardMethod.getHostedFields({
         fields: {
@@ -232,6 +300,7 @@ function openCard() {
 
 function closeAll() {
     unmount();
+    unmountWallets();
     ['backdrop', 'sheet', 'busy', 'done'].forEach(id => show(id, false));
 }
 
@@ -366,8 +435,10 @@ async function main() {
     });
 
     checkout.paymentMethods.subscribe(methods => {
-        cardMethod = (methods as HeadlessCheckout.PurseHeadlessCheckoutPaymentMethod[])
-            .find((m): m is CardMethod => m.method === 'creditcard' && !m.isSecondary) ?? null;
+        const primaries = (methods as HeadlessCheckout.PurseHeadlessCheckoutPaymentMethod[])
+            .filter((m): m is CardMethod => !m.isSecondary);
+        cardMethod = primaries.find(m => m.method === 'creditcard') ?? null;
+        walletMethods = primaries.filter(m => WALLETS.some(w => isWallet(m, w)));
         methodsReady = true;
         maybeEnableBuyNow();
     });

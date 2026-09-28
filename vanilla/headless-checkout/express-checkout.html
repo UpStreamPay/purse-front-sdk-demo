@@ -124,15 +124,6 @@
                 <div class="text-xl font-semibold" style="color: var(--xc-ink-2)" data-total></div>
               </div>
 
-              <!-- Token path: the CVV hosted field is mounted collapsed and only
-                   revealed by a first tap on "Payer" when the token needs it. -->
-              <div id="token-cvv-field" class="xc-collapse">
-                <div class="xc-field">
-                  <label><span data-i18n="shop.cvvFor"></span> <span id="token-cvv-card"></span></label>
-                  <div class="hf-field-wrap" id="token-cvv"></div>
-                </div>
-              </div>
-
               <button id="express-pay" class="xc-btn-primary w-full justify-between px-4">
                 <span id="express-pay-label"></span>
                 <span id="express-pay-token" hidden class="xc-badge">
@@ -140,6 +131,26 @@
                   <span id="token-pan" class="text-xs"></span>
                 </span>
               </button>
+
+              <!-- Token path: the CVV hosted field is mounted collapsed, below the
+                   button, and only revealed (and scrolled to) by a first tap on
+                   "Payer" when the token needs it. -->
+              <div id="token-cvv-field" class="xc-collapse">
+                <div class="xc-field">
+                  <label><span data-i18n="shop.cvvFor"></span> <span id="token-cvv-card"></span></label>
+                  <div class="hf-field-wrap" id="token-cvv"></div>
+                </div>
+              </div>
+
+              <!-- Wallets the session offers (Google Pay, Apple Pay, PayPal in popup
+                   mode). Each slot appears once its button is ready; the block and
+                   its separator only when at least one is. -->
+              <div id="xpay-block" hidden class="flex flex-col gap-3">
+                <div class="xc-separator" data-i18n="shop.orPayWith"></div>
+                <div id="xpay-googlepay" hidden></div>
+                <div id="xpay-applepay" hidden></div>
+                <div id="xpay-paypal" hidden></div>
+              </div>
 
               <button id="other-method" hidden class="xc-link mx-auto" data-i18n="shop.otherMethod"></button>
             </div>
