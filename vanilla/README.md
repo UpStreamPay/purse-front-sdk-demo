@@ -21,10 +21,10 @@ npm run dev
 
 | Variable | Required by | Description |
 |---|---|---|
-| `VITE_PURSE_SESSION_JSON` | Drop-in, Headless checkout | Base64 session token from your backend |
+| `VITE_PURSE_SESSION_JSON` | Drop-in, Headless checkout | Static base64 session — wins over `VITE_PURSE_PROXY_URL` when set |
 | `VITE_PURSE_TENANT_ID` | Secure Fields | Tenant identifier |
 | `VITE_PURSE_API_KEY` | Secure Fields | API key for Secure Fields |
-| `VITE_PURSE_PROXY_URL` | Advanced Flow | Merchant backend proxying the Payment API v2 endpoints |
+| `VITE_PURSE_PROXY_URL` | Drop-in, Headless checkout, Advanced Flow | Merchant backend (Alfred). Creates a fresh session per page load (`/order/` → `/orchestration_session/`) and proxies the Payment API v2 endpoints |
 | `VITE_PURSE_ENVIRONMENT` | All | `sandbox` (default) or `production` |
 
 In production, replace `getSession()` in each recipe with a fetch to your backend API that creates and returns a payment session.
@@ -44,6 +44,7 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 | `/headless-checkout/render-methods.html` | `src/headless-checkout/render-methods.ts` | Lists all payment methods from the session. Clicking one mounts a hosted form via `getPaymentElement()`. |
 | `/headless-checkout/hosted-form.html` | `src/headless-checkout/hosted-form.ts` | Single-iframe form via `getPaymentElement(PaymentElementOptions)` with full label/error/theme customisation. |
 | `/headless-checkout/hosted-fields.html` | `src/headless-checkout/hosted-fields.ts` | Isolated per-field iframes via `getHostedFields()`. Switch between grid, single-line, and card-shaped layouts — same iframes reflow via CSS. Includes brand detection and co-brand selection. |
+| `/headless-checkout/express-checkout.html` | `src/headless-checkout/express-checkout.ts` | One-click "Buy now" from a product page into an express bottom sheet. Pays with the session's saved card (`paymentTokens`) in one tap, or falls back to a card sheet built with `getHostedFields()` and an optional save-card (`register`) checkbox. |
 
 ### Secure Fields
 
@@ -59,5 +60,5 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 ## Shared utilities
 
-- `src/shared/session.ts` — reads `VITE_PURSE_SESSION_JSON`, normalises base64 padding
+- `src/shared/session.ts` — a pasted `VITE_PURSE_SESSION_JSON` wins (normalises base64 padding), else creates a session through the proxy
 - `src/shared/ui.ts` — `$()` helper, `setStep()`, `showNotice()`, `showResult()`

@@ -134,3 +134,207 @@
 /* ── Dropin container ────────────────────────────────────────── */
 
 #dropin-container { min-height: 200px; }
+
+/* ── Express checkout phone mock ─────────────────────────────────
+ *
+ * The mock reproduces one merchant's storefront theme, so its colors are
+ * scoped as CSS custom properties on .xc-phone rather than repeated as
+ * one-off hex values — swap them once here to theme the whole mock.
+ * (The demo's own chrome — header, stepper, debug panel — stays on the
+ * app's --color-accent, same as every other page.)
+ */
+
+.xc-phone {
+  --xc-accent: #db4444;
+  --xc-accent-soft: rgba(219, 68, 68, 0.08);
+  --xc-ink: #141413;
+  --xc-ink-2: #101828;
+  --xc-muted: #6b6b6b;
+  --xc-muted-2: #6a7282;
+  --xc-hairline: #e5e7eb;
+
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  height: 780px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  color: var(--xc-ink);
+}
+
+.xc-shopbar {
+  flex: 0 0 auto;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 0.5px solid var(--xc-hairline);
+}
+
+.xc-divider {
+  height: 1px;
+  background: var(--xc-hairline);
+}
+
+.xc-info-card {
+  border-radius: 4px;
+  padding: 16px;
+  font-size: 14px;
+  box-shadow: inset 0 0 0 1px var(--xc-hairline);
+}
+.xc-info-card .xc-name { font-weight: 500; color: var(--xc-ink-2); }
+.xc-info-card .xc-meta { color: var(--xc-muted); }
+
+.xc-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 4px;
+  background: #f9fafb;
+}
+
+.xc-btn-primary {
+  height: 48px;
+  border-radius: 4px;
+  border: 0;
+  background: var(--xc-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  transition: filter 0.15s ease, transform 0.12s ease;
+}
+.xc-btn-primary:hover:not(:disabled) { filter: brightness(0.93); }
+.xc-btn-primary:active:not(:disabled) { transform: scale(0.995); }
+.xc-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.xc-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.xc-badge img {
+  width: 36px;
+  height: 24px;
+  border-radius: 2px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.xc-link {
+  font: inherit;
+  font-size: 14px;
+  color: var(--xc-ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.xc-icon-btn {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--xc-ink);
+}
+
+/* Bottom sheet — shared by the express and card panels. */
+.xc-sheet {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 10;
+  max-height: 95%;
+  background: #fff;
+  border-radius: 38px 38px 0 0;
+  box-shadow: 0 15px 75px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+.xc-sheet-handle {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px;
+}
+.xc-sheet-handle span {
+  width: 36px;
+  height: 5px;
+  border-radius: 100px;
+  background: #ccc;
+}
+.xc-sheet-header {
+  position: relative;
+  height: 40px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px 10px;
+}
+.xc-sheet-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--xc-ink-2);
+}
+.xc-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+.xc-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.ship-option {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--xc-hairline);
+  transition: all 0.15s ease;
+}
+.ship-option:has(input:checked) {
+  background: var(--xc-accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--xc-accent);
+}
+
+.xc-field { display: flex; flex-direction: column; gap: 4px; }
+.xc-field label { font-size: 14px; line-height: 20px; color: #364153; }
+.xc-field .hf-field-wrap {
+  height: 48px;
+  background: #fff;
+  border-color: #99a1af;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}

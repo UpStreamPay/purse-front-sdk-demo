@@ -6,6 +6,7 @@ export default defineConfig({
   base: process.env.VITE_BASE_URL ?? '/',
   plugins: [tailwindcss()],
   envDir: '../',
+  server: { port: Number(process.env.PORT) || 5173 },
   build: {
     rollupOptions: {
       input: {
@@ -14,6 +15,7 @@ export default defineConfig({
         'headless-render-methods': resolve(__dirname, 'headless-checkout/render-methods.html'),
         'headless-hosted-form': resolve(__dirname, 'headless-checkout/hosted-form.html'),
         'headless-hosted-fields': resolve(__dirname, 'headless-checkout/hosted-fields.html'),
+        'headless-express-checkout': resolve(__dirname, 'headless-checkout/express-checkout.html'),
         'securefields-tokenize': resolve(__dirname, 'securefields/tokenize.html'),
         'advanced-complete-payment': resolve(__dirname, 'advanced-flow/complete-payment.html'),
         'advanced-token-payment': resolve(__dirname, 'advanced-flow/token-payment.html'),

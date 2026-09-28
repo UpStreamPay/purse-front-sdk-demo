@@ -20,13 +20,29 @@ const BUILD_DEFAULTS: Record<EnvKey, string> = {
     VITE_PURSE_PROXY_URL: import.meta.env.VITE_PURSE_PROXY_URL ?? '',
 };
 
+// Alfred's deployed instances, used when no proxy is configured. Production has
+// none, so it stays empty there rather than pointing at a non-prod backend.
+const ALFRED_URLS: Partial<Record<string, string>> = {
+    sandbox: 'https://usp-widget-merchant.purse-sandbox.com',
+    test: 'https://usp-widget-merchant.purse-test.com',
+};
+
+// The proxy follows the environment, so switching it in the debug panel also
+// switches Alfred.
+function defaultFor(key: EnvKey): string {
+    if (key === 'VITE_PURSE_PROXY_URL' && !BUILD_DEFAULTS[key]) {
+        return ALFRED_URLS[getEnv('VITE_PURSE_ENVIRONMENT')] ?? '';
+    }
+    return BUILD_DEFAULTS[key];
+}
+
 export function getEnv(key: EnvKey): string {
-    return localStorage.getItem(LS_PREFIX + key) ?? BUILD_DEFAULTS[key];
+    return localStorage.getItem(LS_PREFIX + key) ?? defaultFor(key);
 }
 
 export function setEnv(key: EnvKey, value: string): void {
     const trimmed = value.trim();
-    if (!trimmed || trimmed === BUILD_DEFAULTS[key]) {
+    if (!trimmed || trimmed === defaultFor(key)) {
         localStorage.removeItem(LS_PREFIX + key);
     } else {
         localStorage.setItem(LS_PREFIX + key, trimmed);
@@ -57,11 +73,11 @@ export function resetForKeys(keys: readonly EnvKey[]): void {
  */
 export const DEMO_ENV_KEYS = {
     // Drop-in and Headless Checkout are driven by a payment session — pasted,
-    // or created through the merchant backend (Alfred).
+    // or created through the merchant backend (Alfred) when none is.
     session: [
         'VITE_PURSE_ENVIRONMENT',
-        'VITE_PURSE_SESSION_JSON',
         'VITE_PURSE_PROXY_URL',
+        'VITE_PURSE_SESSION_JSON',
     ],
     // Secure Fields tokenisation — tenant + api key, no session.
     secureFields: [
@@ -85,11 +101,19 @@ export function isOverridden(key: EnvKey): boolean {
 }
 
 export function getBuildDefault(key: EnvKey): string {
-    return BUILD_DEFAULTS[key];
+    return defaultFor(key);
 }
 
-export function getEnvironment(): 'sandbox' | 'production' | undefined {
-    return getEnv('VITE_PURSE_ENVIRONMENT') as 'sandbox' | 'production' | undefined;
+// Headless and Drop-in only ship sandbox + production CDNs. Any other value
+// ('test', which only Secure Fields has, or a typo) would make the loader
+// inject <script src="undefined">, so fall back to sandbox instead.
+export function getEnvironment(): 'sandbox' | 'production' {
+    const env = getEnv('VITE_PURSE_ENVIRONMENT');
+    if (env === 'sandbox' || env === 'production') {
+        return env;
+    }
+    console.warn(`VITE_PURSE_ENVIRONMENT="${env}" has no Headless/Drop-in CDN — using sandbox.`);
+    return 'sandbox';
 }
 
 // Secure Fields additionally supports a 'test' environment. The SDK's public

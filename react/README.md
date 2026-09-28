@@ -27,9 +27,9 @@ npm run dev
 
 ## What's in here
 
-Single-page app with one demo:
+Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`); each demo lives in its own folder with an `index.html` registered in `vite.config.ts`.
 
-**Secure Fields — tokenization**
+**Secure Fields — tokenization** (`/securefields/`)
 - Mounts isolated card-field iframes via `getSecureFields()` from `@purse-eu/web-sdk`
 - Toggle between standalone brand selector and embedded brand selector (co-brand support)
 - On submit, returns a `vault_form_token` you pass to your backend
@@ -39,6 +39,8 @@ Single-page app with one demo:
 
 | File | Description |
 |---|---|
+| `src/Landing.tsx` | Landing page — add an entry to `DEMOS` for each new demo |
+| `src/securefields/SecureFieldsPage.tsx` | Secure Fields page — brand-selector toggle + form |
 | `src/securefields/PaymentForm.tsx` | Main form — mounts Secure Fields, handles submit |
 | `src/securefields/BrandSelector.tsx` | Co-brand selector component |
 | `src/securefields/TokenizationResultDisplay.tsx` | Displays the returned token |
