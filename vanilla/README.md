@@ -44,7 +44,7 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 | `/headless-checkout/render-methods.html` | `src/headless-checkout/render-methods.ts` | Lists all payment methods from the session. Clicking one mounts a hosted form via `getPaymentElement()`. |
 | `/headless-checkout/hosted-form.html` | `src/headless-checkout/hosted-form.ts` | Single-iframe form via `getPaymentElement(PaymentElementOptions)` with full label/error/theme customisation. |
 | `/headless-checkout/hosted-fields.html` | `src/headless-checkout/hosted-fields.ts` | Isolated per-field iframes via `getHostedFields()`. Switch between grid, single-line, and card-shaped layouts — same iframes reflow via CSS. Includes brand detection and co-brand selection. |
-| `/headless-checkout/express-checkout.html` | `src/headless-checkout/express-checkout.ts` | One-click "Buy now" from a product page into an express bottom sheet. Pays with the session's saved card (`paymentTokens`) in one tap, or falls back to a card sheet built with `getHostedFields()` and an optional save-card (`register`) checkbox. |
+| `/headless-checkout/express-checkout.html` | `src/headless-checkout/express-checkout.ts` | One-click "Buy now" from a product page into an express bottom sheet. Pays with the session's saved card (`paymentTokens`) in one tap, or continues, inside the same sheet, to a card step built with `getHostedFields()` and an optional save-card (`register`) checkbox. |
 
 ### Secure Fields
 

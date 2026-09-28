@@ -65,17 +65,24 @@
         <!-- Backdrop -->
         <div id="backdrop" hidden class="absolute inset-0 z-[8] bg-black/40"></div>
 
-        <!-- ── Express sheet ───────────────────────────────────────── -->
-        <div id="sheet-express" hidden class="xc-sheet">
+        <!-- ── Express sheet ───────────────────────────────────────────
+             One "tunnel": paying by card, or picking another method, continues
+             inside this same sheet (the card step swaps in), never a second
+             sheet stacked on top. -->
+        <div id="sheet" hidden class="xc-sheet">
           <div class="xc-sheet-handle"><span></span></div>
           <div class="xc-sheet-header">
-            <div class="xc-sheet-title" data-i18n="shop.expressTitle"></div>
+            <button id="card-back" hidden class="xc-icon-btn absolute left-4" data-i18n-attr="aria-label:shop.back">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </button>
+            <div id="sheet-title" class="xc-sheet-title"></div>
             <button data-close class="xc-icon-btn absolute right-4" data-i18n-attr="aria-label:shop.close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
 
-          <div class="xc-sheet-body">
+          <!-- Step 1 — express summary -->
+          <div id="view-express" class="xc-sheet-body">
             <!-- Customer info (mock — in a real integration this comes from your account system) -->
             <div class="flex flex-col gap-4">
               <div class="text-base font-medium" style="color: #364153" data-i18n="shop.myInfo"></div>
@@ -137,22 +144,9 @@
               <button id="other-method" hidden class="xc-link mx-auto" data-i18n="shop.otherMethod"></button>
             </div>
           </div>
-        </div>
 
-        <!-- ── Card sheet ──────────────────────────────────────────── -->
-        <div id="sheet-card" hidden class="xc-sheet" style="z-index: 11">
-          <div class="xc-sheet-handle"><span></span></div>
-          <div class="xc-sheet-header">
-            <button id="card-back" class="xc-icon-btn absolute left-4" data-i18n-attr="aria-label:shop.back">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            </button>
-            <div class="xc-sheet-title" data-i18n="shop.addCard"></div>
-            <button data-close class="xc-icon-btn absolute right-4" data-i18n-attr="aria-label:shop.close">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-          </div>
-
-          <div class="xc-sheet-body">
+          <!-- Step 2 — new card, in the same sheet -->
+          <div id="view-card" hidden class="xc-sheet-body">
             <div class="xc-field">
               <label data-i18n="shop.cardNumber"></label>
               <div class="hf-field-wrap" id="xc-pan"></div>
