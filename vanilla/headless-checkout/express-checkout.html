@@ -120,11 +120,13 @@
                 <div class="text-xl font-semibold" style="color: var(--xc-ink-2)" data-total></div>
               </div>
 
-              <!-- Token path: a CVV field mounts here when the token needs one.
-                   Hidden by el.hasUI() — the SDK's own signal for "nothing to render". -->
-              <div id="token-cvv-field" class="xc-field" hidden>
-                <label>CVV</label>
-                <div class="hf-field-wrap" id="token-element"></div>
+              <!-- Token path: the CVV hosted field is mounted collapsed and only
+                   revealed by a first tap on "Payer" when the token needs it. -->
+              <div id="token-cvv-field" class="xc-collapse">
+                <div class="xc-field">
+                  <label>Cryptogramme de la carte <span id="token-cvv-card"></span></label>
+                  <div class="hf-field-wrap" id="token-cvv"></div>
+                </div>
               </div>
 
               <button id="express-pay" class="xc-btn-primary w-full justify-between px-4">

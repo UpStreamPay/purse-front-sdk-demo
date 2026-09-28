@@ -92,10 +92,43 @@ function tokenPanLabel(t: Token): string {
     return last4 ? `•••• ${last4}` : raw;
 }
 
+// The token's CVV field is mounted as soon as the sheet opens but stays
+// collapsed: the first tap on "Payer" either pays straight away (the token
+// needs no CVV, so the payment is already fulfilled — true one-click) or
+// reveals the field and waits for it.
+let cvvRevealed = false;
+
+function revealCvv(open: boolean) {
+    cvvRevealed = open;
+    $('token-cvv-field').classList.toggle('is-open', open);
+}
+
+// A bare hosted-field iframe, themed like the card sheet — getPaymentElement()'s
+// hosted form would draw its own framed input inside ours.
+function mountCvvField(t: Token): ActiveElement {
+    const hf = t.getHostedFields({
+        fields: {cvv: {target: 'token-cvv', placeholder: '123'}},
+        theme: CARD_THEME,
+    });
+    hf.render();
+    return hf;
+}
+
+// hostedForm.noCVV is only honoured by the hosted form, which then renders
+// nothing and is fulfilled at once. It suppresses the field and its requirement
+// client-side only: the partner still enforces its own rule server-side, so
+// forcing it on a token that needs CVV can make submitPayment() fail.
+function mountWithoutCvv(t: Token): ActiveElement {
+    const el = t.getPaymentElement({hostedForm: {noCVV: true}});
+    el.appendTo($('token-cvv'));
+    return el;
+}
+
 function refreshPayButtons() {
     const t = currentToken();
-    // The express button is always clickable without a token: it opens the card sheet.
-    expressPayBtn.disabled = t ? !fulfilled : !cardMethod;
+    // With a token, the first tap is always allowed (it pays or reveals the CVV);
+    // without one, the button opens the card sheet.
+    expressPayBtn.disabled = t ? cvvRevealed && !fulfilled : !cardMethod;
     cardPayBtn.disabled = !fulfilled;
 }
 
@@ -106,28 +139,18 @@ function openExpress() {
     show('sheet-card', false);
     show('other-method', !!t && !!cardMethod);
     show('express-pay-token', !!t);
-    show('token-cvv-field', false);
+    revealCvv(false);
 
     unmount();
     if (t) {
         $('express-pay-label').textContent = 'Payer';
         $('token-pan').textContent = tokenPanLabel(t);
+        $('token-cvv-card').textContent = tokenPanLabel(t);
         ($('token-icon') as HTMLImageElement).src = t.iconUrl;
         ($('token-icon') as HTMLImageElement).alt = t.description.brand ?? '';
 
-        // hostedForm.noCVV only suppresses the field and its requirement client-side;
-        // it doesn't change what the partner enforces server-side, so forcing it on a
-        // token that actually needs CVV can make submitPayment() fail even though the
-        // UI shows nothing left to fill in.
-        const el = t.getPaymentElement(noCvv.checked ? {hostedForm: {noCVV: true}} : undefined);
-        el.on('fatalError', () => showResult('error', 'Fatal error in token element'));
-        el.appendTo($('token-element'));
-        activeElement = el;
-
-        // hasUI() is the SDK's own signal for "nothing to render" — true one-click
-        // when the token needs no CVV, so the field row collapses instead of
-        // showing an empty box.
-        show('token-cvv-field', el.hasUI());
+        activeElement = noCvv.checked ? mountWithoutCvv(t) : mountCvvField(t);
+        activeElement.on('fatalError', () => showResult('error', 'Fatal error in token element'));
     } else {
         $('express-pay-label').textContent = 'Payer par carte bancaire';
     }
@@ -227,10 +250,13 @@ $('card-back').addEventListener('click', openExpress);
 
 expressPayBtn.addEventListener('click', () => {
     const t = currentToken();
-    if (t) {
+    if (!t) {
+        openCard();
+    } else if (fulfilled) {
         pay(t, `${t.description.brand ?? 'Carte'} ${tokenPanLabel(t)}`);
     } else {
-        openCard();
+        revealCvv(true);
+        refreshPayButtons();
     }
 });
 cardPayBtn.addEventListener('click', () => {

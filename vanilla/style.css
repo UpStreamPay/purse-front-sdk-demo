@@ -330,6 +330,23 @@
   box-shadow: inset 0 0 0 1.5px var(--xc-accent);
 }
 
+/* Collapsed but still laid out — not display:none — so a hosted-field iframe
+   mounted inside renders and reports readiness before it is revealed. The
+   negative margin cancels the parent's flex gap while closed. */
+.xc-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-bottom: -16px;
+  transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+}
+.xc-collapse > * { overflow: hidden; min-height: 0; }
+.xc-collapse.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-bottom: 0;
+}
+
 .xc-field { display: flex; flex-direction: column; gap: 4px; }
 .xc-field label { font-size: 14px; line-height: 20px; color: #364153; }
 .xc-field .hf-field-wrap {
