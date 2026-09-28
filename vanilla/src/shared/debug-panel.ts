@@ -15,8 +15,53 @@ const HINTS: Record<EnvKey, string> = {
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
     VITE_PURSE_API_KEY: 'for Secure Fields',
     VITE_PURSE_ENTITY_ID: 'merchant id for wallet token lookup (advanced flow)',
-    VITE_PURSE_PROXY_URL: 'merchant backend proxy (advanced flow)',
+    VITE_PURSE_PROXY_URL: 'merchant backend (Alfred) — sessions + advanced flow',
 };
+
+// Never echoed on the page, even as a default.
+const SECRET_KEYS: ReadonlySet<EnvKey> = new Set(['VITE_PURSE_API_KEY', 'VITE_PURSE_SESSION_JSON']);
+
+/**
+ * With nothing overridden, the demo runs on build defaults the reader never set
+ * — say which, so "where is this talking to?" has an answer on the page itself.
+ */
+function mountDefaultsBanner(keys: readonly EnvKey[], openPanel: () => void) {
+    if (keys.some(isOverridden)) {
+        return;
+    }
+    const values = keys
+        .filter(k => !SECRET_KEYS.has(k) && getEnv(k))
+        .map(k => `${LABELS[k]}: ${getEnv(k)}`);
+    if (values.length === 0) {
+        return;
+    }
+    const createsSession =
+        keys.includes('VITE_PURSE_SESSION_JSON') && !getEnv('VITE_PURSE_SESSION_JSON') && getEnv('VITE_PURSE_PROXY_URL');
+
+    const banner = document.createElement('div');
+    banner.className =
+        'flex gap-3 px-4 py-3.5 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-900 mb-6';
+
+    const text = document.createElement('div');
+    text.className = 'min-w-0';
+    const title = document.createElement('div');
+    title.className = 'font-semibold';
+    title.textContent = 'Running on the default configuration';
+    const detail = document.createElement('div');
+    detail.className = 'text-xs mt-1 break-words';
+    detail.textContent =
+        values.join(' · ') + (createsSession ? ' — a fresh payment session is created through the proxy on each load.' : '');
+
+    const override = document.createElement('button');
+    override.className =
+        'text-xs font-semibold underline underline-offset-2 mt-1.5 cursor-pointer bg-transparent border-0 p-0 font-[inherit] text-sky-900';
+    override.textContent = 'Override in ⚙ Config';
+    override.addEventListener('click', openPanel);
+
+    text.append(title, detail, override);
+    banner.append(Object.assign(document.createElement('span'), {textContent: 'ℹ'}), text);
+    document.querySelector('demo-header')?.after(banner);
+}
 
 function updateBadge(
     area: HTMLElement,
@@ -180,6 +225,10 @@ export function mountDebugPanel(keys: readonly EnvKey[] = ENV_KEYS) {
 
     host.appendChild(panel);
     host.appendChild(toggleBtn);
+
+    mountDefaultsBanner(keys, () => {
+        panel.style.display = 'block';
+    });
 
     // Interactions
     toggleBtn.addEventListener('click', () => {
