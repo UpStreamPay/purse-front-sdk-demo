@@ -1,12 +1,18 @@
-import { PaymentForm } from "./securefields/PaymentForm.tsx";
-import { DebugPanel } from "./shared/DebugPanel.tsx";
+import { PaymentForm } from "./PaymentForm.tsx";
+import { DebugPanel } from "../shared/DebugPanel.tsx";
 import { useState } from "react";
 
-function App() {
+export function SecureFieldsPage() {
   const [embeddedBrandSelector, setEmbeddedBrandSelector] = useState(false);
   return (
     <main className="min-h-screen w-screen  flex flex-col items-center justify-center p-4 ">
       <header className="w-full max-w-lg mb-4 text-center relative">
+        <a
+          href="../"
+          className="absolute left-0 top-0 text-xs text-gray-400 no-underline hover:text-gray-600"
+        >
+          ← All demos
+        </a>
         <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
           Purse SDK — React demos
         </p>
@@ -60,4 +66,3 @@ function App() {
   );
 }
 
-export default App;
