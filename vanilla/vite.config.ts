@@ -6,6 +6,7 @@ export default defineConfig({
   base: process.env.VITE_BASE_URL ?? '/',
   plugins: [tailwindcss()],
   envDir: '../',
+  server: { port: Number(process.env.PORT) || 5173 },
   build: {
     rollupOptions: {
       input: {
