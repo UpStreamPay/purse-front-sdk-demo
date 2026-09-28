@@ -14,8 +14,8 @@ import {mountDebugPanel} from '../shared/debug-panel';
 //     "Payer •••• 4242" button. If the partner needs no CVV, isPaymentFulfilled
 //     is true right away and the payment is one tap; otherwise the first tap
 //     reveals the token's CVV field right above the button.
-//   • No token (or "Ignore saved tokens" checked), or "use another payment
-//     method" → the same sheet continues to a card step built with
+//   • No token (or "Ignore saved tokens" checked), or "use another card"
+//     → the same sheet continues to a card step built with
 //     getHostedFields() on the credit card method, with an optional
 //     "save my card" (register) checkbox.
 //

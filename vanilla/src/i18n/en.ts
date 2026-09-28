@@ -207,7 +207,7 @@ export const en = {
     'shop.cvvFor': 'Security code for card',
     'shop.pay': 'Pay',
     'shop.payByCard': 'Pay by card',
-    'shop.otherMethod': 'Use another payment method',
+    'shop.otherMethod': 'Use another card',
     'shop.orPayWith': 'or pay with',
     'shop.addCard': 'Add my card',
     'shop.cardNumber': 'Card number',

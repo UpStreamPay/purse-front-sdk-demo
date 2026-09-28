@@ -204,7 +204,7 @@ export const fr: Record<MessageKey, string> = {
     'shop.cvvFor': 'Cryptogramme de la carte',
     'shop.pay': 'Payer',
     'shop.payByCard': 'Payer par carte bancaire',
-    'shop.otherMethod': 'Utiliser un autre moyen de paiement',
+    'shop.otherMethod': 'Utiliser une autre carte',
     'shop.orPayWith': 'ou payer avec',
     'shop.addCard': 'Ajouter ma carte',
     'shop.cardNumber': 'Numéro de carte',
