@@ -2,7 +2,7 @@ import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnvironment, DEMO_ENV_KEYS} from '../shared/env';
 import {getSession} from '../shared/session';
-import {$, showNotice, showResult} from '../shared/ui';
+import {$, setStep, showNotice, showResult} from '../shared/ui';
 import {mountDebugPanel} from '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +28,7 @@ const buyNowBtn = $('buy-now') as HTMLButtonElement;
 const expressPayBtn = $('express-pay') as HTMLButtonElement;
 const cardPayBtn = $('card-pay') as HTMLButtonElement;
 const forceNoToken = $('force-no-token') as HTMLInputElement;
+const noCvv = $('no-cvv') as HTMLInputElement;
 const saveCard = $('save-card') as HTMLInputElement;
 
 let checkout: HeadlessCheckout.HeadlessCheckout | null = null;
@@ -35,6 +36,21 @@ let token: Token | null = null;
 let cardMethod: CardMethod | null = null;
 let activeElement: ActiveElement | null = null;
 let fulfilled = false;
+
+// paymentMethods and paymentTokens are independent Readable stores — one can
+// emit before the other. Buy Now must wait on both, or a fast click can open
+// the express sheet before the saved token has arrived and silently render
+// the no-token path (missing the "Payer •••• 4242" badge) even though the
+// session does have a saved card.
+let methodsReady = false;
+let tokensReady = false;
+
+function maybeEnableBuyNow() {
+    if (methodsReady && tokensReady && checkout?.sessionState.value !== 'submitted') {
+        buyNowBtn.disabled = false;
+        setStep('step-ready', 'done');
+    }
+}
 
 const CARD_THEME: HeadlessCheckout.HostedFieldsTheme = {
     global: {},
@@ -62,6 +78,19 @@ function currentToken(): Token | null {
     return forceNoToken.checked ? null : token;
 }
 
+// `description.masked_pan` ("Will contain displayable value of the PAN") is
+// typed as required but is empty on some real sessions — this one included.
+// `description.label` ("the way the partner formats the masked pan") is the
+// SDK's own documented fallback for exactly that case, but partners format it
+// differently (4111********1111, ****1111, 424242XXXXXX4242, …) — so pull the
+// trailing digit run out of whichever is set and display it the same way
+// regardless of partner: "•••• 4242".
+function tokenPanLabel(t: Token): string {
+    const raw = t.description.masked_pan || t.description.label || '';
+    const last4 = raw.match(/\d{2,4}$/)?.[0];
+    return last4 ? `•••• ${last4}` : raw;
+}
+
 function refreshPayButtons() {
     const t = currentToken();
     // The express button is always clickable without a token: it opens the card sheet.
@@ -76,19 +105,28 @@ function openExpress() {
     show('sheet-card', false);
     show('other-method', !!t && !!cardMethod);
     show('express-pay-token', !!t);
+    show('token-cvv-field', false);
 
     unmount();
     if (t) {
         $('express-pay-label').textContent = 'Payer';
-        $('token-pan').textContent = t.description.masked_pan;
+        $('token-pan').textContent = tokenPanLabel(t);
         ($('token-icon') as HTMLImageElement).src = t.iconUrl;
         ($('token-icon') as HTMLImageElement).alt = t.description.brand ?? '';
 
-        // Renders nothing when the token needs no CVV — then it's a true one-click.
-        const el = t.getPaymentElement();
+        // hostedForm.noCVV only suppresses the field and its requirement client-side;
+        // it doesn't change what the partner enforces server-side, so forcing it on a
+        // token that actually needs CVV can make submitPayment() fail even though the
+        // UI shows nothing left to fill in.
+        const el = t.getPaymentElement(noCvv.checked ? {hostedForm: {noCVV: true}} : undefined);
         el.on('fatalError', () => showResult('error', 'Fatal error in token element'));
         el.appendTo($('token-element'));
         activeElement = el;
+
+        // hasUI() is the SDK's own signal for "nothing to render" — true one-click
+        // when the token needs no CVV, so the field row collapses instead of
+        // showing an empty box.
+        show('token-cvv-field', el.hasUI());
     } else {
         $('express-pay-label').textContent = 'Payer par carte bancaire';
     }
@@ -128,18 +166,21 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
     if (!checkout) {
         return;
     }
+    setStep('step-pay', 'active');
     show('busy', true);
     try {
         // Pin the source actually shown to the user: a CVV-less token could
         // otherwise stay primary (and fulfilled) while the card sheet is open.
         source.setAsPrimarySource();
         await checkout.submitPayment();
+        setStep('step-pay', 'done');
         $('done-method').textContent = methodLabel;
         show('done', true);
         // The session is consumed — no second purchase on it.
         buyNowBtn.disabled = true;
         showResult('success', {status: 'submitted', method: methodLabel});
     } catch (err) {
+        setStep('step-pay', 'error');
         showResult('error', String(err));
     } finally {
         show('busy', false);
@@ -158,7 +199,7 @@ $('card-back').addEventListener('click', openExpress);
 expressPayBtn.addEventListener('click', () => {
     const t = currentToken();
     if (t) {
-        pay(t, `${t.description.brand ?? 'Carte'} ${t.description.masked_pan}`);
+        pay(t, `${t.description.brand ?? 'Carte'} ${tokenPanLabel(t)}`);
     } else {
         openCard();
     }
@@ -176,34 +217,46 @@ forceNoToken.addEventListener('change', () => {
         openExpress();
     }
 });
+noCvv.addEventListener('change', () => {
+    if (!$('sheet-express').hidden && currentToken()) {
+        openExpress();
+    }
+});
 
 // ── Checkout ─────────────────────────────────────────────────────────────────
 
 async function main() {
+    setStep('step-sdk', 'active');
     const {createHeadlessCheckout} = await loadHeadlessCheckout(getEnvironment());
+    setStep('step-sdk', 'done');
 
+    setStep('step-init', 'active');
     let session: string;
     try {
-        session = getSession();
+        session = await getSession();
     } catch (err) {
+        setStep('step-init', 'error');
         showNotice(String(err));
         return;
     }
 
     checkout = await createHeadlessCheckout(session);
+    setStep('step-init', 'done');
+    setStep('step-ready', 'active');
 
     checkout.paymentTokens.subscribe(tokens => {
         token = (tokens as HeadlessCheckout.PurseHeadlessCheckoutPaymentToken[])
             .find((t): t is Token => !t.isSecondary && t.type === 'token' && !t.disabled.value) ?? null;
-        $('token-status').textContent = token ? `Saved card: ${token.description.masked_pan}` : 'No saved card in session';
+        $('token-status').textContent = token ? `Saved card: ${tokenPanLabel(token)}` : 'No saved card in session';
+        tokensReady = true;
+        maybeEnableBuyNow();
     });
 
     checkout.paymentMethods.subscribe(methods => {
         cardMethod = (methods as HeadlessCheckout.PurseHeadlessCheckoutPaymentMethod[])
             .find((m): m is CardMethod => m.method === 'creditcard' && !m.isSecondary) ?? null;
-        if (checkout?.sessionState.value !== 'submitted') {
-            buyNowBtn.disabled = false;
-        }
+        methodsReady = true;
+        maybeEnableBuyNow();
     });
 
     // The amount is fixed by the payment session — display it, never compute it client-side.
