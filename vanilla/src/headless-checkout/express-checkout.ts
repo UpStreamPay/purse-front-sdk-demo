@@ -2,7 +2,8 @@ import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnvironment, DEMO_ENV_KEYS} from '../shared/env';
 import {getSession} from '../shared/session';
-import {$, setStep, showNotice, showResult} from '../shared/ui';
+import {$, isFailedAuthorization, setStep, showNotice, showResult} from '../shared/ui';
+import {consumeRedirectionReturn, type RedirectionClaims} from '../shared/redirection';
 import {mountDebugPanel} from '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -162,6 +163,32 @@ function closeAll() {
     ['backdrop', 'sheet-express', 'sheet-card', 'busy', 'done'].forEach(id => show(id, false));
 }
 
+// Copy per authorization status. PENDING is what the sandbox returns for a
+// submitted card payment until the partner settles it.
+function confirmationCopy(status = ''): {title: string; detail: string} {
+    if (isFailedAuthorization(status)) {
+        return {title: 'Paiement refusé', detail: "Aucun montant n'a été débité. Vous pouvez réessayer avec un autre moyen de paiement."};
+    }
+    if (status === 'AUTHORIZED' || status === 'CAPTURED') {
+        return {title: 'Commande confirmée !', detail: 'Merci pour votre achat. Un e-mail de confirmation vous a été envoyé.'};
+    }
+    return {title: 'Commande enregistrée', detail: 'Votre paiement est en cours de validation — vous recevrez une confirmation par e-mail.'};
+}
+
+function showConfirmation(claims: RedirectionClaims, methodLabel?: string) {
+    const status = claims.authorization_status;
+    const {title, detail} = confirmationCopy(status);
+    $('done-title').textContent = title;
+    $('done-detail').textContent = detail;
+    $('done-ref').textContent = [methodLabel, claims.payment_id && `Paiement ${claims.payment_id.slice(0, 8)}`]
+        .filter(Boolean)
+        .join(' · ');
+    show('done-ok', !isFailedAuthorization(status));
+    show('done-failed', isFailedAuthorization(status));
+    show('done', true);
+    setStep('step-pay', isFailedAuthorization(status) ? 'error' : 'done');
+}
+
 async function pay(source: Token | CardMethod, methodLabel: string) {
     if (!checkout) {
         return;
@@ -172,10 +199,11 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
         // Pin the source actually shown to the user: a CVV-less token could
         // otherwise stay primary (and fulfilled) while the card sheet is open.
         source.setAsPrimarySource();
+        // Usually never resolves here: with a shopper_redirection_url on the
+        // session (shared/session.ts), the SDK navigates the tab away and the
+        // shopper lands back on this page — see the return branch in main().
         await checkout.submitPayment();
-        setStep('step-pay', 'done');
-        $('done-method').textContent = methodLabel;
-        show('done', true);
+        showConfirmation({}, methodLabel);
         // The session is consumed — no second purchase on it.
         buyNowBtn.disabled = true;
         showResult('success', {status: 'submitted', method: methodLabel});
@@ -192,7 +220,8 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
 buyNowBtn.addEventListener('click', openExpress);
 $('backdrop').addEventListener('click', closeAll);
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAll));
-$('back-home').addEventListener('click', closeAll);
+// A paid session can't be reused — start over on a fresh one.
+$('back-home').addEventListener('click', () => location.reload());
 $('other-method').addEventListener('click', openCard);
 $('card-back').addEventListener('click', openExpress);
 
@@ -226,6 +255,15 @@ noCvv.addEventListener('change', () => {
 // ── Checkout ─────────────────────────────────────────────────────────────────
 
 async function main() {
+    // Back from submitPayment()'s redirection: show the outcome, don't start over.
+    const returned = consumeRedirectionReturn();
+    if (returned) {
+        ['step-sdk', 'step-init', 'step-ready'].forEach(id => setStep(id, 'done'));
+        showConfirmation(returned);
+        showResult(isFailedAuthorization(returned.authorization_status) ? 'error' : 'success', returned, 'Returned from payment');
+        return;
+    }
+
     setStep('step-sdk', 'active');
     const {createHeadlessCheckout} = await loadHeadlessCheckout(getEnvironment());
     setStep('step-sdk', 'done');

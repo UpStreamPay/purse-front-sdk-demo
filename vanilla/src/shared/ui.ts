@@ -1,6 +1,7 @@
 import type { DemoStepper, StepState } from '../components/demo-stepper';
 import type { DemoNotice } from '../components/demo-notice';
 import type { DemoResult } from '../components/demo-result';
+import { consumeRedirectionReturn } from './redirection';
 
 export const $ = (id: string) => document.getElementById(id)!;
 
@@ -17,4 +18,28 @@ export function showNotice(msg: string) {
 
 export function showResult(type: 'success' | 'error', data: unknown, successLabel = 'Payment submitted') {
   document.querySelector<DemoResult>('demo-result')?.show(type, data, successLabel);
+}
+
+/** Authorization statuses that mean the payment did not go through. */
+export function isFailedAuthorization(status = ''): boolean {
+  return /REFUSED|FAILED|CANCEL|ERROR/i.test(status);
+}
+
+/**
+ * Session demos are their own `shopper_redirection_url`: on the way back from
+ * `submitPayment()`, show the outcome instead of booting a new checkout.
+ * Returns true when the page was loaded from a redirection — the caller stops.
+ */
+export function showRedirectionReturn(): boolean {
+  const claims = consumeRedirectionReturn();
+  if (!claims) {
+    return false;
+  }
+  const status = claims.authorization_status ?? 'UNKNOWN';
+  showResult(
+    isFailedAuthorization(status) ? 'error' : 'success',
+    claims,
+    `Returned from payment — authorization ${status}. Reload to start a new one.`,
+  );
+  return true;
 }

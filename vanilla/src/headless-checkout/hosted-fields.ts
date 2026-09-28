@@ -2,7 +2,7 @@ import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import { getEnv, getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import {getSession} from '../shared/session';
-import {$, setStep, showNotice, showResult} from '../shared/ui';
+import {$, setStep, showNotice, showResult, showRedirectionReturn} from '../shared/ui';
 import type {DemoButton} from '../components/demo-button';
 import type {DemoBrandPills} from '../components/demo-brand-pills';
 import { mountDebugPanel } from '../shared/debug-panel';
@@ -122,6 +122,11 @@ document.querySelectorAll('[data-layout]').forEach(tab => {
 });
 
 async function main() {
+    // Back from submitPayment()'s redirection — show the outcome, don't start over.
+    if (showRedirectionReturn()) {
+        return;
+    }
+
     setStep('step-sdk', 'active');
 
     const {createHeadlessCheckout} = await loadHeadlessCheckout(
