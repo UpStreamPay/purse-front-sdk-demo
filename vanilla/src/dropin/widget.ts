@@ -3,6 +3,7 @@ import { loadDropInCheckout } from '@purse-eu/web-sdk';
 import { getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import { getSession } from '../shared/session';
 import { $, setStep, showNotice, showResult, showRedirectionReturn } from '../shared/ui';
+import { localeTag, t } from '../i18n';
 import type { DemoButton } from '../components/demo-button';
 import { mountDebugPanel } from '../shared/debug-panel';
 
@@ -39,7 +40,7 @@ async function main() {
   }
 
   // Step 2 — Initialise the drop-in
-  const dropin = await createDropinCheckout({session},
+  const dropin = await createDropinCheckout({session, locale: localeTag},
     // Optional: listen to drop-in lifecycle events
     // event => console.log('[dropin event]', event.code, event.payload),
   );
@@ -61,7 +62,7 @@ async function main() {
   // Step 4 — External pay button (optional, drop-in has its own by default)
   payBtn.addEventListener('click', async () => {
     payBtn.disabled = true;
-    payBtn.label = 'Processing…';
+    payBtn.label = t('common.processing');
     payBtn.loading = true;
 
     try {
@@ -72,7 +73,7 @@ async function main() {
       setStep('step-pay', 'error');
       showResult('error', String(err));
       payBtn.disabled = false;
-      payBtn.label = 'Retry';
+      payBtn.label = t('common.retry');
       payBtn.loading = false;
     }
   });

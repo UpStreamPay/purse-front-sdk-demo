@@ -1,6 +1,7 @@
 import '../components';
 import { getEnv, DEMO_ENV_KEYS } from '../shared/env';
 import { setStep, showNotice, showResult } from '../shared/ui';
+import { t } from '../i18n';
 import {
   proxyBase,
   browserData,
@@ -83,7 +84,7 @@ async function loadSavedCards(customerReference: string) {
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''));
 
   if (tokens.length === 0) {
-    showNotice('No active saved cards for this customer — run the Complete Payment demo with "Save this card" first.');
+    showNotice(t('token.noTokens'));
     return false;
   }
 
@@ -93,14 +94,14 @@ async function loadSavedCards(customerReference: string) {
     selectedToken = tokens.find(t => t.id === id) ?? null;
     setStep('step-tokens', 'done');
   });
-  list.options = tokens.map(t => ({
-    id: t.id,
-    title: t.description?.display_token ?? t.id,
-    secondary: t.description?.brand_name,
+  list.options = tokens.map(tok => ({
+    id: tok.id,
+    title: tok.description?.display_token ?? tok.id,
+    secondary: tok.description?.brand_name,
     meta: [
-      [t.description?.holder_name, t.scope.partner].filter(Boolean).join(' · '),
-      `Exp ${monthYear(t.expiration_date)}`,
-      `Added ${day(t.created_at)} · Updated ${day(t.updated_at)}`,
+      [tok.description?.holder_name, tok.scope.partner].filter(Boolean).join(' · '),
+      t('token.expires', { date: monthYear(tok.expiration_date) }),
+      t('token.dates', { added: day(tok.created_at), updated: day(tok.updated_at) }),
     ],
   }));
   // Auto-select the first card so the demo is one click to pay.
@@ -113,7 +114,7 @@ async function initCvvForm() {
   const tenantId = getEnv('VITE_PURSE_SECUREFIELDS_TENANT_ID');
   const apiKey = getEnv('VITE_PURSE_API_KEY');
   if (!tenantId || !apiKey) {
-    showNotice('Set Tenant ID and API Key in .env.local or the debug panel');
+    showNotice(t('notice.setTenantAndKey'));
     return;
   }
 
@@ -136,7 +137,7 @@ async function initCvvForm() {
   payBtn.addEventListener('click', async () => {
     if (!paymentContext || !selectedToken) return;
     payBtn.disabled = true;
-    payBtn.label = 'Processing…';
+    payBtn.label = t('common.processing');
     payBtn.loading = true;
 
     try {
@@ -145,7 +146,7 @@ async function initCvvForm() {
         setStep('step-pay', 'error');
         showResult('error', tokenResult);
         payBtn.disabled = false;
-        payBtn.label = 'Retry';
+        payBtn.label = t('common.retry');
         payBtn.loading = false;
         return;
       }
@@ -182,26 +183,26 @@ async function initCvvForm() {
         setStep('step-pay', 'error');
         showResult('error', data);
         payBtn.disabled = false;
-        payBtn.label = 'Retry';
+        payBtn.label = t('common.retry');
         return;
       }
 
       setStep('step-pay', 'done');
-      showResult('success', data, 'Payment created');
-      payBtn.label = 'Done';
+      showResult('success', data, t('result.created'));
+      payBtn.label = t('common.done');
     } catch (e) {
       payBtn.loading = false;
       setStep('step-pay', 'error');
       showResult('error', { error: (e as Error).message });
       payBtn.disabled = false;
-      payBtn.label = 'Retry';
+      payBtn.label = t('common.retry');
     }
   });
 }
 
 async function main() {
   if (!proxyBase()) {
-    showNotice('Set Proxy URL (VITE_PURSE_PROXY_URL) in .env.local or the debug panel');
+    showNotice(t('notice.setProxy'));
     return;
   }
   try {

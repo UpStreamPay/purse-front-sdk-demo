@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { DemoElement } from './base';
+import { t } from '../i18n';
 
 /**
  * <demo-button> — the full-width primary action button.
@@ -16,7 +17,7 @@ import { DemoElement } from './base';
  */
 @customElement('demo-button')
 export class DemoButton extends DemoElement {
-  @property() label = 'Submit';
+  @property() label = t('common.submit');
   @property({ type: Boolean }) disabled = false;
   @property({ type: Boolean }) loading = false;
 

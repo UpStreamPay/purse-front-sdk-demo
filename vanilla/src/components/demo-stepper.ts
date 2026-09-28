@@ -1,6 +1,7 @@
 import { html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DemoElement } from './base';
+import { translate } from '../i18n';
 
 export type StepState = 'pending' | 'active' | 'done' | 'error';
 
@@ -11,7 +12,8 @@ type Step = { id: string; label: string };
  *
  *   <demo-stepper steps="step-sdk:Load SDK, step-init:Init, step-pay:Pay"></demo-stepper>
  *
- * `steps` is a comma-separated list of `id:label` pairs. Drive it from script
+ * `steps` is a comma-separated list of `id:label` pairs; a label that is an
+ * i18n key (e.g. `step.pay`) is translated. Drive it from script
  * via the shared `setStep(id, state)` helper (shared/ui.ts) or directly:
  *
  *   document.querySelector('demo-stepper').setStep('step-pay', 'done');
@@ -59,7 +61,7 @@ export class DemoStepper extends DemoElement {
           return html`
             <div class="flex-1 px-3.5 py-3 text-xs text-muted border-r border-border flex items-center gap-2 ${last ? '' : 'sm:border-b-0 border-b'}" data-state=${st}>
               <div class="w-5 h-5 rounded-full ${this.iconBg(st)} flex items-center justify-center shrink-0 text-xs text-white transition-colors duration-200">${this.icon(st, i + 1)}</div>
-              <span class="text-xs">${step.label}</span>
+              <span class="text-xs">${translate(step.label)}</span>
             </div>
           `;
         })}

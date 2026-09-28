@@ -3,6 +3,7 @@ import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import { getEnv, getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult, showRedirectionReturn} from '../shared/ui';
+import {localeTag, t} from '../i18n';
 import type {DemoButton} from '../components/demo-button';
 import type {DemoBrandPills} from '../components/demo-brand-pills';
 import { mountDebugPanel } from '../shared/debug-panel';
@@ -59,20 +60,20 @@ const THEMES: Record<Layout, HeadlessCheckout.HostedFieldsTheme> = {
 const FIELD_TARGETS: Record<Layout, HeadlessCheckout.HostedFieldsOptions['fields']> = {
     grid: {
         cardNumber: {target: 'grid-pan', placeholder: '1234 5678 9012 3456'},
-        holderName: {target: 'grid-name', placeholder: 'Card Holder Name'},
-        expDate: {target: 'grid-exp', placeholder: 'MM/YY'},
+        holderName: {target: 'grid-name', placeholder: t('fields.placeholder.holder')},
+        expDate: {target: 'grid-exp', placeholder: t('common.placeholder.exp')},
         cvv: {target: 'grid-cvv', placeholder: '123'},
     },
     'single-line': {
         cardNumber: {target: 'sl-pan', placeholder: '1234 5678 9012 3456'},
-        holderName: {target: 'sl-name', placeholder: 'Card Holder Name'},
-        expDate: {target: 'sl-exp', placeholder: 'MM/YY'},
+        holderName: {target: 'sl-name', placeholder: t('fields.placeholder.holder')},
+        expDate: {target: 'sl-exp', placeholder: t('common.placeholder.exp')},
         cvv: {target: 'sl-cvv', placeholder: '123'},
     },
     card: {
         cardNumber: {target: 'card-pan', placeholder: '1234 5678 9012 3456'},
-        holderName: {target: 'card-name', placeholder: 'Card Holder Name'},
-        expDate: {target: 'card-exp', placeholder: 'MM/YY'},
+        holderName: {target: 'card-name', placeholder: t('fields.placeholder.holder')},
+        expDate: {target: 'card-exp', placeholder: t('common.placeholder.exp')},
         cvv: {target: 'card-cvv', placeholder: '123'},
     },
 };
@@ -97,6 +98,7 @@ function setupHostedFields(method: HeadlessCheckout.PurseHeadlessCheckoutPrimary
     const hf = method.getHostedFields({
         fields: FIELD_TARGETS[layout],
         theme: THEMES[layout],
+        locale: localeTag,
     });
 
     hf.on('ready', () => setStep('step-render', 'done'));
@@ -167,7 +169,7 @@ async function main() {
     setStep('step-pay', 'active');
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.label = 'Processing…';
+        payBtn.label = t('common.processing');
         payBtn.loading = true;
 
         try {
@@ -178,7 +180,7 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.label = 'Retry';
+            payBtn.label = t('common.retry');
             payBtn.loading = false;
         }
     });

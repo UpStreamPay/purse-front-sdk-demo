@@ -3,6 +3,7 @@ import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import { getEnv, getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult, showRedirectionReturn} from '../shared/ui';
+import {localeTag, t} from '../i18n';
 import type {DemoButton} from '../components/demo-button';
 import type {DemoOptionList} from '../components/demo-option-list';
 import { mountDebugPanel } from '../shared/debug-panel';
@@ -60,10 +61,10 @@ function renderPaymentElement(
     container.innerHTML = '';
 
     // getPaymentElement() renders a hosted form (single iframe)
-    const el = method.getPaymentElement();
+    const el = method.getPaymentElement({locale: localeTag});
 
     el.on('fatalError', () => {
-        showResult('error', 'Fatal error in payment element');
+        showResult('error', t('result.fatalElement'));
     });
 
     el.appendTo(container);
@@ -129,7 +130,7 @@ async function main() {
     setStep('step-pay', 'active');
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.label = 'Processing…';
+        payBtn.label = t('common.processing');
         payBtn.loading = true;
 
         try {
@@ -140,7 +141,7 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.label = 'Retry';
+            payBtn.label = t('common.retry');
             payBtn.loading = false;
         }
     });

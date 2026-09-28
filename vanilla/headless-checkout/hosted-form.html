@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hosted Form — Quick Start</title>
+    <title data-i18n="form.pageTitle">Hosted Form — Quick Start</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,17 +11,16 @@
       <demo-header
         badge="Headless"
         variant="violet"
-        heading="Hosted Form — Complete Form"
+        data-i18n-attr="heading:form.title; description:form.desc"
         source="headless-checkout/hosted-form.ts"
-        description="A single hosted iframe containing PAN, expiry, CVV and holder name, rendered via <code>method.getPaymentElement()</code>."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init checkout, step-method:Credit card method, step-form:Render form, step-pay:Pay"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initCheckout, step-method:step.creditCardMethod, step-form:step.renderForm, step-pay:step.pay"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Card details</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="common.cardDetails"></div>
         <!--
           getPaymentElement() appends a single hosted iframe here.
           The partner controls the look of the form inside the iframe.
@@ -29,12 +28,12 @@
         -->
         <div class="min-h-20 border border-dashed border-border rounded-lg p-4">
           <div id="payment-element">
-            <div class="flex items-center justify-center min-h-20 text-muted text-sm" id="form-placeholder">Loading form…</div>
+            <div class="flex items-center justify-center min-h-20 text-muted text-sm" id="form-placeholder" data-i18n="form.loading"></div>
           </div>
         </div>
       </div>
 
-      <demo-button label="Pay" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.pay" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>

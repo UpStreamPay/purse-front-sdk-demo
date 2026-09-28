@@ -3,6 +3,7 @@ import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import { getEnv, getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, setStep, showNotice, showResult, showRedirectionReturn} from '../shared/ui';
+import {localeTag, t} from '../i18n';
 import type {DemoButton} from '../components/demo-button';
 import { mountDebugPanel } from '../shared/debug-panel';
 
@@ -14,35 +15,35 @@ const payBtn = document.querySelector<DemoButton>('demo-button')!;
 let activeForm: HeadlessCheckout.PurseHeadlessCheckoutPaymentElement | null = null;
 
 const PAYMENT_ELEMENT_OPTIONS: HeadlessCheckout.PaymentElementOptions = {
-    locale: 'en-GB',
+    locale: localeTag,
     hostedForm: {
         // ── Card number ────────────────────────────────────────────
-        panInputLabel: 'Card number',
+        panInputLabel: t('form.panLabel'),
         panPlaceholder: '1234 5678 9012 3456',
-        panRequiredError: 'Card number is required',
-        panFormatError: 'Card number is invalid',
-        panCannotBeEmptyError: 'Card number cannot be empty',
+        panRequiredError: t('form.panRequired'),
+        panFormatError: t('form.panFormat'),
+        panCannotBeEmptyError: t('form.panEmpty'),
         // ── Expiry ────────────────────────────────────────────────
-        expirationInputLabel: 'Expiry date',
-        expirationPlaceholder: 'MM/YY',
-        expirationRequiredError: 'Expiry date is required',
-        expirationFormatError: 'Expiry date is invalid',
-        expirationCannotBeEmptyError: 'Expiry date cannot be empty',
-        expirationOutOfRangeError: 'Card is expired',
+        expirationInputLabel: t('form.expLabel'),
+        expirationPlaceholder: t('common.placeholder.exp'),
+        expirationRequiredError: t('form.expRequired'),
+        expirationFormatError: t('form.expFormat'),
+        expirationCannotBeEmptyError: t('form.expEmpty'),
+        expirationOutOfRangeError: t('form.expExpired'),
         // ── CVV ───────────────────────────────────────────────────
         cvvInputLabel: 'CVV',
         cvvPlaceholder: '123',
         cvv4InputLabel: 'CVV',
         cvv4Placeholder: '1234',
-        cvvRequiredError: 'CVV is required',
-        cvvFormatError: 'CVV is invalid',
-        cvvCannotBeEmptyError: 'CVV cannot be empty',
+        cvvRequiredError: t('form.cvvRequired'),
+        cvvFormatError: t('form.cvvFormat'),
+        cvvCannotBeEmptyError: t('form.cvvEmpty'),
         // ── Holder name ───────────────────────────────────────────
-        holderInputLabel: 'Cardholder name',
-        holderPlaceholder: 'John Doe',
-        holderRequiredError: 'Cardholder name is required',
-        holderFormatError: 'Cardholder name is invalid',
-        holderCannotBeEmptyError: 'Cardholder name cannot be empty',
+        holderInputLabel: t('form.holderLabel'),
+        holderPlaceholder: t('common.placeholder.holder'),
+        holderRequiredError: t('form.holderRequired'),
+        holderFormatError: t('form.holderFormat'),
+        holderCannotBeEmptyError: t('form.holderEmpty'),
         // ── Brand ─────────────────────────────────────────────────
         brandSelectionMode: 'implicit',
     },
@@ -89,7 +90,7 @@ function renderHostedForm(method: HeadlessCheckout.PurseHeadlessCheckoutPrimaryM
     container.innerHTML = '';
 
     const form = method.getPaymentElement(PAYMENT_ELEMENT_OPTIONS);
-    form.on('fatalError', () => showResult('error', 'Fatal error in payment form'));
+    form.on('fatalError', () => showResult('error', t('result.fatalForm')));
     form.appendTo(container);
     activeForm = form;
 
@@ -146,7 +147,7 @@ async function main() {
     // Step 5 — Submit
     payBtn.addEventListener('click', async () => {
         payBtn.disabled = true;
-        payBtn.label = 'Processing…';
+        payBtn.label = t('common.processing');
         payBtn.loading = true;
 
         try {
@@ -157,7 +158,7 @@ async function main() {
             setStep('step-pay', 'error');
             showResult('error', String(err));
             payBtn.disabled = false;
-            payBtn.label = 'Retry';
+            payBtn.label = t('common.retry');
             payBtn.loading = false;
         }
     });

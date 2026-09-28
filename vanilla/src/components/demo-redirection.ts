@@ -1,6 +1,8 @@
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DemoElement } from './base';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { t } from '../i18n';
 
 /** Mirror of shared/redirection.ts `RedirectionPlan`, kept structural so this
  *  component stays presentational (no logic imports, like every demo-*). */
@@ -10,6 +12,10 @@ export type RedirectionPlanView = {
   params?: Record<string, string>;
   source: string;
 };
+
+// The return URL is interpolated into translated markup.
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 const CHOICE_BASE = 'flex-1 px-3.5 py-3 bg-bg border border-border rounded-lg text-left cursor-pointer transition-all hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed';
 
@@ -41,14 +47,14 @@ export class DemoRedirection extends DemoElement {
 
   private choose(mode: 'top' | 'iframe') {
     this.mode = mode;
-    this.status = mode === 'iframe' ? 'Waiting for the return page to post back…' : 'Redirecting…';
+    this.status = mode === 'iframe' ? t('redirect.waiting') : t('redirect.redirecting');
     this.dispatchEvent(new CustomEvent('redirect-follow', { detail: { mode }, bubbles: true }));
   }
 
   private renderParams(params: Record<string, string>) {
     return html`
       <div class="mt-3">
-        <div class="text-xs text-muted mb-1.5">Hidden form fields (${Object.keys(params).length})</div>
+        <div class="text-xs text-muted mb-1.5">${t('redirect.hiddenFields', { count: Object.keys(params).length })}</div>
         <div class="flex flex-col gap-1">
           ${Object.entries(params).map(([name, value]) => html`
             <div class="flex gap-2 text-xs font-mono">
@@ -66,29 +72,28 @@ export class DemoRedirection extends DemoElement {
     const { kind, url, params, source } = this.plan;
     return html`
       <div class="bg-white border border-border rounded-xl p-5 mt-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Redirection required</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">${t('redirect.title')}</div>
 
         <p class="text-xs text-muted mb-3.5">
-          <code>authorization.status</code> is <strong>PENDING</strong>: the shopper has to be sent to the
-          partner page before the authorisation is settled. Resolved from <code>${source}</code>.
+          ${unsafeHTML(t('redirect.intro'))} <code>${source}</code>.
         </p>
 
         <div class="flex flex-col gap-1 text-xs">
-          <div class="flex gap-2"><span class="text-muted w-16 shrink-0">Method</span><span class="font-mono font-semibold">${kind === 'HTML_FORM' ? 'POST (HTML form)' : kind}</span></div>
+          <div class="flex gap-2"><span class="text-muted w-16 shrink-0">${t('redirect.method')}</span><span class="font-mono font-semibold">${kind === 'HTML_FORM' ? t('redirect.htmlForm') : kind}</span></div>
           ${url
-            ? html`<div class="flex gap-2"><span class="text-muted w-16 shrink-0">URL</span><span class="font-mono break-all">${url}</span></div>`
+            ? html`<div class="flex gap-2"><span class="text-muted w-16 shrink-0">${t('redirect.url')}</span><span class="font-mono break-all">${url}</span></div>`
             : nothing}
         </div>
         ${params && Object.keys(params).length ? this.renderParams(params) : nothing}
 
         <div class="flex flex-col sm:flex-row gap-2 mt-4">
           <button class="${CHOICE_BASE}" ?disabled=${this.mode !== null} @click=${() => this.choose('top')}>
-            <span class="block text-sm font-medium">Follow the redirection</span>
-            <span class="block text-xs text-muted mt-0.5">Full page — ${kind === 'GET' ? 'location.assign()' : 'auto-submitted form, target _top'}</span>
+            <span class="block text-sm font-medium">${t('redirect.follow')}</span>
+            <span class="block text-xs text-muted mt-0.5">${kind === 'GET' ? t('redirect.followGet') : t('redirect.followPost')}</span>
           </button>
           <button class="${CHOICE_BASE}" ?disabled=${this.mode !== null} @click=${() => this.choose('iframe')}>
-            <span class="block text-sm font-medium">Open in an iframe</span>
-            <span class="block text-xs text-muted mt-0.5">Stay on the checkout — needs a return page that posts back</span>
+            <span class="block text-sm font-medium">${t('redirect.iframe')}</span>
+            <span class="block text-xs text-muted mt-0.5">${t('redirect.iframeHint')}</span>
           </button>
         </div>
 
@@ -102,12 +107,8 @@ export class DemoRedirection extends DemoElement {
         ${this.mode === 'iframe'
           ? html`
             <p class="text-xs text-muted mt-3">
-              ⚠ Partner and ACS pages often refuse to be framed (<code>X-Frame-Options: DENY</code>,
-              <code>frame-ancestors</code>). If the frame stays blank, fall back to the full-page redirect.
-              ${this.returnUrl
-                ? html`The frame ends on <code class="break-all">${this.returnUrl}</code>, which posts
-                    <code>purse-demo:redirection-complete</code> to this window.`
-                : nothing}
+              ${unsafeHTML(t('redirect.frameWarning'))}
+              ${this.returnUrl ? unsafeHTML(t('redirect.frameReturn', { url: escapeHtml(this.returnUrl) })) : nothing}
             </p>`
           : nothing}
       </div>

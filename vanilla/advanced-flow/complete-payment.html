@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advanced Flow — Complete Payment</title>
+    <title data-i18n="complete.title">Advanced Flow — Complete Payment</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,35 +11,27 @@
       <demo-header
         badge="Advanced Flow"
         variant="amber"
-        heading="Advanced Flow — Complete Payment"
+        data-i18n-attr="heading:complete.title; description:complete.desc"
         source="advanced-flow/complete-payment.ts"
-        description="Drive the raw Payment API v2 yourself: <code>eligible-solutions</code> → Secure Fields card form → <code>create_payment</code>. The v2 endpoints are proxied by a merchant backend (they require a server-side bearer token) — set the <strong>Proxy URL</strong> in the config panel."
       ></demo-header>
 
-      <demo-stepper steps="step-eligible:Eligible, step-form:Card form, step-3ds:3DS versioning, step-pay:Create payment, step-redirect:Redirection"></demo-stepper>
+      <demo-stepper steps="step-eligible:step.eligible, step-form:step.cardForm, step-3ds:step.threeDsVersioning, step-pay:step.createPayment, step-redirect:step.redirection"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <!-- Step 1 — eligible payment solutions returned for the order -->
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Eligible solutions</div>
-        <demo-chips empty-text="Checking eligibility…"></demo-chips>
-        <p class="text-xs text-muted mt-3">
-          Pick the card solution to pay with — <code>partner</code> + <code>method</code> go on the
-          <code>create_payment</code> split item. Non-card solutions are listed for information: each
-          needs its own partner flow, not this card form.
-        </p>
-        <p class="text-xs text-muted mt-2">
-          For a returning customer you would also list saved cards here (wallet tokens).
-          This demo covers the new-card path.
-        </p>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="complete.eligible"></div>
+        <demo-chips data-i18n-attr="empty-text:complete.checking"></demo-chips>
+        <p class="text-xs text-muted mt-3" data-i18n-html="complete.pickHint"></p>
+        <p class="text-xs text-muted mt-2" data-i18n="complete.walletHint"></p>
       </div>
 
       <!-- Step 4 opt-in — read at Secure Fields init, so toggling it re-mounts
            the form below (and clears anything typed into it) -->
       <label class="flex items-center gap-2 text-xs text-muted mb-4 cursor-pointer">
         <input type="checkbox" id="three-ds" class="cursor-pointer" checked />
-        Run 3DS on submit (<code>threeDS: { enabled: true }</code> — versioning + device fingerprint)
+        <span data-i18n-html="complete.threeDs"></span>
       </label>
 
       <!-- Steps 2–3 — Secure Fields card form (PCI-safe iframes) -->
@@ -58,10 +50,10 @@
       <!-- Step 5 — token registration consent -->
       <label class="flex items-center gap-2 text-xs text-muted mt-4 cursor-pointer">
         <input type="checkbox" id="save-token" class="cursor-pointer" />
-        Save this card for future payments (<code>save_token</code>)
+        <span data-i18n-html="complete.saveToken"></span>
       </label>
 
-      <demo-button label="Pay" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.pay" disabled></demo-button>
 
       <demo-result></demo-result>
 

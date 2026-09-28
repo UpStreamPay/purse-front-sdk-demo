@@ -1,6 +1,7 @@
 import '../components';
 import { getEnv, DEMO_ENV_KEYS } from '../shared/env';
 import { $, setStep, showNotice, showResult } from '../shared/ui';
+import { t } from '../i18n';
 import {
   proxyBase,
   browserData,
@@ -110,7 +111,7 @@ const solutionId = ({ partner, method }: CardSolution) => `${partner}:${method}`
 function renderEligible(solutions: CardSolution[], cards: CardSolution[]) {
   const cardIds = new Set(cards.map(solutionId));
   const chips = document.querySelector<DemoChips>('demo-chips')!;
-  chips.emptyText = 'No eligible solutions returned.';
+  chips.emptyText = t('complete.noEligible');
   chips.selectable = true;
   chips.chips = solutions.map(solution => ({
     id: solutionId(solution),
@@ -143,7 +144,7 @@ async function initCardForm() {
   const tenantId = getEnv('VITE_PURSE_SECUREFIELDS_TENANT_ID');
   const apiKey = getEnv('VITE_PURSE_API_KEY');
   if (!tenantId || !apiKey) {
-    showNotice('Set Tenant ID and API Key in .env.local or the debug panel');
+    showNotice(t('notice.setTenantAndKey'));
     return;
   }
 
@@ -160,8 +161,8 @@ async function initCardForm() {
     apiKey,
     fields: {
       cardNumber: { target: 'sf-pan', placeholder: '1234 5678 9012 3456' },
-      holderName: { target: 'sf-name', placeholder: 'Card Holder Name' },
-      expDate: { target: 'sf-exp', placeholder: 'MM/YY' },
+      holderName: { target: 'sf-name', placeholder: t('fields.placeholder.holder') },
+      expDate: { target: 'sf-exp', placeholder: t('common.placeholder.exp') },
       cvv: { target: 'sf-cvv', placeholder: '123' },
     },
     brandSelect: true,
@@ -171,7 +172,7 @@ async function initCardForm() {
       setStep('step-form', 'done');
       setStep('step-pay', 'active');
       payBtn.disabled = false;
-      payBtn.label = 'Pay';
+      payBtn.label = t('common.pay');
     },
   });
 }
@@ -187,7 +188,7 @@ function registerPayHandler() {
     const saveToken = saveTokenEl.checked;
     if (!paymentContext || !handle) return;
     payBtn.disabled = true;
-    payBtn.label = 'Processing…';
+    payBtn.label = t('common.processing');
     payBtn.loading = true;
 
     try {
@@ -209,7 +210,7 @@ function registerPayHandler() {
         setStep('step-3ds', 'error');
         showResult('error', tokenResult);
         payBtn.disabled = false;
-        payBtn.label = 'Retry';
+        payBtn.label = t('common.retry');
         payBtn.loading = false;
         return;
       }
@@ -277,13 +278,13 @@ function registerPayHandler() {
         setStep('step-pay', 'error');
         showResult('error', data);
         payBtn.disabled = false;
-        payBtn.label = 'Retry';
+        payBtn.label = t('common.retry');
         return;
       }
 
       setStep('step-pay', 'done');
-      showResult('success', data, 'Payment created');
-      payBtn.label = 'Done';
+      showResult('success', data, t('result.created'));
+      payBtn.label = t('common.done');
 
       // Step 7 — the payment is created, but not necessarily authorised yet.
       handleRedirection(data as PaymentV2);
@@ -292,7 +293,7 @@ function registerPayHandler() {
       setStep('step-pay', 'error');
       showResult('error', { error: (e as Error).message });
       payBtn.disabled = false;
-      payBtn.label = 'Retry';
+      payBtn.label = t('common.retry');
     }
   });
 }
@@ -336,9 +337,9 @@ function handleRedirection(payment: PaymentV2) {
     const stop = onRedirectionReturn((result) => {
       stop();
       setStep('step-redirect', 'done');
-      redirectionEl.setStatus('Redirection complete — frame closed.');
+      redirectionEl.setStatus(t('redirect.complete'));
       $('redirect-frame').replaceChildren();
-      showResult('success', result, 'Back from the redirection');
+      showResult('success', result, t('redirect.backFrom'));
     });
 
     await redirectionEl.updateComplete;
@@ -348,7 +349,7 @@ function handleRedirection(payment: PaymentV2) {
 
 async function main() {
   if (!proxyBase()) {
-    showNotice('Set Proxy URL (VITE_PURSE_PROXY_URL) in .env.local or the debug panel');
+    showNotice(t('notice.setProxy'));
     return;
   }
   try {
@@ -361,7 +362,7 @@ async function main() {
     // showcase implements the new-card path (see token-payment.ts for saved cards).
     if (cards.length === 0) {
       renderEligible(solutions, cards);
-      showNotice('No credit-card solution eligible for this order — cannot render the card form.');
+      showNotice(t('complete.noCardSolution'));
       return;
     }
     // The chip selection writes into paymentContext, so it exists before the

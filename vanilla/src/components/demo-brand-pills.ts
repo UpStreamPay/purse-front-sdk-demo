@@ -1,6 +1,7 @@
 import { html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { DemoElement } from './base';
+import { t } from '../i18n';
 
 const PILL_BASE = 'px-2.5 py-0.5 bg-bg border border-border rounded-full text-xs cursor-pointer transition-all';
 const PILL_SELECTED = 'px-2.5 py-0.5 bg-accent text-white border-accent rounded-full text-xs cursor-pointer transition-all';
@@ -39,7 +40,7 @@ export class DemoBrandPills extends DemoElement {
     if (this.brands.length === 0) return nothing;
     return html`
       <div class="flex items-center gap-2 text-xs text-muted mt-2.5">
-        <span>Detected:</span>
+        <span>${t('common.detectedBrands')}</span>
         <div class="flex gap-1.5 flex-wrap">
           ${this.brands.map(
             b => html`<button class="${b === this.selected ? PILL_SELECTED : PILL_BASE}" @click=${() => this.select(b)}>${b}</button>`,

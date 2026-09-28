@@ -1,5 +1,6 @@
 import '../components';
 import { showNotice, showResult } from '../shared/ui';
+import { t } from '../i18n';
 import { RETURN_MESSAGE, type RedirectionReturn } from '../shared/redirection';
 
 /**
@@ -38,11 +39,11 @@ if (embedded) {
 }
 
 if (!payload.redirectionData) {
-  showNotice('No purse-redirection-data parameter — open this page through an actual redirection.');
+  showNotice(t('return.noParam'));
 }
 
 showResult(
   'success',
   payload,
-  embedded ? 'Returned inside the iframe — parent notified' : 'Returned from the partner page',
+  embedded ? t('return.embedded') : t('return.topLevel'),
 );

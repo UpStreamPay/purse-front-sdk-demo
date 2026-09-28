@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay.tsx";
 import { loadSecureFields, type Securefields } from "@purse-eu/web-sdk";
 import { getEnv } from "../shared/env";
+import { t } from "../i18n";
 
 export const PaymentForm = ({
   embeddedBrandSelector,
@@ -49,11 +50,11 @@ export const PaymentForm = ({
             },
             expDate: {
               target: "expDate-target",
-              placeholder: "MM/YY",
+              placeholder: t("sf.placeholder.exp"),
             },
             holderName: {
               target: "holder-name-target",
-              placeholder: "Card Holder Name",
+              placeholder: t("sf.placeholder.holder"),
             },
           },
           styles: {
@@ -91,7 +92,7 @@ export const PaymentForm = ({
         htmlFor="card-number"
         className="block text-sm font-medium text-gray-700"
       >
-        Card Number
+        {t("sf.cardNumber")}
       </label>
       <div
         id="card-number"
@@ -111,7 +112,7 @@ export const PaymentForm = ({
         htmlFor="cvv"
         className="block text-sm font-medium text-gray-700 mt-4"
       >
-        CVV
+        {t("sf.cvv")}
       </label>
       <div
         id="cvv"
@@ -123,7 +124,7 @@ export const PaymentForm = ({
         htmlFor="expiry-date"
         className="block text-sm font-medium text-gray-700 mt-4"
       >
-        Expiry Date
+        {t("sf.expiry")}
       </label>
       <div
         id="expiry-date"
@@ -135,7 +136,7 @@ export const PaymentForm = ({
         htmlFor="holder-name"
         className="block text-sm font-medium text-gray-700 mt-4"
       >
-        Card Holder Name
+        {t("sf.holder")}
       </label>
       <div
         id="holder-name"
@@ -160,7 +161,7 @@ export const PaymentForm = ({
             });
         }}
       >
-        Submit Payment
+        {t("sf.submit")}
       </button>
 
       {tokenizationResult && (

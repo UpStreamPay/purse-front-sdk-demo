@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advanced Flow — Token Payment</title>
+    <title data-i18n="token.title">Advanced Flow — Token Payment</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,25 +11,24 @@
       <demo-header
         badge="Advanced Flow"
         variant="amber"
-        heading="Advanced Flow — Token Payment"
+        data-i18n-attr="heading:token.title; description:token.desc"
         source="advanced-flow/token-payment.ts"
-        description="Pay with a returning customer's <strong>saved card</strong>: list wallet tokens → pick one → re-enter <strong>CVV only</strong> via Secure Fields → <code>create_payment</code> with <code>wallet_token</code>. The v2 and wallet endpoints are proxied by a merchant backend — set the <strong>Proxy URL</strong> in the config panel."
       ></demo-header>
 
-      <demo-stepper steps="step-tokens:Saved cards, step-cvv:CVV, step-pay:Create payment"></demo-stepper>
+      <demo-stepper steps="step-tokens:step.savedCards, step-cvv:common.cvv, step-pay:step.createPayment"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <!-- Step 1 — saved card tokens for the returning customer -->
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Saved cards</div>
-        <demo-option-list mono uppercase-secondary empty-text="Loading saved cards…"></demo-option-list>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="token.savedCards"></div>
+        <demo-option-list mono uppercase-secondary data-i18n-attr="empty-text:token.loading"></demo-option-list>
       </div>
 
       <!-- Step 2 — Secure Fields CVV-only form (PCI-safe iframe) -->
       <sf-card-form fields="cvv"></sf-card-form>
 
-      <demo-button label="Pay with saved card" disabled></demo-button>
+      <demo-button data-i18n-attr="label:token.payWithSaved" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>
