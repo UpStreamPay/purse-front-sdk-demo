@@ -56,10 +56,12 @@ export function resetForKeys(keys: readonly EnvKey[]): void {
  * from, so it applies even to the demos that read nothing else.
  */
 export const DEMO_ENV_KEYS = {
-    // Drop-in and Headless Checkout are driven by a payment session.
+    // Drop-in and Headless Checkout are driven by a payment session — pasted,
+    // or created through the merchant backend (Alfred).
     session: [
         'VITE_PURSE_ENVIRONMENT',
         'VITE_PURSE_SESSION_JSON',
+        'VITE_PURSE_PROXY_URL',
     ],
     // Secure Fields tokenisation — tenant + api key, no session.
     secureFields: [

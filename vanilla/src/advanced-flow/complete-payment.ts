@@ -249,7 +249,7 @@ function registerPayHandler() {
         currency: paymentContext.currency,
         order: paymentContext.order,
         customer: paymentContext.customer,
-        shopper_redirection_url : 'https://purse.eu?clement_bg=1',
+        shopper_redirection_url: RETURN_URL,
         split: [
           {
             amount: paymentContext.amount,

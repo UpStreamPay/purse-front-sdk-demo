@@ -26,7 +26,7 @@ async function main() {
   // Step 2 — Fetch session
   let session: string;
   try {
-    session = getSession();
+    session = await getSession();
   } catch (err) {
     setStep('step-init', 'error');
     showNotice(String(err));
