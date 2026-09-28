@@ -2,9 +2,14 @@ import {getEnv} from './env';
 import {proxyBase} from './proxy';
 
 /**
- * The payment session the drop-in / headless demos boot with. A pasted
- * VITE_PURSE_SESSION_JSON wins; otherwise one is created through the merchant
- * backend (Alfred) — in production, this is your own backend call.
+ * The payment session the Drop-in / Headless demos boot with. A pasted
+ * VITE_PURSE_SESSION_JSON — an explicit debug-panel override — always wins;
+ * otherwise one is created through the merchant backend (Alfred), the same
+ * two calls the Sandpack demos use (see docs/post-payment-redirect.md):
+ *   1. GET  /order/                 → { order: <legacy order> }
+ *   2. POST /orchestration_session/ → client session; `widget.data` is the SDK input
+ *
+ * In production, this is your own backend call.
  */
 export async function getSession(): Promise<string> {
     const raw = getEnv('VITE_PURSE_SESSION_JSON').trim();
@@ -15,24 +20,30 @@ export async function getSession(): Promise<string> {
     if (!proxyBase()) {
         throw new Error('No session — set VITE_PURSE_PROXY_URL or VITE_PURSE_SESSION_JSON in .env.local or the debug panel');
     }
+    return fetchProxySession();
+}
 
-    // GET /order returns the sample legacy order; /orchestration_session turns
-    // it into a session. The shopper comes back to this page after a redirection.
-    const orderRes = await fetch(`${proxyBase()}/order/`);
+async function fetchProxySession(): Promise<string> {
+    const base = proxyBase();
+    const orderRes = await fetch(`${base}/order/`);
     if (!orderRes.ok) {
-        throw new Error(`Order fetch failed: ${orderRes.status} ${orderRes.statusText}`);
+        throw new Error(`Order fetch failed (${base}/order/): ${orderRes.status} ${orderRes.statusText}`);
     }
     const {order} = await orderRes.json();
+    // The shopper comes back to this page after a redirection (3DS, bank auth, …).
     order.order.redirection = window.location.origin + window.location.pathname;
 
-    const res = await fetch(`${proxyBase()}/orchestration_session/`, {
+    const sessionRes = await fetch(`${base}/orchestration_session/`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(order),
     });
-    if (!res.ok) {
-        throw new Error(`Session creation failed: ${res.status} ${res.statusText}`);
+    if (!sessionRes.ok) {
+        throw new Error(`Session creation failed (${base}/orchestration_session/): ${sessionRes.status} ${sessionRes.statusText}`);
     }
-    const {widget} = await res.json();
-    return widget.data;
+    const data = await sessionRes.json();
+    if (typeof data?.widget?.data !== 'string') {
+        throw new Error('Session response has no widget.data');
+    }
+    return data.widget.data;
 }
