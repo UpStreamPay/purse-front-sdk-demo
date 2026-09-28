@@ -94,14 +94,14 @@ async function loadSavedCards(customerReference: string) {
     selectedToken = tokens.find(t => t.id === id) ?? null;
     setStep('step-tokens', 'done');
   });
-  list.options = tokens.map(t => ({
-    id: t.id,
-    title: t.description?.display_token ?? t.id,
-    secondary: t.description?.brand_name,
+  list.options = tokens.map(tok => ({
+    id: tok.id,
+    title: tok.description?.display_token ?? tok.id,
+    secondary: tok.description?.brand_name,
     meta: [
-      [t.description?.holder_name, t.scope.partner].filter(Boolean).join(' · '),
-      `Exp ${monthYear(t.expiration_date)}`,
-      `Added ${day(t.created_at)} · Updated ${day(t.updated_at)}`,
+      [tok.description?.holder_name, tok.scope.partner].filter(Boolean).join(' · '),
+      t('token.expires', { date: monthYear(tok.expiration_date) }),
+      t('token.dates', { added: day(tok.created_at), updated: day(tok.updated_at) }),
     ],
   }));
   // Auto-select the first card so the demo is one click to pay.

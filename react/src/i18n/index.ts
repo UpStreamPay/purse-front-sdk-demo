@@ -39,7 +39,10 @@ function storedLocale(): string | null {
   }
 }
 
-export const locale: Locale = resolveLocale(storedLocale(), navigator.languages ?? [navigator.language]);
+export const locale: Locale = resolveLocale(
+  storedLocale(),
+  navigator.languages?.length ? navigator.languages : [navigator.language],
+);
 
 export function t(key: MessageKey): string {
   return LOCALES[locale].messages[key] ?? en[key];

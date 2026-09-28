@@ -248,6 +248,8 @@ export const fr: Record<MessageKey, string> = {
     'token.savedCards': 'Cartes enregistrées',
     'token.loading': 'Chargement des cartes enregistrées…',
     'token.payWithSaved': 'Payer avec la carte enregistrée',
+    'token.expires': 'Exp. {date}',
+    'token.dates': 'Ajoutée le {added} · Mise à jour le {updated}',
     'token.noTokens': 'Aucune carte enregistrée active pour ce client — lancez d’abord la démo Complete Payment avec « Enregistrer cette carte ».',
 
     // ── Advanced flow: redirection return ────────────────────────────────────

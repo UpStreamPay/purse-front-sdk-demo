@@ -31,8 +31,8 @@ async function main() {
     // Only `cvv` is strictly required; the others can be omitted for CVV-only flows.
     fields: {
       cardNumber: { target: 'sf-pan',  placeholder: '1234 5678 9012 3456' },
-      holderName: { target: 'sf-name', placeholder: 'Card Holder Name' },
-      expDate:    { target: 'sf-exp',  placeholder: 'MM/YY' },
+      holderName: { target: 'sf-name', placeholder: t('fields.placeholder.holder') },
+      expDate:    { target: 'sf-exp',  placeholder: t('common.placeholder.exp') },
       cvv:        { target: 'sf-cvv',  placeholder: '123' },
     },
     brandSelect: true,

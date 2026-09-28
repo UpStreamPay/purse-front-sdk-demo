@@ -251,6 +251,8 @@ export const en = {
     'token.savedCards': 'Saved cards',
     'token.loading': 'Loading saved cards…',
     'token.payWithSaved': 'Pay with saved card',
+    'token.expires': 'Exp {date}',
+    'token.dates': 'Added {added} · Updated {updated}',
     'token.noTokens': 'No active saved cards for this customer — run the Complete Payment demo with "Save this card" first.',
 
     // ── Advanced flow: redirection return ────────────────────────────────────
