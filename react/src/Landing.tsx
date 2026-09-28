@@ -1,27 +1,28 @@
+import { t } from "./i18n";
+import { LocalePicker } from "./shared/LocalePicker";
+
 // One entry per demo page. Each `href` is a folder with its own index.html
 // (see vite.config.ts), relative so it works under any VITE_BASE_URL.
 const DEMOS = [
   {
     href: "securefields/",
     badge: "Secure Fields",
-    title: "Tokenize",
-    description:
-      "Card-field iframes via initSecureFields → vault_form_token. Standalone or embedded co-brand selector. No payment session required.",
+    title: t("landing.sf.title"),
+    description: t("landing.sf.desc"),
   },
 ];
 
 export function Landing() {
   return (
     <main className="min-h-screen w-screen flex flex-col items-center p-4 pt-10">
-      <header className="w-full max-w-2xl mb-8">
+      <header className="w-full max-w-2xl mb-8 relative">
+        <LocalePicker className="absolute right-0 top-0" />
         <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
-          Purse SDK
+          {t("landing.eyebrow")}
         </p>
-        <h1 className="text-2xl font-bold mt-1">React demos</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          React 19 + <code>@purse-eu/web-sdk</code>. Set credentials in each
-          demo's Debug panel or in the repo-root <code>.env.local</code>.
-        </p>
+        <h1 className="text-2xl font-bold mt-1">{t("landing.title")}</h1>
+        {/* Static dictionary markup (<code>) — never user input. */}
+        <p className="text-sm text-gray-400 mt-1" dangerouslySetInnerHTML={{ __html: t("landing.intro") }} />
       </header>
       <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
         {DEMOS.map((demo) => (

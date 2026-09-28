@@ -1,4 +1,5 @@
 import type { Securefields } from "@purse-eu/web-sdk";
+import { t } from "../i18n";
 type CardBrand = Securefields.Brand;
 
 const assetsBrandMapper: Record<string, string> = {
@@ -27,7 +28,7 @@ export const InlineBrandSelector = ({
     // Only one brand, just show the icon
     return (
       <div className="flex px-4 py-2 items-center text-sm text-gray-600">
-        <span id="brand-label">Your payment will be processed with</span>
+        <span id="brand-label">{t("sf.brand.single")}</span>
         <span
           aria-label={brands[0]}
           title={brands[0]}
@@ -47,12 +48,12 @@ export const InlineBrandSelector = ({
   // Multiple brands: render as a radio group
   return (
     <div className="flex px-4 py-2 items-center text-sm text-gray-600">
-      <span id="brand-label">Please select your preferred card brand:</span>
+      <span id="brand-label">{t("sf.brand.pick")}</span>
       <fieldset
         style={{ border: "none", padding: 0, margin: 0 }}
         aria-labelledby="brand-label"
       >
-        <legend className="sr-only">Select card brand</legend>
+        <legend className="sr-only">{t("sf.brand.legend")}</legend>
         <div
           role="radiogroup"
           aria-labelledby="brand-label"

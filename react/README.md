@@ -47,6 +47,10 @@ Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`)
 | `src/shared/env.ts` | Reads env vars; falls back to `localStorage` overrides |
 | `src/shared/DebugPanel.tsx` | In-app config panel — set credentials without rebuild |
 
+## Languages (i18n)
+
+English and French, switched by the locale picker in each page header (stored under `purse_demo_locale`, shared with the vanilla app). Dictionaries are `src/i18n/en.ts` (reference) and `src/i18n/fr.ts` (typed against it); components call `t('key')`. Same model as the vanilla app — see `vanilla/README.md`.
+
 ## Credential override without rebuild
 
 Open the **Debug** panel in the running app and enter `VITE_PURSE_TENANT_ID` / `VITE_PURSE_API_KEY`. Values persist in `localStorage` and override the build defaults immediately.
