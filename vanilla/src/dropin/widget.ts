@@ -2,7 +2,7 @@ import '../components';
 import { loadDropInCheckout } from '@purse-eu/web-sdk';
 import { getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import { getSession } from '../shared/session';
-import { $, setStep, showNotice, showResult } from '../shared/ui';
+import { $, setStep, showNotice, showResult, showRedirectionReturn } from '../shared/ui';
 import type { DemoButton } from '../components/demo-button';
 import { mountDebugPanel } from '../shared/debug-panel';
 
@@ -14,6 +14,11 @@ import { mountDebugPanel } from '../shared/debug-panel';
 const payBtn = document.querySelector<DemoButton>('demo-button')!;
 
 async function main() {
+  // Back from submitPayment()'s redirection — show the outcome, don't start over.
+  if (showRedirectionReturn()) {
+    return;
+  }
+
   setStep('step-sdk', 'active');
 
   // Step 1 — Load SDK from CDN

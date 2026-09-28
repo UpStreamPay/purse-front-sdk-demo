@@ -120,11 +120,13 @@
                 <div class="text-xl font-semibold" style="color: var(--xc-ink-2)" data-total></div>
               </div>
 
-              <!-- Token path: a CVV field mounts here when the token needs one.
-                   Hidden by el.hasUI() — the SDK's own signal for "nothing to render". -->
-              <div id="token-cvv-field" class="xc-field" hidden>
-                <label>CVV</label>
-                <div class="hf-field-wrap" id="token-element"></div>
+              <!-- Token path: the CVV hosted field is mounted collapsed and only
+                   revealed by a first tap on "Payer" when the token needs it. -->
+              <div id="token-cvv-field" class="xc-collapse">
+                <div class="xc-field">
+                  <label>Cryptogramme de la carte <span id="token-cvv-card"></span></label>
+                  <div class="hf-field-wrap" id="token-cvv"></div>
+                </div>
               </div>
 
               <button id="express-pay" class="xc-btn-primary w-full justify-between px-4">
@@ -193,12 +195,18 @@
         </div>
 
         <!-- ── Confirmation ────────────────────────────────────────── -->
+        <!-- Shown after submitPayment(): either in place, or — the usual case — when
+             the SDK brings the shopper back here with ?purse-redirection-data. -->
         <div id="done" hidden class="xc-overlay bg-white px-6 text-center" style="z-index: 15">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background: var(--xc-accent)">
+          <div id="done-ok" class="w-16 h-16 rounded-full flex items-center justify-center" style="background: var(--xc-accent)">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </div>
-          <div class="text-2xl tracking-tight mt-5">Commande confirmée !</div>
-          <div class="text-sm mt-3" style="color: #364153">Payé <span data-total></span> · <span id="done-method"></span></div>
+          <div id="done-failed" hidden class="w-16 h-16 rounded-full flex items-center justify-center bg-[#364153]">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </div>
+          <div id="done-title" class="text-2xl tracking-tight mt-5"></div>
+          <div id="done-detail" class="text-sm mt-3 max-w-[280px]" style="color: #364153"></div>
+          <div id="done-ref" class="text-xs mt-2" style="color: var(--xc-muted-2)"></div>
           <button id="back-home" class="xc-btn-primary w-full mt-8">Retour à l'accueil</button>
         </div>
       </div>

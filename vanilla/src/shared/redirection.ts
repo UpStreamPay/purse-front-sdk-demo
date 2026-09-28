@@ -259,6 +259,44 @@ export type RedirectionReturn = {
 
 export const RETURN_MESSAGE = 'purse-demo:redirection-complete';
 
+/** Claims carried by the `purse-redirection-data` JWS. */
+export type RedirectionClaims = {
+  client_session_id?: string;
+  client_session_status?: string;
+  payment_id?: string;
+  authorization_status?: string;
+};
+
+/**
+ * For a page that is its own `shopper_redirection_url` (every session demo — see
+ * shared/session.ts): after `submitPayment()`, the SDK navigates the whole tab
+ * back here with `?purse-redirection-data=<JWS>`. Without this, the page boots a
+ * fresh session and looks like it just reloaded.
+ *
+ * Returns the decoded claims and strips the parameter from the URL (so a manual
+ * reload starts a new checkout), or `null` on a normal load.
+ *
+ * Decoded for DISPLAY only — a real integration verifies the signature
+ * server-side against GET /payment/v2/signing-jwks and takes the final status
+ * from the `payment.updated` webhook.
+ */
+export function consumeRedirectionReturn(): RedirectionClaims | null {
+  const url = new URL(window.location.href);
+  const jws = url.searchParams.get('purse-redirection-data');
+  if (!jws) {
+    return null;
+  }
+  url.searchParams.delete('purse-redirection-data');
+  history.replaceState(null, '', url);
+
+  try {
+    const payload = jws.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(payload)) as RedirectionClaims;
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Listen for the return page's `postMessage` (iframe mode only). Returns the
  * unsubscribe function. Only same-origin messages are accepted — the return

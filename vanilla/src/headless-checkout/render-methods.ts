@@ -2,7 +2,7 @@ import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import { getEnv, getEnvironment, DEMO_ENV_KEYS } from '../shared/env';
 import {getSession} from '../shared/session';
-import {$, setStep, showNotice, showResult} from '../shared/ui';
+import {$, setStep, showNotice, showResult, showRedirectionReturn} from '../shared/ui';
 import type {DemoButton} from '../components/demo-button';
 import type {DemoOptionList} from '../components/demo-option-list';
 import { mountDebugPanel } from '../shared/debug-panel';
@@ -80,6 +80,11 @@ function renderPaymentElement(
 }
 
 async function main() {
+    // Back from submitPayment()'s redirection — show the outcome, don't start over.
+    if (showRedirectionReturn()) {
+        return;
+    }
+
     setStep('step-sdk', 'active');
 
     // Step 1 — Load the SDK from CDN

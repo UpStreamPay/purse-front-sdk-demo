@@ -2,7 +2,8 @@ import '../components';
 import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnvironment, DEMO_ENV_KEYS} from '../shared/env';
 import {getSession} from '../shared/session';
-import {$, setStep, showNotice, showResult} from '../shared/ui';
+import {$, isFailedAuthorization, setStep, showNotice, showResult} from '../shared/ui';
+import {consumeRedirectionReturn, type RedirectionClaims} from '../shared/redirection';
 import {mountDebugPanel} from '../shared/debug-panel';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,10 +92,43 @@ function tokenPanLabel(t: Token): string {
     return last4 ? `•••• ${last4}` : raw;
 }
 
+// The token's CVV field is mounted as soon as the sheet opens but stays
+// collapsed: the first tap on "Payer" either pays straight away (the token
+// needs no CVV, so the payment is already fulfilled — true one-click) or
+// reveals the field and waits for it.
+let cvvRevealed = false;
+
+function revealCvv(open: boolean) {
+    cvvRevealed = open;
+    $('token-cvv-field').classList.toggle('is-open', open);
+}
+
+// A bare hosted-field iframe, themed like the card sheet — getPaymentElement()'s
+// hosted form would draw its own framed input inside ours.
+function mountCvvField(t: Token): ActiveElement {
+    const hf = t.getHostedFields({
+        fields: {cvv: {target: 'token-cvv', placeholder: '123'}},
+        theme: CARD_THEME,
+    });
+    hf.render();
+    return hf;
+}
+
+// hostedForm.noCVV is only honoured by the hosted form, which then renders
+// nothing and is fulfilled at once. It suppresses the field and its requirement
+// client-side only: the partner still enforces its own rule server-side, so
+// forcing it on a token that needs CVV can make submitPayment() fail.
+function mountWithoutCvv(t: Token): ActiveElement {
+    const el = t.getPaymentElement({hostedForm: {noCVV: true}});
+    el.appendTo($('token-cvv'));
+    return el;
+}
+
 function refreshPayButtons() {
     const t = currentToken();
-    // The express button is always clickable without a token: it opens the card sheet.
-    expressPayBtn.disabled = t ? !fulfilled : !cardMethod;
+    // With a token, the first tap is always allowed (it pays or reveals the CVV);
+    // without one, the button opens the card sheet.
+    expressPayBtn.disabled = t ? cvvRevealed && !fulfilled : !cardMethod;
     cardPayBtn.disabled = !fulfilled;
 }
 
@@ -105,28 +139,18 @@ function openExpress() {
     show('sheet-card', false);
     show('other-method', !!t && !!cardMethod);
     show('express-pay-token', !!t);
-    show('token-cvv-field', false);
+    revealCvv(false);
 
     unmount();
     if (t) {
         $('express-pay-label').textContent = 'Payer';
         $('token-pan').textContent = tokenPanLabel(t);
+        $('token-cvv-card').textContent = tokenPanLabel(t);
         ($('token-icon') as HTMLImageElement).src = t.iconUrl;
         ($('token-icon') as HTMLImageElement).alt = t.description.brand ?? '';
 
-        // hostedForm.noCVV only suppresses the field and its requirement client-side;
-        // it doesn't change what the partner enforces server-side, so forcing it on a
-        // token that actually needs CVV can make submitPayment() fail even though the
-        // UI shows nothing left to fill in.
-        const el = t.getPaymentElement(noCvv.checked ? {hostedForm: {noCVV: true}} : undefined);
-        el.on('fatalError', () => showResult('error', 'Fatal error in token element'));
-        el.appendTo($('token-element'));
-        activeElement = el;
-
-        // hasUI() is the SDK's own signal for "nothing to render" — true one-click
-        // when the token needs no CVV, so the field row collapses instead of
-        // showing an empty box.
-        show('token-cvv-field', el.hasUI());
+        activeElement = noCvv.checked ? mountWithoutCvv(t) : mountCvvField(t);
+        activeElement.on('fatalError', () => showResult('error', 'Fatal error in token element'));
     } else {
         $('express-pay-label').textContent = 'Payer par carte bancaire';
     }
@@ -162,6 +186,32 @@ function closeAll() {
     ['backdrop', 'sheet-express', 'sheet-card', 'busy', 'done'].forEach(id => show(id, false));
 }
 
+// Copy per authorization status. PENDING is what the sandbox returns for a
+// submitted card payment until the partner settles it.
+function confirmationCopy(status = ''): {title: string; detail: string} {
+    if (isFailedAuthorization(status)) {
+        return {title: 'Paiement refusé', detail: "Aucun montant n'a été débité. Vous pouvez réessayer avec un autre moyen de paiement."};
+    }
+    if (status === 'AUTHORIZED' || status === 'CAPTURED') {
+        return {title: 'Commande confirmée !', detail: 'Merci pour votre achat. Un e-mail de confirmation vous a été envoyé.'};
+    }
+    return {title: 'Commande enregistrée', detail: 'Votre paiement est en cours de validation — vous recevrez une confirmation par e-mail.'};
+}
+
+function showConfirmation(claims: RedirectionClaims, methodLabel?: string) {
+    const status = claims.authorization_status;
+    const {title, detail} = confirmationCopy(status);
+    $('done-title').textContent = title;
+    $('done-detail').textContent = detail;
+    $('done-ref').textContent = [methodLabel, claims.payment_id && `Paiement ${claims.payment_id.slice(0, 8)}`]
+        .filter(Boolean)
+        .join(' · ');
+    show('done-ok', !isFailedAuthorization(status));
+    show('done-failed', isFailedAuthorization(status));
+    show('done', true);
+    setStep('step-pay', isFailedAuthorization(status) ? 'error' : 'done');
+}
+
 async function pay(source: Token | CardMethod, methodLabel: string) {
     if (!checkout) {
         return;
@@ -172,10 +222,11 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
         // Pin the source actually shown to the user: a CVV-less token could
         // otherwise stay primary (and fulfilled) while the card sheet is open.
         source.setAsPrimarySource();
+        // Usually never resolves here: with a shopper_redirection_url on the
+        // session (shared/session.ts), the SDK navigates the tab away and the
+        // shopper lands back on this page — see the return branch in main().
         await checkout.submitPayment();
-        setStep('step-pay', 'done');
-        $('done-method').textContent = methodLabel;
-        show('done', true);
+        showConfirmation({}, methodLabel);
         // The session is consumed — no second purchase on it.
         buyNowBtn.disabled = true;
         showResult('success', {status: 'submitted', method: methodLabel});
@@ -192,16 +243,20 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
 buyNowBtn.addEventListener('click', openExpress);
 $('backdrop').addEventListener('click', closeAll);
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeAll));
-$('back-home').addEventListener('click', closeAll);
+// A paid session can't be reused — start over on a fresh one.
+$('back-home').addEventListener('click', () => location.reload());
 $('other-method').addEventListener('click', openCard);
 $('card-back').addEventListener('click', openExpress);
 
 expressPayBtn.addEventListener('click', () => {
     const t = currentToken();
-    if (t) {
+    if (!t) {
+        openCard();
+    } else if (fulfilled) {
         pay(t, `${t.description.brand ?? 'Carte'} ${tokenPanLabel(t)}`);
     } else {
-        openCard();
+        revealCvv(true);
+        refreshPayButtons();
     }
 });
 cardPayBtn.addEventListener('click', () => {
@@ -226,6 +281,15 @@ noCvv.addEventListener('change', () => {
 // ── Checkout ─────────────────────────────────────────────────────────────────
 
 async function main() {
+    // Back from submitPayment()'s redirection: show the outcome, don't start over.
+    const returned = consumeRedirectionReturn();
+    if (returned) {
+        ['step-sdk', 'step-init', 'step-ready'].forEach(id => setStep(id, 'done'));
+        showConfirmation(returned);
+        showResult(isFailedAuthorization(returned.authorization_status) ? 'error' : 'success', returned, 'Returned from payment');
+        return;
+    }
+
     setStep('step-sdk', 'active');
     const {createHeadlessCheckout} = await loadHeadlessCheckout(getEnvironment());
     setStep('step-sdk', 'done');
