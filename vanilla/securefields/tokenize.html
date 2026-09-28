@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Secure Fields — Quick Start</title>
+    <title data-i18n="sf.pageTitle">Secure Fields — Quick Start</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,18 +11,17 @@
       <demo-header
         badge="Secure Fields"
         variant="pink"
-        heading="Secure Fields — Integration"
+        data-i18n-attr="heading:sf.title; description:sf.desc"
         source="securefields/tokenize.ts"
-        description="<code>initSecureFields</code> → fields rendered in iframes → submit → vault token returned. No session required — operates at tenant level."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init fields, step-render:Fields ready, step-submit:Tokenise"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initFields, step-render:step.fieldsReady, step-submit:step.tokenise"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <sf-card-form fields="pan exp cvv name" brand></sf-card-form>
 
-      <demo-button label="Submit" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.submit" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>

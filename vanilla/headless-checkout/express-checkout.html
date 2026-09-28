@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Headless Checkout — Express Checkout</title>
+    <title data-i18n="express.pageTitle">Headless Checkout — Express Checkout</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,28 +11,27 @@
       <demo-header
         badge="Headless"
         variant="violet"
-        heading="Express Checkout — One-click"
+        data-i18n-attr="heading:express.title; description:express.desc"
         source="headless-checkout/express-checkout.ts"
-        description="Product page → <em>Acheter maintenant</em> → express sheet. With a saved token in the session, <code>paymentTokens</code> gives a one-click pay button; without one, the sheet falls back to <code>getHostedFields()</code> on the credit card method."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init checkout, step-ready:List tokens, step-pay:Pay"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initCheckout, step-ready:step.listTokens, step-pay:step.pay"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <!-- Demo-only controls — not part of a real integration, just ways to
            force each SDK path so both are reachable from one session. -->
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Demo controls</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="express.controls"></div>
         <div class="flex flex-col gap-3">
           <label class="flex items-center gap-2 text-sm cursor-pointer select-none">
             <input type="checkbox" id="force-no-token" class="accent-accent" />
-            Ignore saved tokens (show the new-card path)
+            <span data-i18n="express.ignoreTokens"></span>
             <span id="token-status" class="ml-auto text-xs text-muted"></span>
           </label>
           <label class="flex items-center gap-2 text-sm cursor-pointer select-none">
             <input type="checkbox" id="no-cvv" class="accent-accent" />
-            Force <code>hostedForm.noCVV</code> on the token element
+            <span data-i18n-html="express.forceNoCvv"></span>
           </label>
         </div>
       </div>
@@ -51,17 +50,15 @@
         <!-- Product page -->
         <div class="flex-1 overflow-y-auto">
           <div class="relative h-[300px] bg-[#f5f5f3]">
-            <img src="../express-checkout/product-chair.jpg" alt="Chaise en bois - Laurna" class="w-full h-full object-cover" />
-            <span class="absolute left-4 bottom-4 px-3 py-1 rounded-full bg-white/90 text-xs">En stock</span>
+            <img src="../express-checkout/product-chair.jpg" data-i18n-attr="alt:shop.productName" class="w-full h-full object-cover" />
+            <span class="absolute left-4 bottom-4 px-3 py-1 rounded-full bg-white/90 text-xs" data-i18n="shop.inStock"></span>
           </div>
           <div class="px-4 pt-5 pb-8">
-            <div class="text-2xl tracking-tight">Chaise en bois - Laurna</div>
+            <div class="text-2xl tracking-tight" data-i18n="shop.productName"></div>
             <div class="text-xl mt-2">79,99 €</div>
             <div class="xc-divider my-4"></div>
-            <p class="text-sm leading-[21px]" style="color: var(--xc-muted)">
-              Chaise en bois massif au design minimaliste et élégant. Parfaite pour votre salle à manger ou votre bureau.
-            </p>
-            <button id="buy-now" disabled class="xc-btn-primary w-full mt-6">Acheter maintenant</button>
+            <p class="text-sm leading-[21px]" style="color: var(--xc-muted)" data-i18n="shop.productDesc"></p>
+            <button id="buy-now" disabled class="xc-btn-primary w-full mt-6" data-i18n="shop.buyNow"></button>
           </div>
         </div>
 
@@ -72,8 +69,8 @@
         <div id="sheet-express" hidden class="xc-sheet">
           <div class="xc-sheet-handle"><span></span></div>
           <div class="xc-sheet-header">
-            <div class="xc-sheet-title">Achat express</div>
-            <button data-close class="xc-icon-btn absolute right-4" aria-label="Fermer">
+            <div class="xc-sheet-title" data-i18n="shop.expressTitle"></div>
+            <button data-close class="xc-icon-btn absolute right-4" data-i18n-attr="aria-label:shop.close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
@@ -81,7 +78,7 @@
           <div class="xc-sheet-body">
             <!-- Customer info (mock — in a real integration this comes from your account system) -->
             <div class="flex flex-col gap-4">
-              <div class="text-base font-medium" style="color: #364153">Mes informations</div>
+              <div class="text-base font-medium" style="color: #364153" data-i18n="shop.myInfo"></div>
               <div class="xc-info-card">
                 <div class="xc-name">Camille Lourme</div>
                 <div class="xc-meta">0601020304</div>
@@ -93,19 +90,19 @@
 
             <!-- Delivery (cosmetic: the charged amount is fixed by the payment session) -->
             <div class="flex flex-col gap-4">
-              <div class="text-base font-medium" style="color: #364153">Mode de livraison</div>
+              <div class="text-base font-medium" style="color: #364153" data-i18n="shop.delivery"></div>
               <label class="ship-option">
                 <input type="radio" name="ship" value="home" checked class="sr-only" />
                 <div class="flex-1">
-                  <div class="text-sm font-medium" style="color: var(--xc-ink-2)">Livraison à domicile</div>
-                  <div class="text-xs" style="color: var(--xc-muted)">Sous 3-5 jours ouvrés · 1 rue de la Liberté, 75011 Paris</div>
+                  <div class="text-sm font-medium" style="color: var(--xc-ink-2)" data-i18n="shop.home"></div>
+                  <div class="text-xs" style="color: var(--xc-muted)" data-i18n="shop.homeDetail"></div>
                 </div>
               </label>
               <label class="ship-option">
                 <input type="radio" name="ship" value="store" class="sr-only" />
                 <div class="flex-1">
-                  <div class="text-sm font-medium" style="color: var(--xc-ink-2)">Retrait en magasin</div>
-                  <div class="text-xs" style="color: var(--xc-muted)">Disponible sous 2h</div>
+                  <div class="text-sm font-medium" style="color: var(--xc-ink-2)" data-i18n="shop.store"></div>
+                  <div class="text-xs" style="color: var(--xc-muted)" data-i18n="shop.storeDetail"></div>
                 </div>
               </label>
             </div>
@@ -114,9 +111,9 @@
 
             <!-- Payment -->
             <div class="flex flex-col gap-4">
-              <div class="text-base font-medium" style="color: #364153">Mode de paiement</div>
+              <div class="text-base font-medium" style="color: #364153" data-i18n="shop.payment"></div>
               <div class="xc-total-row">
-                <div class="text-sm" style="color: #364153">Total</div>
+                <div class="text-sm" style="color: #364153" data-i18n="shop.total"></div>
                 <div class="text-xl font-semibold" style="color: var(--xc-ink-2)" data-total></div>
               </div>
 
@@ -124,7 +121,7 @@
                    revealed by a first tap on "Payer" when the token needs it. -->
               <div id="token-cvv-field" class="xc-collapse">
                 <div class="xc-field">
-                  <label>Cryptogramme de la carte <span id="token-cvv-card"></span></label>
+                  <label><span data-i18n="shop.cvvFor"></span> <span id="token-cvv-card"></span></label>
                   <div class="hf-field-wrap" id="token-cvv"></div>
                 </div>
               </div>
@@ -137,7 +134,7 @@
                 </span>
               </button>
 
-              <button id="other-method" hidden class="xc-link mx-auto">Utiliser un autre moyen de paiement</button>
+              <button id="other-method" hidden class="xc-link mx-auto" data-i18n="shop.otherMethod"></button>
             </div>
           </div>
         </div>
@@ -146,44 +143,44 @@
         <div id="sheet-card" hidden class="xc-sheet" style="z-index: 11">
           <div class="xc-sheet-handle"><span></span></div>
           <div class="xc-sheet-header">
-            <button id="card-back" class="xc-icon-btn absolute left-4" aria-label="Retour">
+            <button id="card-back" class="xc-icon-btn absolute left-4" data-i18n-attr="aria-label:shop.back">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
             </button>
-            <div class="xc-sheet-title">Ajouter ma carte</div>
-            <button data-close class="xc-icon-btn absolute right-4" aria-label="Fermer">
+            <div class="xc-sheet-title" data-i18n="shop.addCard"></div>
+            <button data-close class="xc-icon-btn absolute right-4" data-i18n-attr="aria-label:shop.close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
 
           <div class="xc-sheet-body">
             <div class="xc-field">
-              <label>Numéro de carte</label>
+              <label data-i18n="shop.cardNumber"></label>
               <div class="hf-field-wrap" id="xc-pan"></div>
             </div>
             <div class="flex gap-3">
               <div class="xc-field flex-1 min-w-0">
-                <label>Date d'expiration</label>
+                <label data-i18n="shop.expiry"></label>
                 <div class="hf-field-wrap" id="xc-exp"></div>
               </div>
               <div class="xc-field flex-1 min-w-0">
-                <label>CVV</label>
+                <label data-i18n="shop.cvv"></label>
                 <div class="hf-field-wrap" id="xc-cvv"></div>
               </div>
             </div>
             <div class="xc-field">
-              <label>Nom sur la carte</label>
+              <label data-i18n="shop.holder"></label>
               <div class="hf-field-wrap" id="xc-name"></div>
             </div>
 
             <label id="save-card-box" hidden class="rounded bg-[#f3f4f6] p-4 flex items-center gap-2 text-sm cursor-pointer" style="color: var(--xc-ink-2)">
               <input type="checkbox" id="save-card" style="accent-color: var(--xc-accent)" />
-              Enregistrer ma carte bancaire
+              <span data-i18n="shop.saveCard"></span>
             </label>
 
-            <button id="card-pay" disabled class="xc-btn-primary w-full">Payer <span data-total></span></button>
+            <button id="card-pay" disabled class="xc-btn-primary w-full"><span data-i18n="shop.pay"></span> <span data-total></span></button>
             <div class="flex items-center justify-center gap-2 text-sm" style="color: #364153">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="15" height="10" x="4.5" y="11" rx="2.2"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg>
-              Paiement sécurisé
+              <span data-i18n="shop.securePayment"></span>
             </div>
           </div>
         </div>
@@ -191,7 +188,7 @@
         <!-- ── Busy overlay ────────────────────────────────────────── -->
         <div id="busy" hidden class="xc-overlay bg-white/95">
           <div class="w-9 h-9 rounded-full border-[2.5px] animate-spin" style="border-color: var(--xc-hairline); border-top-color: var(--xc-accent)"></div>
-          <div class="text-sm" style="color: var(--xc-muted-2)">Paiement en cours…</div>
+          <div class="text-sm" style="color: var(--xc-muted-2)" data-i18n="shop.processing"></div>
         </div>
 
         <!-- ── Confirmation ────────────────────────────────────────── -->
@@ -207,7 +204,7 @@
           <div id="done-title" class="text-2xl tracking-tight mt-5"></div>
           <div id="done-detail" class="text-sm mt-3 max-w-[280px]" style="color: #364153"></div>
           <div id="done-ref" class="text-xs mt-2" style="color: var(--xc-muted-2)"></div>
-          <button id="back-home" class="xc-btn-primary w-full mt-8">Retour à l'accueil</button>
+          <button id="back-home" class="xc-btn-primary w-full mt-8" data-i18n="shop.backHome"></button>
         </div>
       </div>
 

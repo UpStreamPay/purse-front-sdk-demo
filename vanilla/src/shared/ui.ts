@@ -2,6 +2,7 @@ import type { DemoStepper, StepState } from '../components/demo-stepper';
 import type { DemoNotice } from '../components/demo-notice';
 import type { DemoResult } from '../components/demo-result';
 import { consumeRedirectionReturn } from './redirection';
+import { t } from '../i18n';
 
 export const $ = (id: string) => document.getElementById(id)!;
 
@@ -16,7 +17,7 @@ export function showNotice(msg: string) {
   document.querySelector<DemoNotice>('demo-notice')?.show(msg);
 }
 
-export function showResult(type: 'success' | 'error', data: unknown, successLabel = 'Payment submitted') {
+export function showResult(type: 'success' | 'error', data: unknown, successLabel = t('result.submitted')) {
   document.querySelector<DemoResult>('demo-result')?.show(type, data, successLabel);
 }
 
@@ -39,7 +40,7 @@ export function showRedirectionReturn(): boolean {
   showResult(
     isFailedAuthorization(status) ? 'error' : 'success',
     claims,
-    `Returned from payment — authorization ${status}. Reload to start a new one.`,
+    t('result.returned', { status }),
   );
   return true;
 }

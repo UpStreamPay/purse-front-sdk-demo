@@ -1,13 +1,14 @@
 import { html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { DemoElement } from './base';
+import { t, type MessageKey } from '../i18n';
 
 // Canonical render order; `fields` selects which of these to show.
-const FIELD_DEFS: Record<string, { label: string; target: string; cls: string }> = {
-  pan:  { label: 'Card number', target: 'sf-pan',  cls: 'hf-field hf-field--full hf-field--pan' },
-  exp:  { label: 'Expiry',      target: 'sf-exp',  cls: 'hf-field' },
-  cvv:  { label: 'CVV',         target: 'sf-cvv',  cls: 'hf-field hf-field--exp' },
-  name: { label: 'Holder name', target: 'sf-name', cls: 'hf-field hf-field--name' },
+const FIELD_DEFS: Record<string, { label: MessageKey; target: string; cls: string }> = {
+  pan:  { label: 'common.cardNumber', target: 'sf-pan',  cls: 'hf-field hf-field--full hf-field--pan' },
+  exp:  { label: 'common.expiry',     target: 'sf-exp',  cls: 'hf-field' },
+  cvv:  { label: 'common.cvv',        target: 'sf-cvv',  cls: 'hf-field hf-field--exp' },
+  name: { label: 'common.holderName', target: 'sf-name', cls: 'hf-field hf-field--name' },
 };
 const ORDER = ['pan', 'exp', 'cvv', 'name'];
 
@@ -33,13 +34,13 @@ export class SfCardForm extends DemoElement {
     const shown = ORDER.filter(k => selected.has(k));
     return html`
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Card details</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">${t('common.cardDetails')}</div>
         <div class="hf-layout-grid">
           ${shown.map(k => {
             const f = FIELD_DEFS[k];
             return html`
               <div class="${f.cls}">
-                <label class="hf-label">${f.label}</label>
+                <label class="hf-label">${t(f.label)}</label>
                 <div class="hf-field-wrap" id="${f.target}"></div>
               </div>
             `;

@@ -28,6 +28,11 @@
   body { min-height: 100vh; }
 }
 
+/* Everything below lives in the components layer so Tailwind utilities on the
+ * same element win (e.g. `justify-between` over .xc-btn-primary's centring) —
+ * unlayered rules would beat every utility regardless of specificity. */
+@layer components {
+
 /* ── Steps — JS sets data-state at runtime ───────────────────── */
 
 .step[data-state="done"] .step__icon    { background: var(--color-step-done); }
@@ -354,4 +359,6 @@
   background: #fff;
   border-color: #99a1af;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
 }

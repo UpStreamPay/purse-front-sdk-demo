@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Drop-in Checkout — Quick Start</title>
+    <title data-i18n="dropin.title">Drop-in Checkout — Quick Start</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,17 +11,16 @@
       <demo-header
         badge="Drop-in"
         variant="blue"
-        heading="Drop-in Checkout — Quick Start"
+        data-i18n-attr="heading:dropin.title; description:dropin.desc"
         source="dropin/widget.ts"
-        description="Pre-built widget mounted in a div. React to <code>isPaymentFulfilled</code> and call <code>submitPayment()</code> when ready."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init drop-in, step-mount:Mount widget, step-pay:Pay"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initDropin, step-mount:step.mountWidget, step-pay:step.pay"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <div class="bg-white border border-border rounded-xl p-5 mb-4">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Widget</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="dropin.widget"></div>
         <!-- The drop-in renders itself inside this element -->
         <div id="dropin-container"></div>
       </div>
@@ -31,7 +30,7 @@
         Use this external button pattern when you need full control over placement
         (e.g. a sticky footer, or a multi-step checkout flow).
       -->
-      <demo-button label="Pay" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.pay" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>

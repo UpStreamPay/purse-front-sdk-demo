@@ -1,5 +1,6 @@
 import {getEnv} from './env';
 import {proxyBase} from './proxy';
+import {t} from '../i18n';
 
 /**
  * The payment session the Drop-in / Headless demos boot with. A pasted
@@ -18,7 +19,7 @@ export async function getSession(): Promise<string> {
         return s + '='.repeat((4 - (s.length % 4)) % 4);
     }
     if (!proxyBase()) {
-        throw new Error('No session — set VITE_PURSE_PROXY_URL or VITE_PURSE_SESSION_JSON in .env.local or the debug panel');
+        throw new Error(t('notice.noSession'));
     }
     return fetchProxySession();
 }
@@ -27,7 +28,7 @@ async function fetchProxySession(): Promise<string> {
     const base = proxyBase();
     const orderRes = await fetch(`${base}/order/`);
     if (!orderRes.ok) {
-        throw new Error(`Order fetch failed (${base}/order/): ${orderRes.status} ${orderRes.statusText}`);
+        throw new Error(t('notice.orderFailed', {url: `${base}/order/`, status: `${orderRes.status} ${orderRes.statusText}`}));
     }
     const {order} = await orderRes.json();
     // The shopper comes back to this page after a redirection (3DS, bank auth, …).
@@ -39,11 +40,11 @@ async function fetchProxySession(): Promise<string> {
         body: JSON.stringify(order),
     });
     if (!sessionRes.ok) {
-        throw new Error(`Session creation failed (${base}/orchestration_session/): ${sessionRes.status} ${sessionRes.statusText}`);
+        throw new Error(t('notice.sessionFailed', {url: `${base}/orchestration_session/`, status: `${sessionRes.status} ${sessionRes.statusText}`}));
     }
     const data = await sessionRes.json();
     if (typeof data?.widget?.data !== 'string') {
-        throw new Error('Session response has no widget.data');
+        throw new Error(t('notice.sessionMalformed'));
     }
     return data.widget.data;
 }

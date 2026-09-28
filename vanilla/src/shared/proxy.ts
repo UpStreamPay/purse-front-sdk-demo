@@ -1,4 +1,5 @@
 import { getEnv } from "./env";
+import { t } from "../i18n";
 
 // Helpers shared by the advanced-flow demos, which drive the raw Payment API v2
 // through the merchant-backend proxy (Alfred) at VITE_PURSE_PROXY_URL.
@@ -124,7 +125,7 @@ export type OrderInfo = {
 export async function fetchOrder(): Promise<OrderInfo> {
   const res = await fetch(`${proxyBase()}/order/`);
   if (!res.ok)
-    throw new Error(`Order fetch failed: ${res.status} ${res.statusText}`);
+    throw new Error(t('notice.orderFailed', { url: `${proxyBase()}/order/`, status: `${res.status} ${res.statusText}` }));
   const { order } = await res.json();
   const o = order.order;
   const c = o.customer ?? {};
@@ -186,7 +187,7 @@ export async function fetchEligibleSolutions(
   });
   if (!res.ok)
     throw new Error(
-      `Eligible solutions failed: ${res.status} ${res.statusText}`,
+      t('notice.eligibleFailed', { status: `${res.status} ${res.statusText}` }),
     );
 
   const { eligible_solutions = [] } = await res.json();
@@ -227,6 +228,6 @@ export async function fetchCustomerTokens(
   const ref = encodeURIComponent(customerReference);
   const res = await fetch(`${proxyBase()}/${scope}tokens/${ref}`);
   if (!res.ok)
-    throw new Error(`Wallet tokens failed: ${res.status} ${res.statusText}`);
+    throw new Error(t('notice.walletFailed', { status: `${res.status} ${res.statusText}` }));
   return res.json();
 }

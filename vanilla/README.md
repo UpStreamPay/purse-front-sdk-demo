@@ -62,3 +62,14 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 - `src/shared/session.ts` — a pasted `VITE_PURSE_SESSION_JSON` wins (normalises base64 padding), else creates a session through the proxy
 - `src/shared/ui.ts` — `$()` helper, `setStep()`, `showNotice()`, `showResult()`
+
+## Languages (i18n)
+
+The demos ship in English and French. The locale picker at the top of every page (in `<demo-header>`) switches language and reloads the page; the choice is stored under `purse_demo_locale`, shared with the React app and the root landing. Without a stored choice, the first supported browser language wins, else English.
+
+- `src/i18n/en.ts` — the reference dictionary; `src/i18n/fr.ts` is typed against its keys, so a missing translation fails `tsc`.
+- Page markup is translated from attributes: `data-i18n` (text), `data-i18n-html` (strings with `<code>`), `data-i18n-attr="attr:key; attr:key"` (e.g. `heading`, `description`, `label`, `empty-text` on the demo components). `<demo-stepper>` labels can be keys (`step-pay:step.pay`).
+- Scripts use `t('key', {param})`; SDK elements get `locale: localeTag` (`en-GB` / `fr-FR`), so the hosted forms, hosted fields and drop-in render in the same language. Secure Fields has no locale option.
+- `node vanilla/src/i18n/resolve.check.ts` — self-check of the locale resolution rule.
+
+Adding a language: add a dictionary typed `Record<MessageKey, string>` and register it in `LOCALES` (`src/i18n/index.ts`), then mirror it in `react/src/i18n` and the inline dictionary of the root `index.html`.

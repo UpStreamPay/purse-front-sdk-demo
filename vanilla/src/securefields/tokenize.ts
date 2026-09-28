@@ -1,6 +1,7 @@
 import '../components';
 import { getEnv, DEMO_ENV_KEYS } from '../shared/env';
 import { setStep, showNotice, showResult } from '../shared/ui';
+import { t } from '../i18n';
 import { bootSecureFields } from '../shared/secure-fields';
 import type { DemoButton } from '../components/demo-button';
 import { mountDebugPanel } from '../shared/debug-panel';
@@ -16,7 +17,7 @@ async function main() {
   const apiKey = getEnv('VITE_PURSE_API_KEY');
 
   if (!tenantId || !apiKey) {
-    showNotice('Set VITE_PURSE_SECUREFIELDS_TENANT_ID and VITE_PURSE_API_KEY in .env.local or the debug panel');
+    showNotice(t('notice.setTenantAndKey'));
     return;
   }
 
@@ -48,7 +49,7 @@ async function main() {
   // Submit: tokenise and receive the vault_form_token.
   payBtn.addEventListener('click', async () => {
     payBtn.disabled = true;
-    payBtn.label = 'Tokenising…';
+    payBtn.label = t('sf.tokenising');
     payBtn.loading = true;
 
     const selectedBrand = getSelectedBrand();
@@ -63,14 +64,14 @@ async function main() {
       setStep('step-submit', 'error');
       showResult('error', result);
       payBtn.disabled = false;
-      payBtn.label = 'Retry';
+      payBtn.label = t('common.retry');
       return;
     }
 
     setStep('step-submit', 'done');
     // The vault_form_token is short-lived; pass it to your backend to complete
     // the payment authorisation.
-    showResult('success', result, 'Vault token received');
+    showResult('success', result, t('result.vaultToken'));
   });
 }
 

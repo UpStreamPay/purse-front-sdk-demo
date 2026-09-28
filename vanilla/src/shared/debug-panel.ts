@@ -1,21 +1,22 @@
 import {ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetForKeys, isOverridden, getBuildDefault} from './env';
+import {t, type MessageKey} from '../i18n';
 
-const LABELS: Record<EnvKey, string> = {
-    VITE_PURSE_ENVIRONMENT: 'Environment',
-    VITE_PURSE_SESSION_JSON: 'Session',
-    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'Tenant ID',
-    VITE_PURSE_API_KEY: 'API Key',
-    VITE_PURSE_ENTITY_ID: 'Entity ID',
-    VITE_PURSE_PROXY_URL: 'Proxy URL',
+const LABELS: Record<EnvKey, MessageKey> = {
+    VITE_PURSE_ENVIRONMENT: 'panel.label.environment',
+    VITE_PURSE_SESSION_JSON: 'panel.label.session',
+    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'panel.label.tenant',
+    VITE_PURSE_API_KEY: 'panel.label.apiKey',
+    VITE_PURSE_ENTITY_ID: 'panel.label.entity',
+    VITE_PURSE_PROXY_URL: 'common.proxyUrl',
 };
 
-const HINTS: Record<EnvKey, string> = {
-    VITE_PURSE_ENVIRONMENT: 'sandbox | production | test',
-    VITE_PURSE_SESSION_JSON: 'base64 payment session token',
-    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'for Secure Fields',
-    VITE_PURSE_API_KEY: 'for Secure Fields',
-    VITE_PURSE_ENTITY_ID: 'merchant id for wallet token lookup (advanced flow)',
-    VITE_PURSE_PROXY_URL: 'merchant backend (Alfred) — sessions + advanced flow',
+const HINTS: Record<EnvKey, MessageKey> = {
+    VITE_PURSE_ENVIRONMENT: 'panel.hint.environment',
+    VITE_PURSE_SESSION_JSON: 'panel.hint.session',
+    VITE_PURSE_SECUREFIELDS_TENANT_ID: 'panel.hint.secureFields',
+    VITE_PURSE_API_KEY: 'panel.hint.secureFields',
+    VITE_PURSE_ENTITY_ID: 'panel.hint.entity',
+    VITE_PURSE_PROXY_URL: 'panel.hint.proxy',
 };
 
 // Never echoed on the page, even as a default.
@@ -31,7 +32,7 @@ function mountDefaultsBanner(keys: readonly EnvKey[], openPanel: () => void) {
     }
     const values = keys
         .filter(k => !SECRET_KEYS.has(k) && getEnv(k))
-        .map(k => `${LABELS[k]}: ${getEnv(k)}`);
+        .map(k => t('banner.value', {label: t(LABELS[k]), value: getEnv(k)}));
     if (values.length === 0) {
         return;
     }
@@ -46,16 +47,16 @@ function mountDefaultsBanner(keys: readonly EnvKey[], openPanel: () => void) {
     text.className = 'min-w-0';
     const title = document.createElement('div');
     title.className = 'font-semibold';
-    title.textContent = 'Running on the default configuration';
+    title.textContent = t('banner.title');
     const detail = document.createElement('div');
     detail.className = 'text-xs mt-1 break-words';
     detail.textContent =
-        values.join(' · ') + (createsSession ? ' — a fresh payment session is created through the proxy on each load.' : '');
+        values.join(' · ') + (createsSession ? t('banner.proxySession') : '');
 
     const override = document.createElement('button');
     override.className =
         'text-xs font-semibold underline underline-offset-2 mt-1.5 cursor-pointer bg-transparent border-0 p-0 font-[inherit] text-sky-900';
-    override.textContent = 'Override in ⚙ Config';
+    override.textContent = t('banner.override');
     override.addEventListener('click', openPanel);
 
     text.append(title, detail, override);
@@ -75,14 +76,14 @@ function updateBadge(
     badge.className = overridden
         ? 'text-xs px-1.5 py-px bg-violet-100 text-violet-700 rounded-full font-medium'
         : 'text-xs px-1.5 py-px bg-bg border border-border text-muted rounded-full';
-    badge.textContent = overridden ? 'local' : 'env';
+    badge.textContent = overridden ? t('panel.local') : t('panel.env');
     area.appendChild(badge);
 
     if (overridden) {
         const btn = document.createElement('button');
         btn.className =
             'text-xs text-muted hover:text-error cursor-pointer bg-transparent border-0 font-[inherit] p-0 leading-none';
-        btn.title = 'Reset to .env value';
+        btn.title = t('panel.resetOne');
         btn.textContent = '↺';
         btn.addEventListener('click', () => {
             resetEnv(key);
@@ -103,7 +104,7 @@ function createRow(key: EnvKey): HTMLElement {
     header.className = 'flex items-center justify-between mb-1.5';
     const label = document.createElement('span');
     label.className = 'text-xs font-semibold text-text';
-    label.textContent = LABELS[key];
+    label.textContent = t(LABELS[key]);
     const badgeArea = document.createElement('div');
     badgeArea.className = 'flex items-center gap-1.5';
     header.appendChild(label);
@@ -120,13 +121,13 @@ function createRow(key: EnvKey): HTMLElement {
         const ta = document.createElement('textarea');
         ta.rows = 3;
         ta.className = baseInputClass + ' resize-none';
-        ta.placeholder = HINTS[key];
+        ta.placeholder = t(HINTS[key]);
         input = ta;
     } else {
         const inp = document.createElement('input');
         inp.type = 'text';
         inp.className = baseInputClass;
-        inp.placeholder = HINTS[key];
+        inp.placeholder = t(HINTS[key]);
         input = inp;
     }
     input.value = getEnv(key);
@@ -141,7 +142,7 @@ function createRow(key: EnvKey): HTMLElement {
         const code = document.createElement('span');
         code.className = 'font-mono';
         code.textContent = def.length > 32 ? def.slice(0, 32) + '…' : def;
-        hint.append('default: ', code);
+        hint.append(`${t('panel.default')} `, code);
         row.appendChild(hint);
     }
 
@@ -186,7 +187,7 @@ export function mountDebugPanel(keys: readonly EnvKey[] = ENV_KEYS) {
     const panelHeader = document.createElement('div');
     panelHeader.className =
         'flex items-center justify-between px-4 py-2.5 border-b border-border bg-bg';
-    panelHeader.innerHTML = `<span class="font-semibold text-xs uppercase tracking-wider text-muted">Debug Config</span>`;
+    panelHeader.innerHTML = `<span class="font-semibold text-xs uppercase tracking-wider text-muted">${t('panel.title')}</span>`;
 
     const headerActions = document.createElement('div');
     headerActions.className = 'flex items-center gap-2';
@@ -194,12 +195,12 @@ export function mountDebugPanel(keys: readonly EnvKey[] = ENV_KEYS) {
     const resetAllBtn = document.createElement('button');
     resetAllBtn.className =
         'text-xs text-error hover:underline cursor-pointer bg-transparent border-0 font-[inherit] p-0';
-    resetAllBtn.textContent = 'Reset all';
+    resetAllBtn.textContent = t('panel.resetAll');
 
     const reloadBtn = document.createElement('button');
     reloadBtn.className =
         'text-xs px-2.5 py-1 bg-accent text-white rounded-full cursor-pointer border-0 font-[inherit] hover:bg-accent-hover transition-colors';
-    reloadBtn.textContent = '⟳ Reload';
+    reloadBtn.textContent = t('panel.reload');
 
     const closeBtn = document.createElement('button');
     closeBtn.className =
@@ -221,7 +222,7 @@ export function mountDebugPanel(keys: readonly EnvKey[] = ENV_KEYS) {
     toggleBtn.className =
         'px-3 py-1.5 bg-white border border-border rounded-full text-xs font-semibold text-muted cursor-pointer hover:border-accent hover:text-accent transition-all';
     toggleBtn.style.cssText = 'box-shadow:0 2px 8px rgba(0,0,0,0.10);';
-    toggleBtn.textContent = '⚙ Config';
+    toggleBtn.textContent = t('panel.toggle');
 
     host.appendChild(panel);
     host.appendChild(toggleBtn);

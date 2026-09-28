@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hosted Fields — Quick Start</title>
+    <title data-i18n="fields.pageTitle">Hosted Fields — Quick Start</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,40 +11,39 @@
       <demo-header
         badge="Headless"
         variant="violet"
-        heading="Hosted Fields — Isolated Fields"
+        data-i18n-attr="heading:fields.title; description:fields.desc"
         source="headless-checkout/hosted-fields.ts"
-        description="Individual iframes per field via <code>method.getHostedFields()</code>. Switch layouts below — the same iframes reflow via CSS."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init checkout, step-method:Get method, step-render:Render fields, step-pay:Pay"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initCheckout, step-method:step.getMethod, step-render:step.renderFields, step-pay:step.pay"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <!-- Layout switcher -->
       <div class="flex gap-1.5 mb-4">
-        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="grid">Grid</button>
-        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="single-line">Single line</button>
-        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="card">Card</button>
+        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="grid" data-i18n="fields.layout.grid"></button>
+        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="single-line" data-i18n="fields.layout.singleLine"></button>
+        <button class="layout-tab px-3.5 py-1.5 border border-border rounded-full text-xs font-[inherit] bg-bg cursor-pointer transition-all" data-layout="card" data-i18n="fields.layout.card"></button>
       </div>
 
       <!-- ── Grid layout ─────────────────────────────────────── -->
       <div id="layout-grid" class="bg-white border border-border rounded-xl p-5 mb-4" style="display:none">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Card details</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="common.cardDetails"></div>
         <div class="hf-layout-grid">
           <div class="hf-field hf-field--full hf-field--pan">
-            <label class="hf-label">Card number</label>
+            <label class="hf-label" data-i18n="common.cardNumber"></label>
             <div class="hf-field-wrap" id="grid-pan"></div>
           </div>
           <div class="hf-field hf-field--exp">
-            <label class="hf-label">Expiry</label>
+            <label class="hf-label" data-i18n="common.expiry"></label>
             <div class="hf-field-wrap" id="grid-exp"></div>
           </div>
           <div class="hf-field hf-field--cvv">
-            <label class="hf-label">CVV</label>
+            <label class="hf-label" data-i18n="common.cvv"></label>
             <div class="hf-field-wrap" id="grid-cvv"></div>
           </div>
           <div class="hf-field hf-field--name">
-            <label class="hf-label">Holder name</label>
+            <label class="hf-label" data-i18n="common.holderName"></label>
             <div class="hf-field-wrap" id="grid-name"></div>
           </div>
         </div>
@@ -52,22 +51,22 @@
 
       <!-- ── Single-line layout ──────────────────────────────── -->
       <div id="layout-single-line" class="bg-white border border-border rounded-xl p-5 mb-4" style="display:none">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Card details</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="common.cardDetails"></div>
         <div class="hf-layout-single-line">
           <div class="hf-field hf-field--pan">
-            <label class="hf-label">Card number</label>
+            <label class="hf-label" data-i18n="common.cardNumber"></label>
             <div class="hf-field-wrap" id="sl-pan"></div>
           </div>
           <div class="hf-field hf-field--name">
-            <label class="hf-label">Holder name</label>
+            <label class="hf-label" data-i18n="common.holderName"></label>
             <div class="hf-field-wrap" id="sl-name"></div>
           </div>
           <div class="hf-field hf-field--exp">
-            <label class="hf-label">Expiry</label>
+            <label class="hf-label" data-i18n="common.expiry"></label>
             <div class="hf-field-wrap" id="sl-exp"></div>
           </div>
           <div class="hf-field hf-field--cvv">
-            <label class="hf-label">CVV</label>
+            <label class="hf-label" data-i18n="common.cvv"></label>
             <div class="hf-field-wrap" id="sl-cvv"></div>
           </div>
         </div>
@@ -87,19 +86,19 @@
             </svg>
           </div>
           <div class="hf-field hf-field--pan">
-            <label class="hf-label">Card number</label>
+            <label class="hf-label" data-i18n="common.cardNumber"></label>
             <div class="hf-field-wrap" id="card-pan"></div>
           </div>
           <div class="hf-field hf-field--exp">
-            <label class="hf-label">Expiry</label>
+            <label class="hf-label" data-i18n="common.expiry"></label>
             <div class="hf-field-wrap" id="card-exp"></div>
           </div>
           <div class="hf-field hf-field--cvv">
-            <label class="hf-label">CVV</label>
+            <label class="hf-label" data-i18n="common.cvv"></label>
             <div class="hf-field-wrap" id="card-cvv"></div>
           </div>
           <div class="hf-field hf-field--name">
-            <label class="hf-label">Holder name</label>
+            <label class="hf-label" data-i18n="common.holderName"></label>
             <div class="hf-field-wrap" id="card-name"></div>
           </div>
         </div>
@@ -108,7 +107,7 @@
       <!-- Brand detection indicator (shared across all layouts) -->
       <demo-brand-pills></demo-brand-pills>
 
-      <demo-button label="Pay" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.pay" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>

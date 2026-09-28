@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Headless Checkout — Quick Start</title>
+    <title data-i18n="methods.title">Headless Checkout — Quick Start</title>
     <link rel="stylesheet" href="../style.css" />
   </head>
   <body>
@@ -11,30 +11,29 @@
       <demo-header
         badge="Headless"
         variant="violet"
-        heading="Headless Checkout — Quick Start"
+        data-i18n-attr="heading:methods.title; description:methods.desc"
         source="headless-checkout/render-methods.ts"
-        description="Full flow: load SDK → init checkout → list payment methods → render form → pay button → result."
       ></demo-header>
 
-      <demo-stepper steps="step-sdk:Load SDK, step-init:Init checkout, step-methods:List methods, step-form:Card input, step-pay:Pay"></demo-stepper>
+      <demo-stepper steps="step-sdk:step.loadSdk, step-init:step.initCheckout, step-methods:step.listMethods, step-form:step.cardInput, step-pay:step.pay"></demo-stepper>
 
       <demo-notice></demo-notice>
 
       <div class="bg-white border border-border rounded-xl p-5 mb-4" id="methods-card" style="display:none">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Payment methods</div>
-        <demo-option-list empty-text="No payment methods in this session"></demo-option-list>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="methods.list"></div>
+        <demo-option-list data-i18n-attr="empty-text:methods.empty"></demo-option-list>
       </div>
 
       <div class="bg-white border border-border rounded-xl p-5 mb-4" id="form-card" style="display:none">
-        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5">Payment form</div>
+        <div class="text-sm font-semibold text-muted uppercase tracking-wider mb-3.5" data-i18n="methods.form"></div>
         <div class="min-h-20 border border-dashed border-border rounded-lg p-4">
           <div id="payment-element">
-            <div class="flex items-center justify-center min-h-20 text-muted text-sm">Select a method above</div>
+            <div class="flex items-center justify-center min-h-20 text-muted text-sm" data-i18n="methods.selectAbove"></div>
           </div>
         </div>
       </div>
 
-      <demo-button label="Pay" disabled></demo-button>
+      <demo-button data-i18n-attr="label:common.pay" disabled></demo-button>
 
       <demo-result></demo-result>
     </div>

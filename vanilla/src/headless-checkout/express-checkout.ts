@@ -3,6 +3,7 @@ import {loadHeadlessCheckout, type HeadlessCheckout} from '@purse-eu/web-sdk';
 import {getEnvironment, DEMO_ENV_KEYS} from '../shared/env';
 import {getSession} from '../shared/session';
 import {$, isFailedAuthorization, setStep, showNotice, showResult} from '../shared/ui';
+import {localeTag, t} from '../i18n';
 import {consumeRedirectionReturn, type RedirectionClaims} from '../shared/redirection';
 import {mountDebugPanel} from '../shared/debug-panel';
 
@@ -86,8 +87,8 @@ function currentToken(): Token | null {
 // differently (4111********1111, ****1111, 424242XXXXXX4242, …) — so pull the
 // trailing digit run out of whichever is set and display it the same way
 // regardless of partner: "•••• 4242".
-function tokenPanLabel(t: Token): string {
-    const raw = t.description.masked_pan || t.description.label || '';
+function tokenPanLabel(tok: Token): string {
+    const raw = tok.description.masked_pan || tok.description.label || '';
     const last4 = raw.match(/\d{2,4}$/)?.[0];
     return last4 ? `•••• ${last4}` : raw;
 }
@@ -105,10 +106,11 @@ function revealCvv(open: boolean) {
 
 // A bare hosted-field iframe, themed like the card sheet — getPaymentElement()'s
 // hosted form would draw its own framed input inside ours.
-function mountCvvField(t: Token): ActiveElement {
-    const hf = t.getHostedFields({
+function mountCvvField(tok: Token): ActiveElement {
+    const hf = tok.getHostedFields({
         fields: {cvv: {target: 'token-cvv', placeholder: '123'}},
         theme: CARD_THEME,
+        locale: localeTag,
     });
     hf.render();
     return hf;
@@ -118,41 +120,70 @@ function mountCvvField(t: Token): ActiveElement {
 // nothing and is fulfilled at once. It suppresses the field and its requirement
 // client-side only: the partner still enforces its own rule server-side, so
 // forcing it on a token that needs CVV can make submitPayment() fail.
-function mountWithoutCvv(t: Token): ActiveElement {
-    const el = t.getPaymentElement({hostedForm: {noCVV: true}});
+function mountWithoutCvv(tok: Token): ActiveElement {
+    const el = tok.getPaymentElement({hostedForm: {noCVV: true}, locale: localeTag});
     el.appendTo($('token-cvv'));
     return el;
 }
 
+// Card scheme → CDN badge: the same table the SDK uses to build a card method's
+// `additionalAssets`. Tokens carry no assets of their own (their `iconUrl` is the
+// generic card icon), only `description.brand`.
+const SCHEME_BADGES: Record<string, {badge: string; label: string}> = {
+    VISA: {badge: 'visa', label: 'Visa'},
+    MASTERCARD: {badge: 'mastercard', label: 'Mastercard'},
+    CARTE_BANCAIRE: {badge: 'cb', label: 'Cartes Bancaires'},
+    AMERICAN_EXPRESS: {badge: 'amex', label: 'American Express'},
+    MAESTRO: {badge: 'maestro', label: 'Maestro'},
+    ONEY: {badge: 'oney', label: 'Oney'},
+};
+
+// The badge sits next to the generic icon on the CDN, so swapping the file name
+// keeps the environment (sandbox / production) the SDK already resolved.
+function tokenBrandBadge(tok: Token): {src: string; alt: string} {
+    const scheme = SCHEME_BADGES[(tok.description.brand ?? '').toUpperCase()];
+    if (!scheme) {
+        return {src: tok.iconUrl, alt: tok.description.brand ?? ''};
+    }
+    return {src: tok.iconUrl.replace(/[^/]+\.svg$/, `${scheme.badge}.svg`), alt: scheme.label};
+}
+
 function refreshPayButtons() {
-    const t = currentToken();
+    const tok = currentToken();
     // With a token, the first tap is always allowed (it pays or reveals the CVV);
     // without one, the button opens the card sheet.
-    expressPayBtn.disabled = t ? cvvRevealed && !fulfilled : !cardMethod;
+    expressPayBtn.disabled = tok ? cvvRevealed && !fulfilled : !cardMethod;
     cardPayBtn.disabled = !fulfilled;
 }
 
 function openExpress() {
-    const t = currentToken();
+    const tok = currentToken();
     show('backdrop', true);
     show('sheet-express', true);
     show('sheet-card', false);
-    show('other-method', !!t && !!cardMethod);
-    show('express-pay-token', !!t);
+    show('other-method', !!tok && !!cardMethod);
+    show('express-pay-token', !!tok);
     revealCvv(false);
 
     unmount();
-    if (t) {
-        $('express-pay-label').textContent = 'Payer';
-        $('token-pan').textContent = tokenPanLabel(t);
-        $('token-cvv-card').textContent = tokenPanLabel(t);
-        ($('token-icon') as HTMLImageElement).src = t.iconUrl;
-        ($('token-icon') as HTMLImageElement).alt = t.description.brand ?? '';
+    if (tok) {
+        $('express-pay-label').textContent = t('shop.pay');
+        $('token-pan').textContent = tokenPanLabel(tok);
+        $('token-cvv-card').textContent = tokenPanLabel(tok);
+        const icon = $('token-icon') as HTMLImageElement;
+        const brand = tokenBrandBadge(tok);
+        icon.src = brand.src;
+        icon.alt = brand.alt;
+        // A scheme the CDN has no badge for falls back to the generic card icon.
+        icon.onerror = () => {
+            icon.onerror = null;
+            icon.src = tok.iconUrl;
+        };
 
-        activeElement = noCvv.checked ? mountWithoutCvv(t) : mountCvvField(t);
-        activeElement.on('fatalError', () => showResult('error', 'Fatal error in token element'));
+        activeElement = noCvv.checked ? mountWithoutCvv(tok) : mountCvvField(tok);
+        activeElement.on('fatalError', () => showResult('error', t('result.fatalToken')));
     } else {
-        $('express-pay-label').textContent = 'Payer par carte bancaire';
+        $('express-pay-label').textContent = t('shop.payByCard');
     }
     refreshPayButtons();
 }
@@ -167,11 +198,12 @@ function openCard() {
     const hf = cardMethod.getHostedFields({
         fields: {
             cardNumber: {target: 'xc-pan', placeholder: '1234 5678 9101 1213'},
-            expDate: {target: 'xc-exp', placeholder: 'MM/AA'},
+            expDate: {target: 'xc-exp', placeholder: t('common.placeholder.exp')},
             cvv: {target: 'xc-cvv', placeholder: '123'},
-            holderName: {target: 'xc-name', placeholder: 'Olivier Dupont'},
+            holderName: {target: 'xc-name', placeholder: t('common.placeholder.holder')},
         },
         theme: CARD_THEME,
+        locale: localeTag,
     });
     hf.render();
     activeElement = hf;
@@ -190,12 +222,12 @@ function closeAll() {
 // submitted card payment until the partner settles it.
 function confirmationCopy(status = ''): {title: string; detail: string} {
     if (isFailedAuthorization(status)) {
-        return {title: 'Paiement refusé', detail: "Aucun montant n'a été débité. Vous pouvez réessayer avec un autre moyen de paiement."};
+        return {title: t('shop.refusedTitle'), detail: t('shop.refusedDetail')};
     }
     if (status === 'AUTHORIZED' || status === 'CAPTURED') {
-        return {title: 'Commande confirmée !', detail: 'Merci pour votre achat. Un e-mail de confirmation vous a été envoyé.'};
+        return {title: t('shop.confirmedTitle'), detail: t('shop.confirmedDetail')};
     }
-    return {title: 'Commande enregistrée', detail: 'Votre paiement est en cours de validation — vous recevrez une confirmation par e-mail.'};
+    return {title: t('shop.pendingTitle'), detail: t('shop.pendingDetail')};
 }
 
 function showConfirmation(claims: RedirectionClaims, methodLabel?: string) {
@@ -203,7 +235,7 @@ function showConfirmation(claims: RedirectionClaims, methodLabel?: string) {
     const {title, detail} = confirmationCopy(status);
     $('done-title').textContent = title;
     $('done-detail').textContent = detail;
-    $('done-ref').textContent = [methodLabel, claims.payment_id && `Paiement ${claims.payment_id.slice(0, 8)}`]
+    $('done-ref').textContent = [methodLabel, claims.payment_id && t('shop.paymentRef', {id: claims.payment_id.slice(0, 8)})]
         .filter(Boolean)
         .join(' · ');
     show('done-ok', !isFailedAuthorization(status));
@@ -249,11 +281,11 @@ $('other-method').addEventListener('click', openCard);
 $('card-back').addEventListener('click', openExpress);
 
 expressPayBtn.addEventListener('click', () => {
-    const t = currentToken();
-    if (!t) {
+    const tok = currentToken();
+    if (!tok) {
         openCard();
     } else if (fulfilled) {
-        pay(t, `${t.description.brand ?? 'Carte'} ${tokenPanLabel(t)}`);
+        pay(tok, `${tokenBrandBadge(tok).alt || t('shop.card')} ${tokenPanLabel(tok)}`);
     } else {
         revealCvv(true);
         refreshPayButtons();
@@ -261,7 +293,7 @@ expressPayBtn.addEventListener('click', () => {
 });
 cardPayBtn.addEventListener('click', () => {
     if (cardMethod) {
-        pay(cardMethod, 'Nouvelle carte');
+        pay(cardMethod, t('shop.newCard'));
     }
 });
 saveCard.addEventListener('change', () => {
@@ -286,7 +318,7 @@ async function main() {
     if (returned) {
         ['step-sdk', 'step-init', 'step-ready'].forEach(id => setStep(id, 'done'));
         showConfirmation(returned);
-        showResult(isFailedAuthorization(returned.authorization_status) ? 'error' : 'success', returned, 'Returned from payment');
+        showResult(isFailedAuthorization(returned.authorization_status) ? 'error' : 'success', returned, t('result.returnedShort'));
         return;
     }
 
@@ -310,8 +342,8 @@ async function main() {
 
     checkout.paymentTokens.subscribe(tokens => {
         token = (tokens as HeadlessCheckout.PurseHeadlessCheckoutPaymentToken[])
-            .find((t): t is Token => !t.isSecondary && t.type === 'token' && !t.disabled.value) ?? null;
-        $('token-status').textContent = token ? `Saved card: ${tokenPanLabel(token)}` : 'No saved card in session';
+            .find((tok): tok is Token => !tok.isSecondary && tok.type === 'token' && !tok.disabled.value) ?? null;
+        $('token-status').textContent = token ? t('express.savedCard', {card: tokenPanLabel(token)}) : t('express.noSavedCard');
         tokensReady = true;
         maybeEnableBuyNow();
     });
@@ -330,7 +362,7 @@ async function main() {
     });
     checkout.remainingAmountToPay.subscribe(amount => {
         // ponytail: assumes major units (79.99); switch to amount / 100 if the session carries minor units.
-        const label = new Intl.NumberFormat('fr-FR', {style: 'currency', currency}).format(amount);
+        const label = new Intl.NumberFormat(localeTag, {style: 'currency', currency}).format(amount);
         document.querySelectorAll('[data-total]').forEach(el => {
             el.textContent = label;
         });
