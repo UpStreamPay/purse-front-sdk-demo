@@ -205,6 +205,7 @@ export const fr: Record<MessageKey, string> = {
     'shop.pay': 'Payer',
     'shop.payByCard': 'Payer par carte bancaire',
     'shop.otherMethod': 'Utiliser un autre moyen de paiement',
+    'shop.orPayWith': 'ou payer avec',
     'shop.addCard': 'Ajouter ma carte',
     'shop.cardNumber': 'Numéro de carte',
     'shop.expiry': "Date d'expiration",

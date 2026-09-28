@@ -208,6 +208,7 @@ export const en = {
     'shop.pay': 'Pay',
     'shop.payByCard': 'Pay by card',
     'shop.otherMethod': 'Use another payment method',
+    'shop.orPayWith': 'or pay with',
     'shop.addCard': 'Add my card',
     'shop.cardNumber': 'Card number',
     'shop.expiry': 'Expiry date',
