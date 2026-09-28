@@ -12,11 +12,12 @@ import {mountDebugPanel} from '../shared/debug-panel';
 //
 //   • Session has a saved card (paymentTokens) → the express sheet shows a
 //     "Payer •••• 4242" button. If the partner needs no CVV, isPaymentFulfilled
-//     is true right away and the payment is one tap; otherwise the token's CVV
-//     field mounts right above the button.
-//   • No token (or "Ignore saved tokens" checked) → the pay button opens a card
-//     sheet built with getHostedFields() on the credit card method, with an
-//     optional "save my card" (register) checkbox.
+//     is true right away and the payment is one tap; otherwise the first tap
+//     reveals the token's CVV field right above the button.
+//   • No token (or "Ignore saved tokens" checked), or "use another payment
+//     method" → the same sheet continues to a card step built with
+//     getHostedFields() on the credit card method, with an optional
+//     "save my card" (register) checkbox.
 //
 // Only one payment element is mounted at a time: switching path removes the
 // previous one so the split never has two primary sources.
@@ -104,7 +105,7 @@ function revealCvv(open: boolean) {
     $('token-cvv-field').classList.toggle('is-open', open);
 }
 
-// A bare hosted-field iframe, themed like the card sheet — getPaymentElement()'s
+// A bare hosted-field iframe, themed like the card step — getPaymentElement()'s
 // hosted form would draw its own framed input inside ours.
 function mountCvvField(tok: Token): ActiveElement {
     const hf = tok.getHostedFields({
@@ -151,16 +152,32 @@ function tokenBrandBadge(tok: Token): {src: string; alt: string} {
 function refreshPayButtons() {
     const tok = currentToken();
     // With a token, the first tap is always allowed (it pays or reveals the CVV);
-    // without one, the button opens the card sheet.
+    // without one, the button continues to the card step.
     expressPayBtn.disabled = tok ? cvvRevealed && !fulfilled : !cardMethod;
     cardPayBtn.disabled = !fulfilled;
 }
 
+// The sheet is one tunnel: the card step replaces the summary in place, with a
+// back arrow — never a second sheet stacked on top.
+type Step = 'express' | 'card';
+
+function showStep(step: Step) {
+    show('backdrop', true);
+    show('sheet', true);
+    show('view-express', step === 'express');
+    show('view-card', step === 'card');
+    show('card-back', step === 'card');
+    $('sheet-title').textContent = step === 'card' ? t('shop.addCard') : t('shop.expressTitle');
+    $(`view-${step}`).scrollTop = 0;
+}
+
+function expressStepOpen(): boolean {
+    return !$('sheet').hidden && !$('view-express').hidden;
+}
+
 function openExpress() {
     const tok = currentToken();
-    show('backdrop', true);
-    show('sheet-express', true);
-    show('sheet-card', false);
+    showStep('express');
     show('other-method', !!tok && !!cardMethod);
     show('express-pay-token', !!tok);
     revealCvv(false);
@@ -192,7 +209,7 @@ function openCard() {
     if (!cardMethod) {
         return;
     }
-    show('sheet-card', true);
+    showStep('card');
     unmount();
 
     const hf = cardMethod.getHostedFields({
@@ -215,7 +232,7 @@ function openCard() {
 
 function closeAll() {
     unmount();
-    ['backdrop', 'sheet-express', 'sheet-card', 'busy', 'done'].forEach(id => show(id, false));
+    ['backdrop', 'sheet', 'busy', 'done'].forEach(id => show(id, false));
 }
 
 // Copy per authorization status. PENDING is what the sandbox returns for a
@@ -252,7 +269,7 @@ async function pay(source: Token | CardMethod, methodLabel: string) {
     show('busy', true);
     try {
         // Pin the source actually shown to the user: a CVV-less token could
-        // otherwise stay primary (and fulfilled) while the card sheet is open.
+        // otherwise stay primary (and fulfilled) while the card step is open.
         source.setAsPrimarySource();
         // Usually never resolves here: with a shopper_redirection_url on the
         // session (shared/session.ts), the SDK navigates the tab away and the
@@ -300,12 +317,12 @@ saveCard.addEventListener('change', () => {
     cardMethod?.register(saveCard.checked).catch(err => showResult('error', String(err)));
 });
 forceNoToken.addEventListener('change', () => {
-    if (!$('sheet-express').hidden) {
+    if (expressStepOpen()) {
         openExpress();
     }
 });
 noCvv.addEventListener('change', () => {
-    if (!$('sheet-express').hidden && currentToken()) {
+    if (expressStepOpen() && currentToken()) {
         openExpress();
     }
 });
