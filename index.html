@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Purse SDK — Demos</title>
+    <title data-i18n="title">Purse SDK — Demos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -21,12 +21,18 @@
     <div class="max-w-3xl mx-auto px-5 pt-10 pb-20">
 
       <!-- Header -->
-      <div class="mb-10">
+      <div class="mb-10 relative">
+        <label class="absolute right-0 top-0 inline-flex items-center gap-1.5 text-xs text-gray-400">
+          <span class="sr-only" data-i18n="language"></span>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg>
+          <select id="locale-picker" class="text-xs text-gray-500 bg-transparent border border-gray-200 rounded-md px-1.5 py-1 cursor-pointer hover:text-gray-700">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
+        </label>
         <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Purse SDK</p>
-        <h1 class="text-2xl font-bold text-gray-900">Demo Apps</h1>
-        <p class="text-sm text-gray-500 mt-1">
-          Runs against the Purse sandbox out of the box. Use the <strong>⚙ Config</strong> panel inside each demo to override credentials via localStorage — no rebuild needed.
-        </p>
+        <h1 class="text-2xl font-bold text-gray-900" data-i18n="heading"></h1>
+        <p class="text-sm text-gray-500 mt-1" data-i18n-html="intro"></p>
       </div>
 
       <!-- Drop-in -->
@@ -38,8 +44,8 @@
               <span class="badge bg-blue-100 text-blue-700">Drop-in</span>
             </div>
             <div>
-              <div class="font-semibold text-sm text-gray-900">Quick Start</div>
-              <div class="text-xs text-gray-500 mt-0.5">Pre-built widget, <code>submitPayment()</code></div>
+              <div class="font-semibold text-sm text-gray-900" data-i18n="quickStart"></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="dropin"></div>
             </div>
           </a>
         </div>
@@ -53,8 +59,8 @@
           <a href="vanilla/headless-checkout/render-methods.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
             <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
             <div>
-              <div class="font-semibold text-sm text-gray-900">Quick Start</div>
-              <div class="text-xs text-gray-500 mt-0.5">List → select → pay</div>
+              <div class="font-semibold text-sm text-gray-900" data-i18n="quickStart"></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n="methods"></div>
             </div>
           </a>
 
@@ -62,7 +68,7 @@
             <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
             <div>
               <div class="font-semibold text-sm text-gray-900">Hosted Form</div>
-              <div class="text-xs text-gray-500 mt-0.5">Single iframe via <code>getPaymentElement()</code></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="form"></div>
             </div>
           </a>
 
@@ -70,7 +76,7 @@
             <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
             <div>
               <div class="font-semibold text-sm text-gray-900">Hosted Fields</div>
-              <div class="text-xs text-gray-500 mt-0.5">Isolated field iframes, multiple layouts</div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n="fields"></div>
             </div>
           </a>
 
@@ -78,7 +84,7 @@
             <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
             <div>
               <div class="font-semibold text-sm text-gray-900">Express Checkout</div>
-              <div class="text-xs text-gray-500 mt-0.5">One-click "Buy now" — saved token or new card in a fast checkout sheet</div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n="express"></div>
             </div>
           </a>
 
@@ -92,8 +98,8 @@
           <a href="vanilla/securefields/tokenize.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
             <div class="shrink-0 mt-0.5"><span class="badge bg-pink-100 text-pink-700">Secure Fields</span></div>
             <div>
-              <div class="font-semibold text-sm text-gray-900">Tokenize</div>
-              <div class="text-xs text-gray-500 mt-0.5"><code>initSecureFields</code> → vault token</div>
+              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenize"></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="sf"></div>
             </div>
           </a>
         </div>
@@ -107,15 +113,15 @@
             <div class="shrink-0 mt-0.5"><span class="badge bg-amber-100 text-amber-800">Advanced Flow</span></div>
             <div>
               <div class="font-semibold text-sm text-gray-900">Complete Payment</div>
-              <div class="text-xs text-gray-500 mt-0.5">Raw Payment API v2 — <code>eligible-solutions</code> → card form → <code>create_payment</code></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="complete"></div>
             </div>
           </a>
 
           <a href="vanilla/advanced-flow/token-payment.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
             <div class="shrink-0 mt-0.5"><span class="badge bg-amber-100 text-amber-800">Advanced Flow</span></div>
             <div>
-              <div class="font-semibold text-sm text-gray-900">Token Payment</div>
-              <div class="text-xs text-gray-500 mt-0.5">Pay with a saved card — list <code>wallet_token</code>s → CVV → <code>create_payment</code></div>
+              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenTitle"></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="token"></div>
             </div>
           </a>
         </div>
@@ -128,8 +134,8 @@
           <a href="react/securefields/" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
             <div class="shrink-0 mt-0.5"><span class="badge bg-sky-100 text-sky-700">React</span></div>
             <div>
-              <div class="font-semibold text-sm text-gray-900">Tokenize</div>
-              <div class="text-xs text-gray-500 mt-0.5">React + hooks, embedded brand selector toggle</div>
+              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenize"></div>
+              <div class="text-xs text-gray-500 mt-0.5" data-i18n="react"></div>
             </div>
           </a>
         </div>
@@ -140,5 +146,68 @@
     <style>
       .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
     </style>
+    <!-- This page is copied as-is into the showcase (deploy.yml, no bundler), so it
+         carries its own tiny dictionary. Same rule and storage key as the vanilla and
+         React apps (vanilla/src/i18n): stored choice → browser language → English. -->
+    <script>
+      (() => {
+        const MESSAGES = {
+          en: {
+            title: 'Purse SDK — Demos',
+            language: 'Language',
+            heading: 'Demo Apps',
+            intro: 'Runs against the Purse sandbox out of the box. Use the <strong>⚙ Config</strong> panel inside each demo to override credentials via localStorage — no rebuild needed.',
+            quickStart: 'Quick Start',
+            tokenize: 'Tokenize',
+            tokenTitle: 'Token Payment',
+            dropin: 'Pre-built widget, <code>submitPayment()</code>',
+            methods: 'List → select → pay',
+            form: 'Single iframe via <code>getPaymentElement()</code>',
+            fields: 'Isolated field iframes, multiple layouts',
+            express: 'One-click "Buy now" — saved token or new card in a fast checkout sheet',
+            sf: '<code>initSecureFields</code> → vault token',
+            complete: 'Raw Payment API v2 — <code>eligible-solutions</code> → card form → <code>create_payment</code>',
+            token: 'Pay with a saved card — list <code>wallet_token</code>s → CVV → <code>create_payment</code>',
+            react: 'React + hooks, embedded brand selector toggle',
+          },
+          fr: {
+            title: 'Purse SDK — Démos',
+            language: 'Langue',
+            heading: 'Applications de démo',
+            intro: 'Fonctionne sur la sandbox Purse sans configuration. Utilisez le panneau <strong>⚙ Config</strong> de chaque démo pour remplacer les identifiants via le localStorage — sans rebuild.',
+            quickStart: 'Démarrage rapide',
+            tokenize: 'Tokenisation',
+            tokenTitle: 'Paiement par token',
+            dropin: 'Widget prêt à l’emploi, <code>submitPayment()</code>',
+            methods: 'Liste → sélection → paiement',
+            form: 'Une seule iframe via <code>getPaymentElement()</code>',
+            fields: 'Une iframe par champ, plusieurs dispositions',
+            express: 'Achat en un clic — carte enregistrée ou nouvelle carte dans un panneau d’achat express',
+            sf: '<code>initSecureFields</code> → token vault',
+            complete: 'Payment API v2 brute — <code>eligible-solutions</code> → formulaire carte → <code>create_payment</code>',
+            token: 'Payer avec une carte enregistrée — liste des <code>wallet_token</code>s → CVV → <code>create_payment</code>',
+            react: 'React + hooks, sélecteur de marque intégré activable',
+          },
+        };
+        const KEY = 'purse_demo_locale';
+        let stored = null;
+        try { stored = localStorage.getItem(KEY); } catch {}
+        const has = (l) => Object.prototype.hasOwnProperty.call(MESSAGES, l);
+        const browser = (navigator.languages || [navigator.language]).map((tag) => tag.toLowerCase().split('-')[0]);
+        const locale = has(stored) ? stored : browser.find(has) || 'en';
+        const m = MESSAGES[locale];
+
+        document.documentElement.lang = locale;
+        document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = m[el.dataset.i18n]; });
+        document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = m[el.dataset.i18nHtml]; });
+
+        const picker = document.getElementById('locale-picker');
+        picker.value = locale;
+        picker.addEventListener('change', () => {
+          try { localStorage.setItem(KEY, picker.value); } catch {}
+          location.reload();
+        });
+      })();
+    </script>
   </body>
 </html>
