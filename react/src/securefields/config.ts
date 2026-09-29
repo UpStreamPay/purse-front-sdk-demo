@@ -8,7 +8,7 @@ import type {
   SubmitResult,
 } from "./useSecureFields";
 
-export const RADII = ["none", "sm", "md", "lg", "full"] as const;
+export const RADII = ["none", "md", "full"] as const;
 export const GRAYS = ["gray", "neutral", "stone"] as const;
 
 /** The UI customizer's settings — everything outside the iframes. */
@@ -35,9 +35,7 @@ export const DEFAULT_CONFIG: Config = {
 // Full class strings so Tailwind keeps them.
 export const RADIUS_CLASS: Record<Config["radius"], string> = {
   none: "rounded-none",
-  sm: "rounded-sm",
   md: "rounded-md",
-  lg: "rounded-lg",
   full: "rounded-full",
 };
 

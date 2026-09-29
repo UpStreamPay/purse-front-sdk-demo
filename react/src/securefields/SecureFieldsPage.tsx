@@ -15,7 +15,6 @@ import {
   Form,
   GRAYS,
   RADII,
-  RADIUS_CLASS,
   type Config,
 } from "./config";
 import { LAYOUTS, StateExamples, type Layout } from "./layouts";
@@ -126,20 +125,20 @@ function Customizer({
         <span className="block text-sm font-medium text-gray-600 dark:text-gray-300">
           {t("sf.custom.radius")}
         </span>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {RADII.map((r) => (
             <button
               key={r}
               type="button"
               aria-pressed={config.radius === r}
               onClick={() => set({ radius: r })}
-              className={`px-3 py-1 text-xs font-medium border cursor-pointer transition-all ${RADIUS_CLASS[r]} ${
+              className={`px-2 py-2 text-xs font-medium border rounded-lg cursor-pointer transition-all ${
                 config.radius === r
-                  ? "bg-indigo-600 text-white border-indigo-600 ring-2 ring-offset-1 ring-indigo-600/20"
+                  ? "bg-indigo-600/5 text-indigo-600 dark:text-indigo-300 border-indigo-600 ring-2 ring-offset-1 ring-indigo-600/20 dark:ring-offset-gray-900"
                   : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
               }`}
             >
-              {r.charAt(0).toUpperCase() + r.slice(1)}
+              {t(`sf.corners.${r}`)}
             </button>
           ))}
         </div>
