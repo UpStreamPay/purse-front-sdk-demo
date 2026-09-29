@@ -5,17 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title data-i18n="title">Purse SDK — Demos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              accent: '#6366f1',
-            },
-          },
-        },
-      };
-    </script>
   </head>
   <body class="bg-gray-50 min-h-screen">
     <div class="max-w-3xl mx-auto px-5 pt-10 pb-20">
@@ -35,159 +24,41 @@
         <p class="text-sm text-gray-500 mt-1" data-i18n-html="intro"></p>
       </div>
 
-      <!-- Drop-in -->
-      <section class="mb-10">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Drop-in</h2>
-        <div class="flex flex-col gap-3">
-          <a href="vanilla/dropin/widget.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5">
-              <span class="badge bg-blue-100 text-blue-700">Drop-in</span>
-            </div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900" data-i18n="quickStart"></div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="dropin"></div>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <!-- Headless -->
-      <section class="mb-10">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Headless</h2>
-        <div class="flex flex-col gap-3">
-
-          <a href="vanilla/headless-checkout/render-methods.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900" data-i18n="quickStart"></div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n="methods"></div>
-            </div>
-          </a>
-
-          <a href="vanilla/headless-checkout/hosted-form.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900">Hosted Form</div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="form"></div>
-            </div>
-          </a>
-
-          <a href="vanilla/headless-checkout/hosted-fields.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900">Hosted Fields</div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n="fields"></div>
-            </div>
-          </a>
-
-          <a href="vanilla/headless-checkout/express-checkout.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-violet-100 text-violet-700">Headless</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900">Express Checkout</div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n="express"></div>
-            </div>
-          </a>
-
-        </div>
-      </section>
-
-      <!-- Secure Fields -->
-      <section class="mb-10">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Secure Fields</h2>
-        <div class="flex flex-col gap-3">
-          <a href="vanilla/securefields/tokenize.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-pink-100 text-pink-700">Secure Fields</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenize"></div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="sf"></div>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <!-- Advanced Flow -->
-      <section class="mb-10">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">Advanced Flow</h2>
-        <div class="flex flex-col gap-3">
-          <a href="vanilla/advanced-flow/complete-payment.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-amber-100 text-amber-800">Advanced Flow</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900">Complete Payment</div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="complete"></div>
-            </div>
-          </a>
-
-          <a href="vanilla/advanced-flow/token-payment.html" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-amber-100 text-amber-800">Advanced Flow</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenTitle"></div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n-html="token"></div>
-            </div>
-          </a>
-        </div>
-      </section>
-
-      <!-- React -->
-      <section class="mb-10">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">React</h2>
-        <div class="flex flex-col gap-3">
-          <a href="react/securefields/" class="demo-card group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
-            <div class="shrink-0 mt-0.5"><span class="badge bg-sky-100 text-sky-700">React</span></div>
-            <div>
-              <div class="font-semibold text-sm text-gray-900" data-i18n="tokenize"></div>
-              <div class="text-xs text-gray-500 mt-0.5" data-i18n="react"></div>
-            </div>
-          </a>
-        </div>
-      </section>
-
+      <!-- Rendered from demos.json — the catalogue shared with both apps' landings
+           and the <demo-switcher> on every demo page (shared/demos.ts). -->
+      <div id="demo-list"></div>
     </div>
 
     <style>
       .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
     </style>
-    <!-- This page is copied as-is into the showcase (deploy.yml, no bundler), so it
-         carries its own tiny dictionary. Same rule and storage key as the vanilla and
-         React apps (vanilla/src/i18n): stored choice → browser language → English. -->
+    <!-- Copied as-is into the showcase (npm run build:site, no bundler), so the
+         header strings live here. Same locale rule and storage key as the vanilla
+         and React apps (vanilla/src/i18n): stored choice → browser language → English. -->
     <script>
-      (() => {
+      (async () => {
         const MESSAGES = {
           en: {
             title: 'Purse SDK — Demos',
             language: 'Language',
             heading: 'Demo Apps',
-            intro: 'Runs against the Purse sandbox out of the box. Use the <strong>⚙ Config</strong> panel inside each demo to override credentials via localStorage — no rebuild needed.',
-            quickStart: 'Quick Start',
-            tokenize: 'Tokenize',
-            tokenTitle: 'Token Payment',
-            dropin: 'Pre-built widget, <code>submitPayment()</code>',
-            methods: 'List → select → pay',
-            form: 'Single iframe via <code>getPaymentElement()</code>',
-            fields: 'Isolated field iframes, multiple layouts',
-            express: 'One-click "Buy now" — saved token or new card in a fast checkout sheet',
-            sf: '<code>initSecureFields</code> → vault token',
-            complete: 'Raw Payment API v2 — <code>eligible-solutions</code> → card form → <code>create_payment</code>',
-            token: 'Pay with a saved card — list <code>wallet_token</code>s → CVV → <code>create_payment</code>',
-            react: 'React + hooks, embedded brand selector toggle',
+            intro: 'Runs against the Purse sandbox out of the box. Use the <strong>⚙ Config</strong> panel inside each demo to override credentials via localStorage — no rebuild needed. Jump between demos with the selector at the top of each page.',
+            failed: 'Could not load demos.json.',
           },
           fr: {
             title: 'Purse SDK — Démos',
             language: 'Langue',
             heading: 'Applications de démo',
-            intro: 'Fonctionne sur la sandbox Purse sans configuration. Utilisez le panneau <strong>⚙ Config</strong> de chaque démo pour remplacer les identifiants via le localStorage — sans rebuild.',
-            quickStart: 'Démarrage rapide',
-            tokenize: 'Tokenisation',
-            tokenTitle: 'Paiement par token',
-            dropin: 'Widget prêt à l’emploi, <code>submitPayment()</code>',
-            methods: 'Liste → sélection → paiement',
-            form: 'Une seule iframe via <code>getPaymentElement()</code>',
-            fields: 'Une iframe par champ, plusieurs dispositions',
-            express: 'Achat en un clic — carte enregistrée ou nouvelle carte dans un panneau d’achat express',
-            sf: '<code>initSecureFields</code> → token vault',
-            complete: 'Payment API v2 brute — <code>eligible-solutions</code> → formulaire carte → <code>create_payment</code>',
-            token: 'Payer avec une carte enregistrée — liste des <code>wallet_token</code>s → CVV → <code>create_payment</code>',
-            react: 'React + hooks, sélecteur de marque intégré activable',
+            intro: 'Fonctionne sur la sandbox Purse sans configuration. Utilisez le panneau <strong>⚙ Config</strong> de chaque démo pour remplacer les identifiants via le localStorage — sans rebuild. Passez d’une démo à l’autre avec le sélecteur en haut de chaque page.',
+            failed: 'Impossible de charger demos.json.',
           },
+        };
+        const BADGES = {
+          blue: 'bg-blue-100 text-blue-700',
+          violet: 'bg-violet-100 text-violet-700',
+          pink: 'bg-pink-100 text-pink-700',
+          amber: 'bg-amber-100 text-amber-800',
+          sky: 'bg-sky-100 text-sky-700',
         };
         const KEY = 'purse_demo_locale';
         let stored = null;
@@ -207,6 +78,36 @@
           try { localStorage.setItem(KEY, picker.value); } catch {}
           location.reload();
         });
+
+        const list = document.getElementById('demo-list');
+        let manifest;
+        try {
+          manifest = await (await fetch('demos.json')).json();
+        } catch {
+          list.textContent = m.failed;
+          return;
+        }
+        // demos.json is our own static file; its desc strings carry <code> markup.
+        list.innerHTML = manifest.sections.map((section) => {
+          const cards = manifest.demos.filter((d) => d.section === section.id);
+          if (!cards.length) {
+            return '';
+          }
+          return `
+            <section class="mb-10">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">${section.title[locale]}</h2>
+              <div class="flex flex-col gap-3">
+                ${cards.map((demo) => `
+                  <a href="${demo.path}" class="group flex items-start gap-4 p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-400 hover:ring-2 hover:ring-indigo-100">
+                    <div class="shrink-0 mt-0.5"><span class="badge ${BADGES[section.variant]}">${section.badge}</span></div>
+                    <div>
+                      <div class="font-semibold text-sm text-gray-900">${demo.title[locale]}</div>
+                      <div class="text-xs text-gray-500 mt-0.5">${demo.desc[locale]}</div>
+                    </div>
+                  </a>`).join('')}
+              </div>
+            </section>`;
+        }).join('');
       })();
     </script>
   </body>

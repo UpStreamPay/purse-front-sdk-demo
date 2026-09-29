@@ -1,0 +1,159 @@
+{
+  "sections": [
+    {
+      "id": "dropin",
+      "badge": "Drop-in",
+      "variant": "blue",
+      "title": {
+        "en": "Drop-in Checkout",
+        "fr": "Drop-in Checkout"
+      }
+    },
+    {
+      "id": "headless",
+      "badge": "Headless",
+      "variant": "violet",
+      "title": {
+        "en": "Headless Checkout",
+        "fr": "Headless Checkout"
+      }
+    },
+    {
+      "id": "secureFields",
+      "badge": "Secure Fields",
+      "variant": "pink",
+      "title": {
+        "en": "Secure Fields",
+        "fr": "Secure Fields"
+      }
+    },
+    {
+      "id": "advanced",
+      "badge": "Advanced Flow",
+      "variant": "amber",
+      "title": {
+        "en": "Advanced Flow",
+        "fr": "Advanced Flow"
+      }
+    },
+    {
+      "id": "react",
+      "badge": "React",
+      "variant": "sky",
+      "title": {
+        "en": "React",
+        "fr": "React"
+      }
+    }
+  ],
+  "demos": [
+    {
+      "section": "dropin",
+      "path": "vanilla/dropin/widget.html",
+      "title": {
+        "en": "Quick Start",
+        "fr": "Démarrage rapide"
+      },
+      "desc": {
+        "en": "Pre-built widget mounted in a div. React to <code>isPaymentFulfilled</code> and call <code>submitPayment()</code> when ready.",
+        "fr": "Widget prêt à l’emploi monté dans une div. Réagissez à <code>isPaymentFulfilled</code> et appelez <code>submitPayment()</code> quand tout est prêt."
+      }
+    },
+    {
+      "section": "headless",
+      "path": "vanilla/headless-checkout/render-methods.html",
+      "title": {
+        "en": "Render Methods",
+        "fr": "Liste des moyens de paiement"
+      },
+      "desc": {
+        "en": "SDK load → init → list methods → select → pay button → result",
+        "fr": "Chargement du SDK → init → liste des moyens → sélection → bouton payer → résultat"
+      }
+    },
+    {
+      "section": "headless",
+      "path": "vanilla/headless-checkout/hosted-form.html",
+      "title": {
+        "en": "Hosted Form",
+        "fr": "Hosted Form"
+      },
+      "desc": {
+        "en": "Single iframe: PAN, expiry, CVV, holder name via <code>getPaymentElement()</code>",
+        "fr": "Une seule iframe : PAN, expiration, CVV, titulaire via <code>getPaymentElement()</code>"
+      }
+    },
+    {
+      "section": "headless",
+      "path": "vanilla/headless-checkout/hosted-fields.html",
+      "title": {
+        "en": "Hosted Fields",
+        "fr": "Hosted Fields"
+      },
+      "desc": {
+        "en": "Isolated field iframes with grid, single-line, and card-shaped layouts",
+        "fr": "Une iframe par champ, en grille, sur une ligne ou en forme de carte"
+      }
+    },
+    {
+      "section": "headless",
+      "path": "vanilla/headless-checkout/express-checkout.html",
+      "title": {
+        "en": "Express Checkout",
+        "fr": "Express Checkout"
+      },
+      "desc": {
+        "en": "One-click \"Buy now\" sheet: saved token → pay in one tap, or new card via hosted fields",
+        "fr": "Achat en un clic : carte enregistrée → paiement en un geste, ou nouvelle carte via les hosted fields"
+      }
+    },
+    {
+      "section": "secureFields",
+      "path": "vanilla/securefields/tokenize.html",
+      "title": {
+        "en": "Tokenize",
+        "fr": "Tokenisation"
+      },
+      "desc": {
+        "en": "<code>initSecureFields</code> → fields rendered in iframes → submit → vault token returned. No session required — operates at tenant level.",
+        "fr": "<code>initSecureFields</code> → champs affichés dans des iframes → soumission → token vault renvoyé. Aucune session nécessaire — fonctionne au niveau du tenant."
+      }
+    },
+    {
+      "section": "advanced",
+      "path": "vanilla/advanced-flow/complete-payment.html",
+      "title": {
+        "en": "Complete Payment",
+        "fr": "Complete Payment"
+      },
+      "desc": {
+        "en": "Raw Payment API v2 via a merchant proxy: <code>eligible-solutions</code> → Secure Fields → <code>create_payment</code> with optional token save.",
+        "fr": "Payment API v2 brute via un proxy marchand : <code>eligible-solutions</code> → Secure Fields → <code>create_payment</code> avec enregistrement de la carte en option."
+      }
+    },
+    {
+      "section": "advanced",
+      "path": "vanilla/advanced-flow/token-payment.html",
+      "title": {
+        "en": "Token Payment",
+        "fr": "Paiement par token"
+      },
+      "desc": {
+        "en": "Pay with a saved card: list <code>wallet_token</code>s → re-enter CVV → <code>create_payment</code> with <code>wallet_token</code>.",
+        "fr": "Payer avec une carte enregistrée : liste des <code>wallet_token</code>s → ressaisie du CVV → <code>create_payment</code> avec <code>wallet_token</code>."
+      }
+    },
+    {
+      "section": "react",
+      "path": "react/securefields/",
+      "title": {
+        "en": "Secure Fields — Form Variations",
+        "fr": "Secure Fields — Variantes de formulaire"
+      },
+      "desc": {
+        "en": "Card-field iframes via <code>initSecureFields</code> in four layouts (stacked, classic, hybrid, inline) with a live UI customizer → vault token. No session required.",
+        "fr": "Iframes de champs carte via <code>initSecureFields</code> en quatre dispositions (empilé, classique, hybride, en ligne) avec personnalisation d’UI en direct → token vault. Aucune session nécessaire."
+      }
+    }
+  ]
+}

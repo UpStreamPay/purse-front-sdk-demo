@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@source "../../shared";
+
+/* Class-driven dark mode (Secure Fields customizer toggles <html class="dark">). */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
@@ -6,24 +10,30 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Same page colours as the vanilla app (vanilla/style.css --color-bg / --color-text). */
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: #f8f9fc;
+  color: #1a1d2e;
+}
+
+/* Hosted fields fill the container the layout gives them: card number / CVV
+   are iframes, holder name / expiry an in-page <controlled-input>. */
+.hf-slot {
+  display: flex;
+  align-items: center;
+}
+.hf-slot > iframe,
+.hf-slot > controlled-input,
+.hf-slot controlled-input input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
 }

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../shared";
 
 @theme inline {
   --color-bg: #f8f9fc;

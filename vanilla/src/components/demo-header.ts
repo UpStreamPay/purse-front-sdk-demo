@@ -4,6 +4,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { DemoElement } from './base';
 import { t } from '../i18n';
 import './demo-locale-picker';
+import '../../../shared/demos';
 
 // Badge colour per demo category. Full class strings so Tailwind keeps them.
 const VARIANTS: Record<string, string> = {
@@ -18,7 +19,7 @@ const SOURCE_BASE =
   'https://github.com/UpStreamPay/purse-front-sdk-demo/blob/main/vanilla/src/';
 
 /**
- * <demo-header> — the page header shared by every demo: back link, "View
+ * <demo-header> — the page header shared by every demo: demo switcher, "View
  * source" link, category badge and title.
  *
  *   <demo-header badge="Headless" variant="violet"
@@ -40,8 +41,8 @@ export class DemoHeader extends DemoElement {
     const badgeClass = VARIANTS[this.variant] ?? VARIANTS.blue;
     return html`
       <div class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-          <a href="../" class="inline-flex items-center gap-1.5 text-muted no-underline text-sm hover:text-text">${t('common.allExamples')}</a>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <demo-switcher app="vanilla"></demo-switcher>
           <div class="flex items-center gap-2">
             <demo-locale-picker></demo-locale-picker>
             ${this.source

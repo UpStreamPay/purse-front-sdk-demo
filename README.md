@@ -5,7 +5,7 @@ Demo apps for [`@purse-eu/web-sdk`](https://www.npmjs.com/package/@purse-eu/web-
 | Folder | Stack | What it demos |
 |---|---|---|
 | [`vanilla/`](./vanilla/) | Vite + TypeScript | Drop-in checkout, Headless checkout, Secure Fields tokenization |
-| [`react/`](./react/) | React 19 + Vite + TypeScript | Secure Fields tokenization |
+| [`react/`](./react/) | React 19 + Vite + TypeScript | Secure Fields tokenization in several form layouts |
 | [`sandpack/`](./sandpack/) | npm package | `@upstreampay/purse-sdk-demos` — Sandpack configs embedded in the doc site |
 
 ## Docs
@@ -44,9 +44,24 @@ npm run dev:sandpack    # Sandpack preview → http://localhost:8000
 
 > If both Vite apps run at the same time, the second is auto-assigned to port 5174.
 
-Build the deployed site (vanilla + react): `npm run build`. Build the Sandpack
-package: `npm run build:sandpack`. Both run against a single hoisted
-`@purse-eu/web-sdk` version — see each workspace's `package.json`.
+Build the Sandpack package: `npm run build:sandpack`. Every workspace runs
+against a single hoisted `@purse-eu/web-sdk` version — see each workspace's
+`package.json`.
+
+### 4. The deployed showcase
+
+```sh
+npm run build:site      # vanilla → dist/vanilla, react → dist/react, + index.html & demos.json
+npx serve dist          # preview exactly what GitHub Pages serves
+```
+
+[`demos.json`](./demos.json) is the demo catalogue — the one place to add or
+rename a demo. It drives the root landing, both apps' landings and the
+`<demo-switcher>` ([`shared/demos.ts`](./shared/demos.ts)) at the top of every
+demo page, which jumps straight to any other demo.
+
+> In dev each app is its own server at `/`, so the switcher's links into the
+> *other* app only resolve on the assembled `dist/`.
 
 ## Environment variables
 

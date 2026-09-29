@@ -1,44 +1,82 @@
 import { t } from "./i18n";
 import { LocalePicker } from "./shared/LocalePicker";
+import { GitHubIcon } from "./shared/GitHubIcon";
+import {
+  BADGE_CLASSES,
+  SECTIONS,
+  demoHref,
+  demosOf,
+  pick,
+} from "../../shared/demos";
 
-// One entry per demo page. Each `href` is a folder with its own index.html
-// (see vite.config.ts), relative so it works under any VITE_BASE_URL.
-const DEMOS = [
-  {
-    href: "securefields/",
-    badge: "Secure Fields",
-    title: t("landing.sf.title"),
-    description: t("landing.sf.desc"),
-  },
-];
+// Cards come from the shared catalogue (demos.json), this app's demos only —
+// same look as the vanilla landing (vanilla/index.html + src/landing.ts).
+const DEMOS = demosOf("react");
 
 export function Landing() {
   return (
-    <main className="min-h-screen w-screen flex flex-col items-center p-4 pt-10">
-      <header className="w-full max-w-2xl mb-8 relative">
-        <LocalePicker className="absolute right-0 top-0" />
-        <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
-          {t("landing.eyebrow")}
-        </p>
-        <h1 className="text-2xl font-bold mt-1">{t("landing.title")}</h1>
-        {/* Static dictionary markup (<code>) — never user input. */}
-        <p className="text-sm text-gray-400 mt-1" dangerouslySetInnerHTML={{ __html: t("landing.intro") }} />
-      </header>
-      <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {DEMOS.map((demo) => (
+    <main className="max-w-2xl mx-auto px-5 pt-10 pb-20">
+      <header className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold mt-2 mb-1.5">
+            {t("landing.title")}
+          </h1>
+          {/* Static dictionary markup (<code>) — never user input. */}
+          <p
+            className="text-sm text-gray-500"
+            dangerouslySetInnerHTML={{ __html: t("landing.intro") }}
+          />
+        </div>
+        <div className="flex items-center gap-2 shrink-0 mt-2">
+          <LocalePicker />
           <a
-            key={demo.href}
-            href={demo.href}
-            className="block p-4 bg-white rounded-xl shadow-lg no-underline text-gray-900 transition-all hover:ring-2 hover:ring-blue-300"
+            href="https://github.com/UpStreamPay/purse-front-sdk-demo/tree/main/react/src"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-1.5 text-gray-500 no-underline text-xs hover:text-gray-900 border border-gray-200 rounded-md px-2 py-1"
           >
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase bg-pink-100 text-pink-800">
-              {demo.badge}
-            </span>
-            <div className="font-semibold text-base my-2">{demo.title}</div>
-            <div className="text-sm text-gray-500">{demo.description}</div>
+            <GitHubIcon />
+            {t("common.viewSource")}
           </a>
-        ))}
-      </div>
+        </div>
+      </header>
+
+      {SECTIONS.map((section) => {
+        const cards = DEMOS.filter((d) => d.section === section.id);
+        if (!cards.length) {
+          return null;
+        }
+        return (
+          <section key={section.id}>
+            <h2 className="text-base font-bold mb-3 mt-2">
+              {pick(section.title)}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-7">
+              {cards.map((demo) => (
+                <a
+                  key={demo.path}
+                  href={demoHref(demo, "react")}
+                  className="block p-4 bg-white border border-gray-200 rounded-xl no-underline text-inherit transition-all hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/10"
+                >
+                  <span
+                    className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide uppercase ${BADGE_CLASSES[section.variant]}`}
+                  >
+                    {section.badge}
+                  </span>
+                  <div className="font-semibold text-base my-2">
+                    {pick(demo.title)}
+                  </div>
+                  {/* demos.json is our own static file; desc carries <code> markup. */}
+                  <div
+                    className="text-sm text-gray-500"
+                    dangerouslySetInnerHTML={{ __html: pick(demo.desc) }}
+                  />
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </main>
   );
 }

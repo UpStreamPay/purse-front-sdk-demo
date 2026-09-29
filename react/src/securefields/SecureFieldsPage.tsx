@@ -1,72 +1,450 @@
-import { PaymentForm } from "./PaymentForm.tsx";
-import { DebugPanel } from "../shared/DebugPanel.tsx";
-import { useState } from "react";
-import { t } from "../i18n";
+import { useEffect, useState, type ReactNode } from "react";
+import type { Securefields } from "@purse-eu/web-sdk";
+import { RotateCcw } from "lucide-react";
+import { t, type MessageKey } from "../i18n";
+import { DebugPanel } from "../shared/DebugPanel";
+import { DemoSwitcher } from "../shared/DemoSwitcher";
 import { LocalePicker } from "../shared/LocalePicker";
+import { GitHubIcon } from "../shared/GitHubIcon";
+import {
+  DEFAULT_CONFIG,
+  LABELLED,
+  readUrlState,
+  writeUrlState,
+  Form,
+  GRAYS,
+  RADII,
+  RADIUS_CLASS,
+  type Config,
+} from "./config";
+import { LAYOUTS, StateExamples, type Layout } from "./layouts";
+import {
+  useSecureFields,
+  type FieldName,
+  type SubmitResult,
+} from "./useSecureFields";
+
+const SOURCE =
+  "https://github.com/UpStreamPay/purse-front-sdk-demo/tree/main/react/src/securefields";
+
+// Input text inside the iframes — the only styling the page can't do from outside.
+// The SDK has its own colour per state (:focus, :valid…), so the text colour is
+// repeated there — setting `color` alone leaves typed text dark in dark mode.
+const styles = (
+  dark: boolean,
+): NonNullable<Securefields.SecureFieldsConfig["styles"]> => {
+  const color = dark ? "#f3f4f6" : "#111827";
+  return {
+    input: {
+      fontFamily: "system-ui, -apple-system, sans-serif",
+      fontSize: "16px",
+      color,
+      backgroundColor: "transparent",
+      placeholderColor: dark ? "#6b7280" : "#9ca3af",
+      ":focus": { color },
+      ":valid": { color },
+      ":invalid": { color },
+      ":empty": { color },
+      ":autocomplete": { color },
+    },
+  };
+};
+
+const PLACEHOLDERS: Record<FieldName, string> = {
+  cardNumber: "1234 1234 1234 1234",
+  holderName: t("sf.placeholder.holder"),
+  expDate: t("sf.placeholder.exp"),
+  cvv: "123",
+};
+const LABELS: Record<FieldName, MessageKey> = {
+  cardNumber: "sf.label.cardNumber",
+  holderName: "sf.label.holderName",
+  expDate: "sf.label.expDate",
+  cvv: "sf.label.cvv",
+};
+
+function Switch({
+  id,
+  checked,
+  onChange,
+  label,
+  hint,
+  disabled = false,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  hint?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-3 ${disabled ? "opacity-50" : ""}`}
+    >
+      <label htmlFor={id} className="space-y-0.5 cursor-pointer">
+        <span className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+          {label}
+        </span>
+        {hint && (
+          <span className="block text-[10px] text-gray-400">{hint}</span>
+        )}
+      </label>
+      <button
+        id={id}
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors cursor-pointer disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+          checked ? "bg-indigo-600" : "bg-gray-300 dark:bg-gray-700"
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-4.5" : "translate-x-0.5"}`}
+        />
+      </button>
+    </div>
+  );
+}
+
+function Customizer({
+  config,
+  set,
+  layout,
+}: {
+  config: Config;
+  set: (patch: Partial<Config>) => void;
+  layout: Layout;
+}) {
+  const hr = <hr className="border-gray-200 dark:border-gray-800" />;
+  // Only show the options that change the current layout.
+  const hasGray = layout === "stacked";
+  const hasFloating = LABELLED[layout].length > 0;
+  return (
+    <div className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm p-6 space-y-6 xl:sticky xl:top-8">
+      <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+        <span>🎨</span> {t("sf.custom.title")}
+      </h2>
+
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-600 dark:text-gray-300">
+          {t("sf.custom.radius")}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {RADII.map((r) => (
+            <button
+              key={r}
+              type="button"
+              aria-pressed={config.radius === r}
+              onClick={() => set({ radius: r })}
+              className={`px-3 py-1 text-xs font-medium border cursor-pointer transition-all ${RADIUS_CLASS[r]} ${
+                config.radius === r
+                  ? "bg-indigo-600 text-white border-indigo-600 ring-2 ring-offset-1 ring-indigo-600/20"
+                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              {r.charAt(0).toUpperCase() + r.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {hr}
+
+      {hasGray && (
+        <>
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-3">
+              {t("sf.custom.gray")}
+            </legend>
+            <div className="flex gap-4">
+              {GRAYS.map((g) => (
+                <label
+                  key={g}
+                  className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="gray"
+                    value={g}
+                    checked={config.gray === g}
+                    onChange={() => set({ gray: g })}
+                    className="accent-indigo-600"
+                  />
+                  {g.charAt(0).toUpperCase() + g.slice(1)}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          {hr}
+        </>
+      )}
+
+      <div className="space-y-4">
+        <Switch
+          id="cfg-icons"
+          label={t("sf.custom.icons")}
+          checked={config.showIcons}
+          onChange={(v) => set({ showIcons: v })}
+        />
+        {hasFloating && (
+          <Switch
+            id="cfg-floating"
+            label={t("sf.custom.floating")}
+            hint={t("sf.custom.remounts")}
+            checked={config.floatingLabels}
+            onChange={(v) => set({ floatingLabels: v })}
+          />
+        )}
+        <Switch
+          id="cfg-dark"
+          label={t("sf.custom.dark")}
+          hint={t("sf.custom.remounts")}
+          checked={config.darkMode}
+          onChange={(v) => set({ darkMode: v })}
+        />
+        {hr}
+        <Switch
+          id="cfg-brand"
+          label={t("sf.custom.embeddedBrand")}
+          // The SDK's selector badges have a baked-in white background that the
+          // `styles` option can't reach, so it only fits a light form (SDK-12366).
+          hint={t(
+            config.darkMode
+              ? "sf.custom.embeddedBrandLightOnly"
+              : "sf.custom.remounts",
+          )}
+          disabled={config.darkMode}
+          checked={config.embeddedBrandSelector && !config.darkMode}
+          onChange={(v) => set({ embeddedBrandSelector: v })}
+        />
+        {hr}
+        <Switch
+          id="cfg-errors"
+          label={t("sf.custom.errors")}
+          hint={t("sf.custom.errorsHint")}
+          checked={config.forceErrors}
+          onChange={(v) => set({ forceErrors: v })}
+        />
+      </div>
+
+      {hr}
+
+      <button
+        type="button"
+        onClick={() => set(DEFAULT_CONFIG)}
+        className="w-full inline-flex items-center justify-center gap-2 h-9 rounded-md border border-gray-300 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+      >
+        <RotateCcw className="h-4 w-4" />
+        {t("sf.custom.reset")}
+      </button>
+    </div>
+  );
+}
+
+function Panel({
+  title,
+  desc,
+  children,
+}: {
+  title: string;
+  desc: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            {title}
+          </h2>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
+      </div>
+      <div className="p-6 sm:p-8 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function ErrorBanner({ message }: { message: string }) {
+  return (
+    <div
+      role="alert"
+      className="rounded-lg border px-4 py-3 text-sm bg-red-50 border-red-300 text-red-900 dark:bg-red-950/40 dark:border-red-800 dark:text-red-200"
+    >
+      {message}
+    </div>
+  );
+}
+
+function Showcase({
+  config,
+  layout,
+  setLayout,
+}: {
+  config: Config;
+  layout: Layout;
+  setLayout: (layout: Layout) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<SubmitResult | null>(null);
+
+  const floating = config.floatingLabels ? LABELLED[layout] : [];
+  const options = Object.fromEntries(
+    (Object.keys(LABELS) as FieldName[]).map((f) => [
+      f,
+      {
+        ariaLabel: t(LABELS[f]),
+        // A floating label replaces the placeholder — only where the layout has one.
+        placeholder: floating.includes(f) ? "" : PLACEHOLDERS[f],
+      },
+    ]),
+  ) as Record<FieldName, { placeholder: string; ariaLabel: string }>;
+  const sf = useSecureFields(
+    layout,
+    styles(config.darkMode),
+    options,
+    config.embeddedBrandSelector,
+    `${config.darkMode}-${config.floatingLabels}-${config.embeddedBrandSelector}`,
+  );
+
+  // A remount clears the fields, so an old token no longer matches what is shown.
+  useEffect(
+    () => setResult(null),
+    [
+      layout,
+      config.darkMode,
+      config.floatingLabels,
+      config.embeddedBrandSelector,
+    ],
+  );
+
+  const onSubmit = async () => {
+    setResult(null);
+    setBusy(true);
+    setResult(await sf.submit());
+    setBusy(false);
+  };
+
+  const Current = LAYOUTS[layout];
+  return (
+    <Form.Provider value={{ config, layout, ...sf, onSubmit, busy, result }}>
+      <div className="space-y-12">
+        <div className="space-y-4">
+          <div
+            role="tablist"
+            aria-label={t("sf.layouts")}
+            className="flex flex-wrap gap-1.5"
+          >
+            {(Object.keys(LAYOUTS) as Layout[]).map((l) => (
+              <button
+                key={l}
+                type="button"
+                role="tab"
+                aria-selected={layout === l}
+                onClick={() => setLayout(l)}
+                className={`px-3.5 py-1.5 border rounded-full text-sm cursor-pointer transition-all ${
+                  layout === l
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-indigo-400"
+                }`}
+              >
+                {t(`sf.layout.${l}` as MessageKey)}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {t("sf.oneLive")}
+          </p>
+        </div>
+
+        {sf.error && <ErrorBanner message={sf.error} />}
+
+        <Panel
+          title={t(`sf.layout.${layout}` as MessageKey)}
+          desc={t(`sf.layout.${layout}.desc` as MessageKey)}
+        >
+          {/* key: a fresh DOM per layout, so the new iframes land in empty containers. */}
+          <Current key={layout} />
+        </Panel>
+
+        <Panel title={t("sf.states.title")} desc={t("sf.states.desc")}>
+          <div className="max-w-md mx-auto">
+            <StateExamples />
+          </div>
+        </Panel>
+      </div>
+    </Form.Provider>
+  );
+}
 
 export function SecureFieldsPage() {
-  const [embeddedBrandSelector, setEmbeddedBrandSelector] = useState(false);
+  const [initial] = useState(readUrlState);
+  const [config, setConfig] = useState(initial.config);
+  const [layout, setLayout] = useState<Layout>(initial.layout);
+
+  useEffect(() => writeUrlState(config, layout), [config, layout]);
+  const set = (patch: Partial<Config>) =>
+    setConfig((c) => ({ ...c, ...patch }));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", config.darkMode);
+  }, [config.darkMode]);
+
   return (
-    <main className="min-h-screen w-screen  flex flex-col items-center justify-center p-4 ">
-      <header className="w-full max-w-lg mb-4 text-center">
-        <div className="flex items-center justify-between mb-4">
-          <a href="../" className="text-xs text-gray-400 no-underline hover:text-gray-600">
-            {t("common.allDemos")}
-          </a>
+    <main className="min-h-screen w-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-12">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <DemoSwitcher />
           <div className="flex items-center gap-2">
             <LocalePicker />
             <a
-              href="https://github.com/UpStreamPay/purse-front-sdk-demo/tree/main/react/src"
+              href={SOURCE}
               target="_blank"
               rel="noopener"
-              className="inline-flex items-center gap-1.5 text-gray-400 no-underline text-xs hover:text-gray-600 border border-gray-200 rounded-md px-2 py-1"
+              className="inline-flex items-center gap-1.5 text-gray-500 no-underline text-xs hover:text-gray-800 dark:hover:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-md px-2 py-1"
             >
-              <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              <GitHubIcon />
               {t("common.viewSource")}
             </a>
           </div>
         </div>
-        <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
-          {t("sf.eyebrow")}
-        </p>
-        <h1 className="text-2xl font-bold mt-1">Secure Fields</h1>
-      </header>
-      <div className="w-10/12 max-w-lg rounded overflow-hidden shadow-lg bg-white p-6 mt-4">
-        <div className="flex items-center">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={embeddedBrandSelector}
-            tabIndex={0}
-            onClick={() => setEmbeddedBrandSelector((v) => !v)}
-            onKeyDown={(e) => {
-              if (e.key === " " || e.key === "Enter") {
-                e.preventDefault();
-                setEmbeddedBrandSelector((v) => !v);
-              }
-            }}
-            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${embeddedBrandSelector ? "bg-blue-500" : "bg-gray-200"}`}
-            style={{
-              transitionTimingFunction: "cubic-bezier(0.68,-0.55,0.27,1.55)",
-            }}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ${embeddedBrandSelector ? "translate-x-6" : "translate-x-1"}`}
-              style={{
-                transitionTimingFunction: "cubic-bezier(0.68,-0.55,0.27,1.55)",
-              }}
-            />
-          </button>
-          <span className="ml-2 text-sm font-medium text-gray-700">
-            {t("sf.embeddedSelector")}
-          </span>
+
+        <div className="text-center space-y-4">
+          <p className="text-sm text-gray-400 uppercase tracking-widest font-semibold">
+            {t("sf.eyebrow")}
+          </p>
+          <h1 className="text-4xl font-bold tracking-tight">{t("sf.title")}</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            {t("sf.desc")}
+          </p>
         </div>
-      </div>
-      <div className="w-10/12 max-w-lg rounded overflow-hidden shadow-lg bg-white p-6 mt-4">
-        <PaymentForm embeddedBrandSelector={embeddedBrandSelector} />
+
+        <hr className="border-gray-200 dark:border-gray-800" />
+
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          <div className="xl:col-span-3 z-20">
+            <Customizer config={config} set={set} layout={layout} />
+          </div>
+          <div className="xl:col-span-9">
+            <Showcase
+              config={{
+                ...config,
+                embeddedBrandSelector:
+                  config.embeddedBrandSelector && !config.darkMode,
+              }}
+              layout={layout}
+              setLayout={setLayout}
+            />
+          </div>
+        </div>
       </div>
       <DebugPanel />
     </main>
   );
 }
-

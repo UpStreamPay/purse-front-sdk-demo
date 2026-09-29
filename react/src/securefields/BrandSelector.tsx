@@ -1,17 +1,7 @@
 import type { Securefields } from "@purse-eu/web-sdk";
 import { t } from "../i18n";
+import { brandLogo } from "../shared/brands";
 type CardBrand = Securefields.Brand;
-
-const assetsBrandMapper: Record<string, string> = {
-  AMERICAN_EXPRESS: "amex",
-  MAESTRO: "maestro",
-  MASTERCARD: "mastercard",
-  VISA: "visa",
-  CARTE_BANCAIRE: "cb",
-  DINERS_CLUB: "diners-club",
-  DISCOVER: "discover",
-  JCB: "jcb",
-};
 
 export const InlineBrandSelector = ({
   brands,
@@ -35,7 +25,7 @@ export const InlineBrandSelector = ({
           className="ml-2 flex items-center"
         >
           <img
-            src={`/public/brands/${assetsBrandMapper[brands[0]]}.svg`}
+            src={brandLogo(brands[0])}
             alt={brands[0]}
             className="h-6 w-9 inline-block"
           />
@@ -76,7 +66,7 @@ export const InlineBrandSelector = ({
                 className="sr-only"
               />
               <img
-                src={`/public/brands/${assetsBrandMapper[brand]}.svg`}
+                src={brandLogo(brand)}
                 alt={brand}
                 className="h-6 w-9 hover:shadow-lg"
               />

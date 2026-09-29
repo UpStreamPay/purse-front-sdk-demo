@@ -4,7 +4,6 @@ import type {MessageKey} from './en';
 // The express-checkout storefront strings are the design's own copy.
 export const fr: Record<MessageKey, string> = {
     // ── Shared chrome ────────────────────────────────────────────────────────
-    'common.allExamples': '← Toutes les démos',
     'common.viewSource': 'Voir le code',
     'common.language': 'Langue',
     'common.pay': 'Payer',
@@ -111,25 +110,6 @@ export const fr: Record<MessageKey, string> = {
     'landing.title': 'Purse SDK — Démos Vanilla TypeScript',
     'landing.intro': 'Application de démo multi-pages basée sur <code>@purse-eu/web-sdk</code>. Copiez <code>.env.example</code> → <code>.env.local</code> et renseignez vos identifiants.',
     'landing.warning': 'Copiez <code>.env.example</code> → <code>.env.local</code> et renseignez vos identifiants. En production, remplacez <code>getSession()</code> dans chaque recette par un appel à votre backend.',
-    'landing.section.dropin': 'Drop-in Checkout',
-    'landing.section.headless': 'Headless Checkout',
-    'landing.section.advanced': 'Advanced Flow',
-    'landing.section.secureFields': 'Secure Fields',
-    'landing.card.quickStart': 'Démarrage rapide',
-    'landing.card.dropin': 'Widget prêt à l’emploi monté dans une div. Réagissez à <code>isPaymentFulfilled</code> et appelez <code>submitPayment()</code> quand tout est prêt.',
-    'landing.card.renderMethods': 'Liste des moyens de paiement',
-    'landing.card.renderMethodsDesc': 'Chargement du SDK → init → liste des moyens → sélection → bouton payer → résultat',
-    'landing.card.hostedForm': 'Hosted Form',
-    'landing.card.hostedFormDesc': 'Une seule iframe : PAN, expiration, CVV, titulaire via <code>getPaymentElement()</code>',
-    'landing.card.hostedFields': 'Hosted Fields',
-    'landing.card.hostedFieldsDesc': 'Une iframe par champ, en grille, sur une ligne ou en forme de carte',
-    'landing.card.express': 'Express Checkout',
-    'landing.card.expressDesc': 'Achat en un clic : carte enregistrée → paiement en un geste, ou nouvelle carte via les hosted fields',
-    'landing.card.complete': 'Complete Payment',
-    'landing.card.completeDesc': 'Payment API v2 brute via un proxy marchand : <code>eligible-solutions</code> → Secure Fields → <code>create_payment</code> avec enregistrement de la carte en option.',
-    'landing.card.token': 'Paiement par token',
-    'landing.card.tokenDesc': 'Payer avec une carte enregistrée : liste des <code>wallet_token</code>s → ressaisie du CVV → <code>create_payment</code> avec <code>wallet_token</code>.',
-    'landing.card.secureFieldsDesc': '<code>initSecureFields</code> → champs affichés dans des iframes → soumission → token vault renvoyé. Aucune session nécessaire — fonctionne au niveau du tenant.',
 
     // ── Drop-in ──────────────────────────────────────────────────────────────
     'dropin.title': 'Drop-in Checkout — Démarrage rapide',

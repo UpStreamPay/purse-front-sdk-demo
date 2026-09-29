@@ -1,12 +1,8 @@
-interface ViteTypeOptions {
-  // By adding this line, you can make the type of ImportMetaEnv strict
-  // to disallow unknown keys.
-  // strictImportMetaEnv: unknown
-}
 
 interface ImportMetaEnv {
   readonly VITE_PURSE_SECUREFIELDS_TENANT_ID: string;
   readonly VITE_PURSE_API_KEY: string;
+  readonly VITE_PURSE_ENVIRONMENT: string | undefined;
 }
 
 interface ImportMeta {

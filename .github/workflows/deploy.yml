@@ -35,22 +35,8 @@ jobs:
       - name: Install workspaces
         run: npm ci
 
-      - name: Build vanilla
-        env:
-          VITE_BASE_URL: /vanilla/
-        run: npm run build -w vanilla
-
-      - name: Build react
-        env:
-          VITE_BASE_URL: /react/
-        run: npm run build -w react
-
-      - name: Assemble dist
-        run: |
-          mkdir -p dist/vanilla dist/react
-          cp -r vanilla/dist/. dist/vanilla/
-          cp -r react/dist/. dist/react/
-          cp index.html dist/index.html
+      - name: Build site
+        run: npm run build:site
 
       - uses: actions/configure-pages@v4
 

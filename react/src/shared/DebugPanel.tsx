@@ -3,11 +3,13 @@ import { ENV_KEYS, type EnvKey, getEnv, setEnv, resetEnv, resetAllEnv, isOverrid
 import { t, type MessageKey } from '../i18n';
 
 const LABELS: Record<EnvKey, MessageKey> = {
+    VITE_PURSE_ENVIRONMENT: 'panel.label.environment',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'panel.label.tenant',
     VITE_PURSE_API_KEY: 'panel.label.apiKey',
 };
 
 const HINTS: Record<EnvKey, MessageKey> = {
+    VITE_PURSE_ENVIRONMENT: 'panel.hint.environment',
     VITE_PURSE_SECUREFIELDS_TENANT_ID: 'panel.hint.secureFields',
     VITE_PURSE_API_KEY: 'panel.hint.secureFields',
 };

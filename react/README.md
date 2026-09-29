@@ -21,27 +21,34 @@ npm run dev
 
 | Variable | Description |
 |---|---|
-| `VITE_PURSE_TENANT_ID` | Tenant identifier |
+| `VITE_PURSE_SECUREFIELDS_TENANT_ID` | Tenant identifier |
 | `VITE_PURSE_API_KEY` | API key for Secure Fields |
 | `VITE_PURSE_ENVIRONMENT` | `sandbox` (default) or `production` |
 
 ## What's in here
 
-Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`); each demo lives in its own folder with an `index.html` registered in `vite.config.ts`.
+Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`, cards from the repo-root `demos.json`); each demo lives in its own folder with an `index.html` registered in `vite.config.ts`.
 
-**Secure Fields — tokenization** (`/securefields/`)
-- Mounts isolated card-field iframes via `getSecureFields()` from `@purse-eu/web-sdk`
-- Toggle between standalone brand selector and embedded brand selector (co-brand support)
-- On submit, returns a `vault_form_token` you pass to your backend
-- No payment session required — tokenizes at tenant level
+**Secure Fields — form variations** (`/securefields/`)
+- Port of the Figma Make "Credit Card Payment Form Variations": stacked, classic, hybrid and inline layouts (the Figma "flip card" is left out: it mirrors typed digits, which the iframes never share), plus a UI customizer (radius, icons, gray shade, floating labels, dark mode, embedded brand selector, error preview)
+- One `initSecureFields()` instance at a time — switching layout re-creates it in the new containers (`useSecureFields.ts`)
+- Labels, borders, icons and errors are React around the fields, driven by their `focus` / `blur` / `change` events (length + validity, never the value)
+- Co-badged cards: brand picked in the page (`brandDetected` → `submit({ selectedNetwork })`) or by the SDK's embedded selector
+- Submit tokenizes the card and shows the `vault_form_token` (plus BIN / last 4 / brands) under the button — no payment session required
+
+### Known SDK limitations
+
+- **Embedded brand selector logo is clipped in tall fields** — [SDK-12365](https://upstreampay.atlassian.net/browse/SDK-12365). The badge is sized to the iframe height (`calc(100vh - 2px)`), then cropped to 36px wide by `object-fit: cover`.
+- **Card number can't be styled with the embedded brand selector** — [SDK-12366](https://upstreampay.atlassian.net/browse/SDK-12366). The badge SVGs have a baked-in white background, and `styles.input.backgroundColor` is ignored. The demo works around it: the stacked card-number row turns white while the embedded selector is on, and the option is disabled in dark mode.
 
 ### Key files
 
 | File | Description |
 |---|---|
-| `src/Landing.tsx` | Landing page — add an entry to `DEMOS` for each new demo |
-| `src/securefields/SecureFieldsPage.tsx` | Secure Fields page — brand-selector toggle + form |
-| `src/securefields/PaymentForm.tsx` | Main form — mounts Secure Fields, handles submit |
+| `src/Landing.tsx` | Landing page — cards come from the repo-root `demos.json` |
+| `src/securefields/SecureFieldsPage.tsx` | Page, UI customizer, layout tabs, submit |
+| `src/securefields/useSecureFields.ts` | Mounts Secure Fields, tracks field / brand state, tokenizes |
+| `src/securefields/layouts.tsx` / `Field.tsx` | The four layouts and the field shell around each iframe |
 | `src/securefields/BrandSelector.tsx` | Co-brand selector component |
 | `src/securefields/TokenizationResultDisplay.tsx` | Displays the returned token |
 | `src/shared/env.ts` | Reads env vars; falls back to `localStorage` overrides |
@@ -53,7 +60,7 @@ English and French, switched by the locale picker in each page header (stored un
 
 ## Credential override without rebuild
 
-Open the **Debug** panel in the running app and enter `VITE_PURSE_TENANT_ID` / `VITE_PURSE_API_KEY`. Values persist in `localStorage` and override the build defaults immediately.
+Open the **Debug** panel in the running app and enter `VITE_PURSE_SECUREFIELDS_TENANT_ID` / `VITE_PURSE_API_KEY`. Values persist in `localStorage` and override the build defaults immediately.
 
 ## Other commands
 
