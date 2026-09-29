@@ -17,6 +17,7 @@
     "dev:react": "npm run dev -w react",
     "dev:sandpack": "npm run dev -w sandpack",
     "build": "npm run build -w vanilla -w react",
+    "build:site": "sh scripts/build-site.sh",
     "build:sandpack": "npm run build -w sandpack",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"

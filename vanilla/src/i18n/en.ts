@@ -7,7 +7,6 @@
  */
 export const en = {
     // ── Shared chrome ────────────────────────────────────────────────────────
-    'common.allExamples': '← All examples',
     'common.viewSource': 'View source',
     'common.language': 'Language',
     'common.pay': 'Pay',
@@ -114,25 +113,6 @@ export const en = {
     'landing.title': 'Purse SDK — Vanilla TypeScript Demos',
     'landing.intro': 'Multi-page demo app using <code>@purse-eu/web-sdk</code>. Copy <code>.env.example</code> → <code>.env.local</code> and fill in your credentials.',
     'landing.warning': 'Copy <code>.env.example</code> → <code>.env.local</code> and fill in your credentials. Replace <code>getSession()</code> in each recipe with your backend API call in production.',
-    'landing.section.dropin': 'Drop-in Checkout',
-    'landing.section.headless': 'Headless Checkout',
-    'landing.section.advanced': 'Advanced Flow',
-    'landing.section.secureFields': 'Secure Fields',
-    'landing.card.quickStart': 'Quick Start',
-    'landing.card.dropin': 'Pre-built widget mounted in a div. React to <code>isPaymentFulfilled</code> and call <code>submitPayment()</code> when ready.',
-    'landing.card.renderMethods': 'Render Methods',
-    'landing.card.renderMethodsDesc': 'SDK load → init → list methods → select → pay button → result',
-    'landing.card.hostedForm': 'Hosted Form',
-    'landing.card.hostedFormDesc': 'Single iframe: PAN, expiry, CVV, holder name via <code>getPaymentElement()</code>',
-    'landing.card.hostedFields': 'Hosted Fields',
-    'landing.card.hostedFieldsDesc': 'Isolated field iframes with grid, single-line, and card-shaped layouts',
-    'landing.card.express': 'Express Checkout',
-    'landing.card.expressDesc': 'One-click "Buy now" sheet: saved token → pay in one tap, or new card via hosted fields',
-    'landing.card.complete': 'Complete Payment',
-    'landing.card.completeDesc': 'Raw Payment API v2 via a merchant proxy: <code>eligible-solutions</code> → Secure Fields → <code>create_payment</code> with optional token save.',
-    'landing.card.token': 'Token Payment',
-    'landing.card.tokenDesc': 'Pay with a saved card: list <code>wallet_token</code>s → re-enter CVV → <code>create_payment</code> with <code>wallet_token</code>.',
-    'landing.card.secureFieldsDesc': '<code>initSecureFields</code> → fields rendered in iframes → submit → vault token returned. No session required — operates at tenant level.',
 
     // ── Drop-in ──────────────────────────────────────────────────────────────
     'dropin.title': 'Drop-in Checkout — Quick Start',
