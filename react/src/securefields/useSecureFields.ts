@@ -39,19 +39,21 @@ const BRANDS: Brand[] = [
   "MAESTRO",
 ];
 
+export type SecureFieldsSetup = {
+  layout: string;
+  styles: NonNullable<Securefields.SecureFieldsConfig["styles"]>;
+  options: Record<FieldName, { placeholder?: string; ariaLabel: string }>;
+  brandSelector: boolean;
+};
+
 /**
- * Mounts one Secure Fields instance into the current layout's containers
- * (targetId). Anything that changes its config — layout, styles, placeholders,
- * embedded brand selector — must change `remountKey`: the instance is destroyed
- * and re-created, and what was typed is lost (the iframes own it).
+ * Mounts one Secure Fields instance into the layout's containers (targetId).
+ * Any change to `setup` re-creates it — typed data is lost, the iframes own it.
+ * `key` identifies the current instance.
  */
-export function useSecureFields(
-  layout: string,
-  styles: NonNullable<Securefields.SecureFieldsConfig["styles"]>,
-  options: Record<FieldName, { placeholder?: string; ariaLabel: string }>,
-  brandSelector: boolean,
-  remountKey: string,
-) {
+export function useSecureFields(setup: SecureFieldsSetup) {
+  // Compared by value: a new object with the same content keeps the instance.
+  const key = JSON.stringify(setup);
   const client = useRef<Securefields.SecureFieldsClient | null>(null);
   const [fields, setFields] = useState(emptyFields);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -60,6 +62,8 @@ export function useSecureFields(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const { layout, styles, options, brandSelector }: SecureFieldsSetup =
+      JSON.parse(key);
     let cancelled = false;
     // A new instance starts blank: drop the previous one's field and brand state.
     setFields(emptyFields());
@@ -128,16 +132,18 @@ export function useSecureFields(
         sf.render();
         client.current = sf;
       })
-      .catch((e) => setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : String(e));
+        }
+      });
 
     return () => {
       cancelled = true;
       client.current?.destroy();
       client.current = null;
     };
-    // styles/options are derived from remountKey; listing them would remount on every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout, remountKey]);
+  }, [key]);
 
   /** Tokenize. Marks every field touched first so the page shows what is missing. */
   const submit = async (): Promise<SubmitResult | null> => {
@@ -153,7 +159,7 @@ export function useSecureFields(
     try {
       // With the embedded selector the SDK tracks the brand itself.
       return await client.current.submit(
-        !brandSelector && selectedBrand
+        !setup.brandSelector && selectedBrand
           ? { selectedNetwork: selectedBrand }
           : undefined,
       );
@@ -163,6 +169,7 @@ export function useSecureFields(
   };
 
   return {
+    key,
     fields,
     brands,
     selectedBrand,

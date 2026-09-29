@@ -78,13 +78,14 @@ class DemoSwitcher extends HTMLElement {
 
     const back = document.createElement('a');
     back.href = siteRoot();
-    back.className = 'text-sm text-gray-500 no-underline hover:text-gray-900 whitespace-nowrap';
+    back.className =
+      'text-sm text-gray-500 no-underline hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 whitespace-nowrap';
     back.textContent = pick(LABELS.all);
 
     const select = document.createElement('select');
     select.ariaLabel = pick(LABELS.jump);
     select.className =
-      'text-sm text-gray-700 bg-white border border-gray-200 rounded-md px-2 py-1 cursor-pointer hover:border-gray-400 max-w-[14rem]';
+      'text-sm text-gray-700 bg-white border border-gray-200 rounded-md px-2 py-1 cursor-pointer hover:border-gray-400 max-w-[14rem] dark:text-gray-200 dark:bg-gray-900 dark:border-gray-700';
     let found = false;
     for (const section of SECTIONS) {
       const group = document.createElement('optgroup');

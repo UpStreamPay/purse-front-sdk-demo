@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @source "../shared";
 
+/* `dark:` only under <html class="dark"> (never set here) — not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-bg: #f8f9fc;
   --color-surface: #ffffff;

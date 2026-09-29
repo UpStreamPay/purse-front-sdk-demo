@@ -68,8 +68,7 @@ export function StackedLayout() {
       <div className="space-y-2">
         <span className={label()}>{t("sf.label.cardInfo")}</span>
         <div className={box(cardError)}>
-          {/* The SDK's embedded selector badges carry a baked-in white background
-              (SDK-12366) — a white cell keeps them from looking pasted on. */}
+          {/* The embedded selector's badges have a white background — match it. */}
           <div
             className={`${cell("cardNumber", config.embeddedBrandSelector ? "bg-white" : shade.bg)} border-b ${shade.line}`}
           >

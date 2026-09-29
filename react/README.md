@@ -30,7 +30,7 @@ npm run dev
 Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`, cards from the repo-root `demos.json`); each demo lives in its own folder with an `index.html` registered in `vite.config.ts`.
 
 **Secure Fields — form variations** (`/securefields/`)
-- Port of the Figma Make "Credit Card Payment Form Variations": stacked, classic, hybrid and inline layouts (the Figma "flip card" is left out: it mirrors typed digits, which the iframes never share), plus a UI customizer (radius, icons, gray shade, floating labels, dark mode, embedded brand selector, error preview)
+- Four card-form layouts — stacked, classic, hybrid, inline — plus a UI customizer (radius, icons, gray shade, floating labels, dark mode, embedded brand selector, error preview). Settings are kept in the URL, so a configured form is a shareable link
 - One `initSecureFields()` instance at a time — switching layout re-creates it in the new containers (`useSecureFields.ts`)
 - Labels, borders, icons and errors are React around the fields, driven by their `focus` / `blur` / `change` events (length + validity, never the value)
 - Co-badged cards: brand picked in the page (`brandDetected` → `submit({ selectedNetwork })`) or by the SDK's embedded selector
@@ -38,8 +38,8 @@ Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`,
 
 ### Known SDK limitations
 
-- **Embedded brand selector logo is clipped in tall fields** — [SDK-12365](https://upstreampay.atlassian.net/browse/SDK-12365). The badge is sized to the iframe height (`calc(100vh - 2px)`), then cropped to 36px wide by `object-fit: cover`.
-- **Card number can't be styled with the embedded brand selector** — [SDK-12366](https://upstreampay.atlassian.net/browse/SDK-12366). The badge SVGs have a baked-in white background, and `styles.input.backgroundColor` is ignored. The demo works around it: the stacked card-number row turns white while the embedded selector is on, and the option is disabled in dark mode.
+- **Embedded brand selector logo is clipped in tall fields.** The badge follows the iframe height, then is cropped to 36px wide.
+- **The embedded brand selector only fits light forms.** Its badges have a white background, and `styles.input.backgroundColor` is ignored. The demo turns the stacked card-number row white while it is on, and disables it in dark mode.
 
 ### Key files
 

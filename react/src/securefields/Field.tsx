@@ -2,7 +2,13 @@ import type { ReactNode } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { t } from "../i18n";
 import { brandLogo } from "../shared/brands";
-import { RADIUS_CLASS, fieldError, useFieldError, useForm } from "./config";
+import {
+  LABELS,
+  RADIUS_CLASS,
+  fieldError,
+  useFieldError,
+  useForm,
+} from "./config";
 import { InlineBrandSelector } from "./BrandSelector";
 import { TokenizationResultDisplay } from "./TokenizationResultDisplay";
 import { targetId, type FieldName } from "./useSecureFields";
@@ -19,14 +25,19 @@ export function ErrorMessage({ children }: { children: ReactNode }) {
   );
 }
 
-/** Errors of several fields grouped in one container (stacked, inline). */
+/** Errors of fields sharing one box (stacked, inline) — named when there are several. */
 export function GroupErrors({ fields }: { fields: FieldName[] }) {
   const form = useForm();
-  const errors = fields.map((f) => fieldError(form, f)).filter(Boolean);
+  const errors = fields.flatMap((f) => {
+    const error = fieldError(form, f);
+    return error ? [{ field: f, error }] : [];
+  });
   return errors.length ? (
     <div className="space-y-1">
-      {errors.map((e) => (
-        <ErrorMessage key={e}>{e}</ErrorMessage>
+      {errors.map(({ field, error }) => (
+        <ErrorMessage key={field}>
+          {fields.length > 1 ? `${t(LABELS[field])}: ${error}` : error}
+        </ErrorMessage>
       ))}
     </div>
   ) : null;
@@ -50,9 +61,9 @@ export function Slot({
 }
 
 /**
- * One bordered field — Figma's SmartInput: standard label above, or a floating
- * label inside that rises on focus / once the field has content (known from the
- * iframe's focus + length events, never its value).
+ * One bordered field: label above, or a floating label that rises on focus or
+ * once the field has content (from the iframe's focus + length events — the
+ * value itself never reaches the page).
  */
 export function Field({
   field,
@@ -111,6 +122,11 @@ export function Field({
     );
   }
 
+  const border = error
+    ? "border-red-500"
+    : f.focused
+      ? "border-indigo-500 ring-2 ring-indigo-500/20"
+      : "border-gray-300 dark:border-gray-700";
   return (
     <div className={`space-y-2 ${className}`}>
       <span
@@ -119,13 +135,7 @@ export function Field({
         {label}
       </span>
       <div
-        className={`relative flex h-11 border bg-white dark:bg-gray-900 transition-all ${radius} ${showIcon ? "pl-10" : "pl-3"} ${
-          error
-            ? "border-red-500 pr-10"
-            : f.focused
-              ? "border-indigo-500 ring-2 ring-indigo-500/20"
-              : "border-gray-300 dark:border-gray-700 pr-3"
-        }`}
+        className={`relative flex h-11 border bg-white dark:bg-gray-900 transition-all ${radius} ${showIcon ? "pl-10" : "pl-3"} ${error ? "pr-10" : "pr-3"} ${border}`}
       >
         {iconEl}
         <Slot field={field} />
@@ -138,7 +148,7 @@ export function Field({
   );
 }
 
-/** Brand logos: detected ones lit, the rest dimmed (display only — CoBadgePicker selects). */
+/** Brand logos: detected ones lit, the rest dimmed. Display only — InlineBrandSelector picks. */
 export function BrandIcons() {
   const { fields, brands: detected } = useForm();
   // An emptied field keeps its last detection — nothing typed means no brand yet.

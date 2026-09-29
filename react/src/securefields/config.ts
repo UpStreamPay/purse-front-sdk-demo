@@ -78,6 +78,13 @@ export function useForm(): FormContext {
   return useContext(Form)!;
 }
 
+export const LABELS: Record<FieldName, MessageKey> = {
+  cardNumber: "sf.label.cardNumber",
+  holderName: "sf.label.holderName",
+  expDate: "sf.label.expDate",
+  cvv: "sf.label.cvv",
+};
+
 const ERRORS: Record<FieldName, MessageKey> = {
   cardNumber: "sf.error.cardNumber",
   holderName: "sf.error.holderName",
@@ -136,7 +143,10 @@ export function readUrlState(): { config: Config; layout: Layout } {
   const layout = q.get("layout");
   return {
     config: config as Config,
-    layout: layout && layout in LABELLED ? (layout as Layout) : "stacked",
+    layout:
+      layout && Object.hasOwn(LABELLED, layout)
+        ? (layout as Layout)
+        : "stacked",
   };
 }
 

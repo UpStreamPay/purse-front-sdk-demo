@@ -100,23 +100,33 @@ function tokenPanLabel(tok: Token): string {
 // needs no CVV, so the payment is already fulfilled — true one-click) or
 // reveals the field and waits for it.
 let cvvRevealed = false;
+let onCvvExpanded: ((e: TransitionEvent) => void) | null = null;
 
 function revealCvv(open: boolean) {
     cvvRevealed = open;
     const field = $('token-cvv-field');
     field.classList.toggle('is-open', open);
+    stopWaitingForCvv(field);
     if (open) {
         // The field sits below the button and may open under the sheet's fold:
         // bring it into view once it has expanded.
         // (Opacity finishes first; wait for the height, or the scroll falls short.)
-        const onExpanded = (e: TransitionEvent) => {
+        onCvvExpanded = (e: TransitionEvent) => {
             if (e.propertyName !== 'grid-template-rows') {
                 return;
             }
-            field.removeEventListener('transitionend', onExpanded);
+            stopWaitingForCvv(field);
             field.scrollIntoView({block: 'nearest', behavior: 'smooth'});
         };
-        field.addEventListener('transitionend', onExpanded);
+        field.addEventListener('transitionend', onCvvExpanded);
+    }
+}
+
+// An interrupted reveal never gets its transitionend: drop the pending listener.
+function stopWaitingForCvv(field: HTMLElement) {
+    if (onCvvExpanded) {
+        field.removeEventListener('transitionend', onCvvExpanded);
+        onCvvExpanded = null;
     }
 }
 

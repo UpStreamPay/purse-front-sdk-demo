@@ -9,6 +9,7 @@ import { GitHubIcon } from "../shared/GitHubIcon";
 import {
   DEFAULT_CONFIG,
   LABELLED,
+  LABELS,
   readUrlState,
   writeUrlState,
   Form,
@@ -56,13 +57,6 @@ const PLACEHOLDERS: Record<FieldName, string> = {
   expDate: t("sf.placeholder.exp"),
   cvv: "123",
 };
-const LABELS: Record<FieldName, MessageKey> = {
-  cardNumber: "sf.label.cardNumber",
-  holderName: "sf.label.holderName",
-  expDate: "sf.label.expDate",
-  cvv: "sf.label.cvv",
-};
-
 function Switch({
   id,
   checked,
@@ -210,8 +204,7 @@ function Customizer({
         <Switch
           id="cfg-brand"
           label={t("sf.custom.embeddedBrand")}
-          // The SDK's selector badges have a baked-in white background that the
-          // `styles` option can't reach, so it only fits a light form (SDK-12366).
+          // Its badges have a fixed white background: light forms only.
           hint={t(
             config.darkMode
               ? "sf.custom.embeddedBrandLightOnly"
@@ -292,7 +285,12 @@ function Showcase({
   setLayout: (layout: Layout) => void;
 }) {
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<SubmitResult | null>(null);
+  // Tagged with the instance that produced it: a remount empties the fields,
+  // so an older token (even one still in flight) is no longer shown.
+  const [result, setResult] = useState<{
+    key: string;
+    value: SubmitResult | null;
+  } | null>(null);
 
   const floating = config.floatingLabels ? LABELLED[layout] : [];
   const options = Object.fromEntries(
@@ -305,35 +303,33 @@ function Showcase({
       },
     ]),
   ) as Record<FieldName, { placeholder: string; ariaLabel: string }>;
-  const sf = useSecureFields(
+  const sf = useSecureFields({
     layout,
-    styles(config.darkMode),
+    styles: styles(config.darkMode),
     options,
-    config.embeddedBrandSelector,
-    `${config.darkMode}-${config.floatingLabels}-${config.embeddedBrandSelector}`,
-  );
-
-  // A remount clears the fields, so an old token no longer matches what is shown.
-  useEffect(
-    () => setResult(null),
-    [
-      layout,
-      config.darkMode,
-      config.floatingLabels,
-      config.embeddedBrandSelector,
-    ],
-  );
+    brandSelector: config.embeddedBrandSelector,
+  });
 
   const onSubmit = async () => {
+    const { key } = sf;
     setResult(null);
     setBusy(true);
-    setResult(await sf.submit());
+    setResult({ key, value: await sf.submit() });
     setBusy(false);
   };
 
   const Current = LAYOUTS[layout];
   return (
-    <Form.Provider value={{ config, layout, ...sf, onSubmit, busy, result }}>
+    <Form.Provider
+      value={{
+        config,
+        layout,
+        ...sf,
+        onSubmit,
+        busy,
+        result: result?.key === sf.key ? result.value : null,
+      }}
+    >
       <div className="space-y-12">
         <div className="space-y-4">
           <div
