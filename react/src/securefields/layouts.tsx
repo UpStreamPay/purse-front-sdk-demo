@@ -58,8 +58,8 @@ export function StackedLayout() {
     RADIUS_CLASS[config.radius === "full" ? "md" : config.radius];
   const box = (error: boolean) =>
     `${containerRadius} border shadow-sm overflow-hidden ${error ? "border-red-500 ring-1 ring-red-500/40" : shade.line}`;
-  const cell = (f: keyof typeof fields, bg = shade.bg) =>
-    `relative flex items-center px-4 h-14 transition-colors ${bg} ${fields[f].focused ? "ring-2 ring-inset ring-indigo-500/40" : ""}`;
+  const cell = (f: keyof typeof fields) =>
+    `relative flex items-center px-4 h-14 transition-colors ${shade.bg} ${fields[f].focused ? "ring-2 ring-inset ring-indigo-500/40" : ""}`;
   const label = (error = false) =>
     `block text-base font-medium ${error ? "text-red-600" : "dark:text-gray-200"}`;
 
@@ -68,10 +68,7 @@ export function StackedLayout() {
       <div className="space-y-2">
         <span className={label()}>{t("sf.label.cardInfo")}</span>
         <div className={box(cardError)}>
-          {/* The embedded selector's badges have a white background — match it. */}
-          <div
-            className={`${cell("cardNumber", config.embeddedBrandSelector ? "bg-white" : shade.bg)} border-b ${shade.line}`}
-          >
+          <div className={`${cell("cardNumber")} border-b ${shade.line}`}>
             <Slot field="cardNumber" />
             {config.showIcons && !config.embeddedBrandSelector && (
               // No room beside a full card number on a phone.

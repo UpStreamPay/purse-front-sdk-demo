@@ -78,7 +78,6 @@ export const fr: Record<MessageKey, string> = {
   "sf.loading": "Chargement des champs sécurisés…",
   "sf.submit": "Tokeniser la carte",
   "sf.custom.embeddedBrand": "Sélecteur de marque intégré",
-  "sf.custom.embeddedBrandLightOnly": "Mode clair uniquement — le sélecteur du SDK n’est pas personnalisable",
   "sf.desc": "Des dispositions de formulaire carte construites autour des mêmes Secure Fields. Les données carte restent dans les iframes Purse — libellés, bordures, icônes et erreurs sont du React autour. La soumission tokenise la carte (token vault, sans paiement).",
   "sf.oneLive": "Une seule disposition est active à la fois : en changer recrée les Secure Fields, la saisie est donc effacée.",
   "sf.eyebrow": "Purse SDK — React · Secure Fields",

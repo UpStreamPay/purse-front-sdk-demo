@@ -203,14 +203,8 @@ function Customizer({
         <Switch
           id="cfg-brand"
           label={t("sf.custom.embeddedBrand")}
-          // Its badges have a fixed white background: light forms only.
-          hint={t(
-            config.darkMode
-              ? "sf.custom.embeddedBrandLightOnly"
-              : "sf.custom.remounts",
-          )}
-          disabled={config.darkMode}
-          checked={config.embeddedBrandSelector && !config.darkMode}
+          hint={t("sf.custom.remounts")}
+          checked={config.embeddedBrandSelector}
           onChange={(v) => set({ embeddedBrandSelector: v })}
         />
         {hr}
@@ -427,15 +421,7 @@ export function SecureFieldsPage() {
             <Customizer config={config} set={set} layout={layout} />
           </div>
           <div className="xl:col-span-9">
-            <Showcase
-              config={{
-                ...config,
-                embeddedBrandSelector:
-                  config.embeddedBrandSelector && !config.darkMode,
-              }}
-              layout={layout}
-              setLayout={setLayout}
-            />
+            <Showcase config={config} layout={layout} setLayout={setLayout} />
           </div>
         </div>
       </div>
