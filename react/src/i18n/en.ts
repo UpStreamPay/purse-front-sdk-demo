@@ -78,7 +78,6 @@ export const en = {
   "sf.loading": "Loading secure fields…",
   "sf.submit": "Tokenize card",
   "sf.custom.embeddedBrand": "Embedded brand selector",
-  "sf.custom.embeddedBrandLightOnly": "Light mode only — the SDK selector isn’t themable",
   "sf.desc": "Card-form layouts built around the same Secure Fields. The card data stays in Purse iframes — labels, borders, icons and error states are plain React around them. Submitting tokenizes the card (vault token, no payment).",
   "sf.oneLive": "One layout is live at a time: switching re-creates the Secure Fields, so typed data is cleared.",
   "sf.eyebrow": "Purse SDK — React · Secure Fields",

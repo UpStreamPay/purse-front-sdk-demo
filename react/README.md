@@ -36,11 +36,6 @@ Multi-page Vite app. `/` is a landing page listing the demos (`src/Landing.tsx`,
 - Co-badged cards: brand picked in the page (`brandDetected` → `submit({ selectedNetwork })`) or by the SDK's embedded selector
 - Submit tokenizes the card and shows the `vault_form_token` (plus BIN / last 4 / brands) under the button — no payment session required
 
-### Known SDK limitations
-
-- **Embedded brand selector logo is clipped in tall fields.** The badge follows the iframe height, then is cropped to 36px wide.
-- **The embedded brand selector only fits light forms.** Its badges have a white background, and `styles.input.backgroundColor` is ignored. The demo turns the stacked card-number row white while it is on, and disables it in dark mode.
-
 ### Key files
 
 | File | Description |
