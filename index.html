@@ -34,7 +34,7 @@
     </style>
     <!-- Copied as-is into the showcase (npm run build:site, no bundler), so the
          header strings live here. Same locale rule and storage key as the vanilla
-         and React apps (vanilla/src/i18n): stored choice → browser language → English. -->
+         and React apps (vanilla/src/i18n): stored choice → English. -->
     <script>
       (async () => {
         const MESSAGES = {
@@ -65,8 +65,7 @@
         let stored = null;
         try { stored = localStorage.getItem(KEY); } catch {}
         const has = (l) => Object.prototype.hasOwnProperty.call(MESSAGES, l);
-        const browser = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language]).map((tag) => tag.toLowerCase().split('-')[0]);
-        const locale = has(stored) ? stored : browser.find(has) || 'en';
+        const locale = has(stored) ? stored : 'en';
         const m = MESSAGES[locale];
 
         document.documentElement.lang = locale;

@@ -65,7 +65,7 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 ## Languages (i18n)
 
-The demos ship in English and French. The locale picker at the top of every page (in `<demo-header>`) switches language and reloads the page; the choice is stored under `purse_demo_locale`, shared with the React app and the root landing. Without a stored choice, the first supported browser language wins, else English.
+The demos ship in English and French. The locale picker at the top of every page (in `<demo-header>`) switches language and reloads the page; the choice is stored under `purse_demo_locale`, shared with the React app and the root landing. Without a stored choice, the demos open in English.
 
 - `src/i18n/en.ts` — the reference dictionary; `src/i18n/fr.ts` is typed against its keys, so a missing translation fails `tsc`.
 - Page markup is translated from attributes: `data-i18n` (text), `data-i18n-html` (strings with `<code>`), `data-i18n-attr="attr:key; attr:key"` (e.g. `heading`, `description`, `label`, `empty-text` on the demo components). `<demo-stepper>` labels can be keys (`step-pay:step.pay`).
