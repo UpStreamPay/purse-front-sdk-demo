@@ -4,7 +4,7 @@ export const en = {
   "common.language": "Language",
   "common.viewSource": "View source",
 
-  "landing.title": "Purse SDK — React Demos",
+  "landing.title": "Purse SDK · React Demos",
   "landing.intro":
     "React 19 + <code>@purse-eu/web-sdk</code>. Set credentials in each demo's Debug panel or in the repo-root <code>.env.local</code>.",
 
@@ -12,7 +12,7 @@ export const en = {
   "sf.brand.pick": "Please select your preferred card brand:",
   "sf.brand.legend": "Select card brand",
   "sf.result.error": "Tokenization Error:",
-  "sf.result.success": "Tokenization Successful!",
+  "sf.result.success": "Tokenization successful",
   "sf.result.token": "Token:",
   "sf.result.bin": "Bin:",
   "sf.result.last4": "Last 4:",
@@ -34,13 +34,13 @@ export const en = {
   "sf.title": "Payment Form Variations",
   "sf.layouts": "Layouts",
   "sf.layout.stacked": "Stacked Layout",
-  "sf.layout.stacked.desc": "One card-like container with internal dividers. Optimized for mobile and \"Elements\"-style integrations.",
+  "sf.layout.stacked.desc": "One card-like container with internal dividers. Suits mobile and \"Elements\"-style integrations.",
   "sf.layout.classic": "Classic Layout",
-  "sf.layout.classic.desc": "Standard vertical flow with distinct fields. Best for familiarity and long forms where clarity is key.",
+  "sf.layout.classic.desc": "Standard vertical flow with distinct fields. Familiar to shoppers, and suits long forms.",
   "sf.layout.hybrid": "Hybrid Layout",
   "sf.layout.hybrid.desc": "Related fields side by side to save vertical space. Common in e-commerce checkouts.",
   "sf.layout.inline": "Inline Layout",
-  "sf.layout.inline.desc": "Card number, expiry and CVC on one line. Efficient on wide desktop viewports.",
+  "sf.layout.inline.desc": "Card number, expiry and CVC on one line. Fits wide desktop viewports.",
   "sf.states.title": "Input States & Feedback",
   "sf.states.desc": "Reference of the interaction states: default, valid and error (static markup).",
   "sf.states.default": "Default / Empty",
@@ -78,11 +78,11 @@ export const en = {
   "sf.loading": "Loading secure fields…",
   "sf.submit": "Tokenize card",
   "sf.custom.embeddedBrand": "Embedded brand selector",
-  "sf.custom.embeddedBrandLightOnly": "Light mode only — the SDK selector isn’t themable",
-  "sf.desc": "Card-form layouts built around the same Secure Fields. The card data stays in Purse iframes — labels, borders, icons and error states are plain React around them. Submitting tokenizes the card (vault token, no payment).",
+  "sf.custom.embeddedBrandLightOnly": "Light mode only: the SDK selector isn’t themable",
+  "sf.desc": "Card-form layouts built around the same Secure Fields. The card data stays in Purse iframes. Labels, borders, icons and error states are plain React around them. Submitting tokenizes the card (vault token, no payment).",
   "sf.oneLive": "One layout is live at a time: switching re-creates the Secure Fields, so typed data is cleared.",
-  "sf.eyebrow": "Purse SDK — React · Secure Fields",
-  "sf.pageTitle": "Purse SDK — React · Secure Fields",
+  "sf.eyebrow": "Purse SDK · React · Secure Fields",
+  "sf.pageTitle": "Purse SDK · React · Secure Fields",
 } as const;
 
 export type MessageKey = keyof typeof en;
