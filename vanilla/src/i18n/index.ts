@@ -31,11 +31,7 @@ function storedLocale(): string | null {
     }
 }
 
-export const locale: Locale = resolveLocale(
-    Object.keys(LOCALES) as Locale[],
-    storedLocale(),
-    navigator.languages?.length ? navigator.languages : [navigator.language],
-);
+export const locale: Locale = resolveLocale(Object.keys(LOCALES) as Locale[], storedLocale());
 
 /** BCP-47 tag for `Intl` and the SDK's `locale` options (e.g. `'fr-FR'`) — both
  *  tags are among the drop-in's shipped translations. */

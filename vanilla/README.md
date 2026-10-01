@@ -1,4 +1,4 @@
-# Purse SDK — Vanilla TypeScript Demos
+# Purse SDK · Vanilla TypeScript Demos
 
 Multi-page Vite app demonstrating `@purse-eu/web-sdk` integration patterns.
 
@@ -21,7 +21,7 @@ npm run dev
 
 | Variable | Required by | Description |
 |---|---|---|
-| `VITE_PURSE_SESSION_JSON` | Drop-in, Headless checkout | Static base64 session — wins over `VITE_PURSE_PROXY_URL` when set |
+| `VITE_PURSE_SESSION_JSON` | Drop-in, Headless checkout | Static base64 session; wins over `VITE_PURSE_PROXY_URL` when set |
 | `VITE_PURSE_TENANT_ID` | Secure Fields | Tenant identifier |
 | `VITE_PURSE_API_KEY` | Secure Fields | API key for Secure Fields |
 | `VITE_PURSE_PROXY_URL` | Drop-in, Headless checkout, Advanced Flow | Merchant backend (Alfred). Creates a fresh session per page load (`/order/` → `/orchestration_session/`) and proxies the Payment API v2 endpoints |
@@ -35,7 +35,7 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 | Page | Entry point | Description |
 |---|---|---|
-| `/dropin/widget.html` | `src/dropin/widget.ts` | Pre-built checkout widget via `createDropinCheckout()`. Minimal integration — mount, react to `isPaymentFulfilled`, call `submitPayment()`. |
+| `/dropin/widget.html` | `src/dropin/widget.ts` | Pre-built checkout widget via `createDropinCheckout()`. Minimal integration: mount, react to `isPaymentFulfilled`, call `submitPayment()`. |
 
 ### Headless checkout
 
@@ -43,14 +43,14 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 |---|---|---|
 | `/headless-checkout/render-methods.html` | `src/headless-checkout/render-methods.ts` | Lists all payment methods from the session. Clicking one mounts a hosted form via `getPaymentElement()`. |
 | `/headless-checkout/hosted-form.html` | `src/headless-checkout/hosted-form.ts` | Single-iframe form via `getPaymentElement(PaymentElementOptions)` with full label/error/theme customisation. |
-| `/headless-checkout/hosted-fields.html` | `src/headless-checkout/hosted-fields.ts` | Isolated per-field iframes via `getHostedFields()`. Switch between grid, single-line, and card-shaped layouts — same iframes reflow via CSS. Includes brand detection and co-brand selection. |
+| `/headless-checkout/hosted-fields.html` | `src/headless-checkout/hosted-fields.ts` | Isolated per-field iframes via `getHostedFields()`. Switch between grid, single-line, and card-shaped layouts; the same iframes reflow via CSS. Includes brand detection and co-brand selection. |
 | `/headless-checkout/express-checkout.html` | `src/headless-checkout/express-checkout.ts` | One-click "Buy now" from a product page into an express bottom sheet. Pays with the session's saved card (`paymentTokens`) in one tap, or continues, inside the same sheet, to a card step built with `getHostedFields()` and an optional save-card (`register`) checkbox. |
 
 ### Secure Fields
 
 | Page | Entry point | Description |
 |---|---|---|
-| `/securefields/tokenize.html` | `src/securefields/tokenize.ts` | Tokenises card data at tenant level — no payment session required. Returns a `vault_form_token` to pass to your backend. |
+| `/securefields/tokenize.html` | `src/securefields/tokenize.ts` | Tokenises card data at tenant level. No payment session required. Returns a `vault_form_token` to pass to your backend. |
 
 ### Advanced Flow
 
@@ -60,16 +60,16 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 ## Shared utilities
 
-- `src/shared/session.ts` — a pasted `VITE_PURSE_SESSION_JSON` wins (normalises base64 padding), else creates a session through the proxy
-- `src/shared/ui.ts` — `$()` helper, `setStep()`, `showNotice()`, `showResult()`
+- `src/shared/session.ts`: a pasted `VITE_PURSE_SESSION_JSON` wins (normalises base64 padding), else creates a session through the proxy
+- `src/shared/ui.ts`: `$()` helper, `setStep()`, `showNotice()`, `showResult()`
 
 ## Languages (i18n)
 
-The demos ship in English and French. The locale picker at the top of every page (in `<demo-header>`) switches language and reloads the page; the choice is stored under `purse_demo_locale`, shared with the React app and the root landing. Without a stored choice, the first supported browser language wins, else English.
+The demos ship in English and French. The locale picker at the top of every page (in `<demo-header>`) switches language and reloads the page; the choice is stored under `purse_demo_locale`, shared with the React app and the root landing. Without a stored choice, the demos open in English.
 
-- `src/i18n/en.ts` — the reference dictionary; `src/i18n/fr.ts` is typed against its keys, so a missing translation fails `tsc`.
+- `src/i18n/en.ts`: the reference dictionary; `src/i18n/fr.ts` is typed against its keys, so a missing translation fails `tsc`.
 - Page markup is translated from attributes: `data-i18n` (text), `data-i18n-html` (strings with `<code>`), `data-i18n-attr="attr:key; attr:key"` (e.g. `heading`, `description`, `label`, `empty-text` on the demo components). `<demo-stepper>` labels can be keys (`step-pay:step.pay`).
 - Scripts use `t('key', {param})`; SDK elements get `locale: localeTag` (`en-GB` / `fr-FR`), so the hosted forms, hosted fields and drop-in render in the same language. Secure Fields has no locale option.
-- `node vanilla/src/i18n/resolve.check.ts` — self-check of the locale resolution rule.
+- `node vanilla/src/i18n/resolve.check.ts`: self-check of the locale resolution rule.
 
 Adding a language: add a dictionary typed `Record<MessageKey, string>` and register it in `LOCALES` (`src/i18n/index.ts`), then mirror it in `react/src/i18n` and the inline dictionary of the root `index.html`.

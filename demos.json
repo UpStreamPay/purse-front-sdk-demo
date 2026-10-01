@@ -115,8 +115,8 @@
         "fr": "Tokenisation"
       },
       "desc": {
-        "en": "<code>initSecureFields</code> → fields rendered in iframes → submit → vault token returned. No session required — operates at tenant level.",
-        "fr": "<code>initSecureFields</code> → champs affichés dans des iframes → soumission → token vault renvoyé. Aucune session nécessaire — fonctionne au niveau du tenant."
+        "en": "<code>initSecureFields</code> → fields rendered in iframes → submit → vault token returned. No session required: it operates at tenant level.",
+        "fr": "<code>initSecureFields</code> → champs affichés dans des iframes → soumission → token vault renvoyé. Aucune session nécessaire : fonctionne au niveau du tenant."
       }
     },
     {
@@ -147,8 +147,8 @@
       "section": "react",
       "path": "react/securefields/",
       "title": {
-        "en": "Secure Fields — Form Variations",
-        "fr": "Secure Fields — Variantes de formulaire"
+        "en": "Secure Fields · Form Variations",
+        "fr": "Secure Fields · Variantes de formulaire"
       },
       "desc": {
         "en": "Card-field iframes via <code>initSecureFields</code> in four layouts (stacked, classic, hybrid, inline) with a live UI customizer → vault token. No session required.",

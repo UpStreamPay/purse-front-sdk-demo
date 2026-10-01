@@ -112,7 +112,7 @@ export function getEnvironment(): 'sandbox' | 'production' {
     if (env === 'sandbox' || env === 'production') {
         return env;
     }
-    console.warn(`VITE_PURSE_ENVIRONMENT="${env}" has no Headless/Drop-in CDN — using sandbox.`);
+    console.warn(`VITE_PURSE_ENVIRONMENT="${env}" has no Headless/Drop-in CDN, using sandbox.`);
     return 'sandbox';
 }
 

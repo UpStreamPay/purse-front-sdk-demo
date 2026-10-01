@@ -18,17 +18,11 @@ export type { MessageKey };
 const STORAGE_KEY = "purse_demo_locale";
 
 /**
- * Stored choice → first supported browser language → English. Same rule as
- * vanilla/src/i18n/resolve.ts (which carries the self-check).
+ * Stored choice → English. Same rule as vanilla/src/i18n/resolve.ts (which
+ * carries the self-check).
  */
-function resolveLocale(stored: string | null, preferred: readonly string[]): Locale {
-  const isSupported = (l: string | null | undefined): l is Locale =>
-    !!l && Object.prototype.hasOwnProperty.call(LOCALES, l);
-  if (isSupported(stored)) {
-    return stored;
-  }
-  const match = preferred.map((tag) => tag.toLowerCase().split("-")[0]).find(isSupported);
-  return match ?? "en";
+function resolveLocale(stored: string | null): Locale {
+  return stored && Object.prototype.hasOwnProperty.call(LOCALES, stored) ? (stored as Locale) : "en";
 }
 
 function storedLocale(): string | null {
@@ -39,10 +33,7 @@ function storedLocale(): string | null {
   }
 }
 
-export const locale: Locale = resolveLocale(
-  storedLocale(),
-  navigator.languages?.length ? navigator.languages : [navigator.language],
-);
+export const locale: Locale = resolveLocale(storedLocale());
 
 export function t(key: MessageKey): string {
   return LOCALES[locale].messages[key] ?? en[key];

@@ -6,14 +6,14 @@ Demo apps for [`@purse-eu/web-sdk`](https://www.npmjs.com/package/@purse-eu/web-
 |---|---|---|
 | [`vanilla/`](./vanilla/) | Vite + TypeScript | Drop-in checkout, Headless checkout, Secure Fields tokenization |
 | [`react/`](./react/) | React 19 + Vite + TypeScript | Secure Fields tokenization in several form layouts |
-| [`sandpack/`](./sandpack/) | npm package | `@upstreampay/purse-sdk-demos` — Sandpack configs embedded in the doc site |
+| [`sandpack/`](./sandpack/) | npm package | `@upstreampay/purse-sdk-demos`: Sandpack configs embedded in the doc site |
 
 ## Docs
 
 | Document | Description |
 |---|---|
 | [`docs/sandpack-package.md`](./docs/sandpack-package.md) | Architecture, exports, env vars, how to add a demo, publishing |
-| [`docs/post-payment-redirect.md`](./docs/post-payment-redirect.md) | Post-payment redirect system — `redirectionUrl`, fake confirmation page, required backend change |
+| [`docs/post-payment-redirect.md`](./docs/post-payment-redirect.md) | Post-payment redirect system: `redirectionUrl`, fake confirmation page, required backend change |
 
 ## Quick start
 
@@ -45,8 +45,8 @@ npm run dev:sandpack    # Sandpack preview → http://localhost:8000
 > If both Vite apps run at the same time, the second is auto-assigned to port 5174.
 
 Build the Sandpack package: `npm run build:sandpack`. Every workspace runs
-against a single hoisted `@purse-eu/web-sdk` version — see each workspace's
-`package.json`.
+against a single hoisted `@purse-eu/web-sdk` version (see each workspace's
+`package.json`).
 
 ### 4. The deployed showcase
 
@@ -55,7 +55,7 @@ npm run build:site      # vanilla → dist/vanilla, react → dist/react, + inde
 npx serve dist          # preview exactly what GitHub Pages serves
 ```
 
-[`demos.json`](./demos.json) is the demo catalogue — the one place to add or
+[`demos.json`](./demos.json) is the demo catalogue, the one place to add or
 rename a demo. It drives the root landing, both apps' landings and the
 `<demo-switcher>` ([`shared/demos.ts`](./shared/demos.ts)) at the top of every
 demo page, which jumps straight to any other demo.
@@ -79,7 +79,7 @@ In production, replace `getSession()` in each recipe with a fetch to your backen
 
 ## Credential override without rebuild
 
-Both apps expose a **⚙ Config / Debug** panel in the UI. Values entered there are stored in `localStorage` and take precedence over the `.env.local` build defaults — useful for testing multiple tenants without restarting the dev server.
+Both apps expose a **⚙ Config / Debug** panel in the UI. Values entered there are stored in `localStorage` and take precedence over the `.env.local` build defaults, so you can test multiple tenants without restarting the dev server.
 
 ## About Purse Vault Secure Fields
 
