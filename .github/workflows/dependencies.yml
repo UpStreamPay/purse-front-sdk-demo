@@ -1,0 +1,23 @@
+name: Dependencies
+
+# Blocks a PR that adds or bumps a dependency (npm or GitHub Action) with a known high or critical vulnerability (PCI-DSS 6.2.3).
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependencies-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime, development, unknown
